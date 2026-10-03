@@ -1,0 +1,44 @@
+# Node
+node_modules/
+dist/
+build/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Mobile (once added)
+mobile/.expo/
+mobile/ios/Pods/
+mobile/android/.gradle/
+mobile/android/app/build/
+
+backend/.env
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/.DS_Store
+backend/coverage/
+backend/.gitignore
+backend/README.md
+backend/package-lock.json
+backend/package.json
+backend/tsconfig.json
