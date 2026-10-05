@@ -14,13 +14,13 @@ const messages: Catalog = {
 
   // ---------- Auth ----------
   'auth.otpSent':          { en: 'Verification code sent',               om: 'Koodiin mirkaneessaa ergameera' },
-  'auth.otpInvalid':       { en: 'Invalid or expired code',              om: 'Koodiin dogoggora ykn yeroon darbe' },
+  'auth.otpInvalid':       { en: 'Invalid or expired code',              om: 'Koodiin dogoggora ykn yeroon irra darbe' },
   'auth.otpTooMany':       { en: 'Too many incorrect attempts',          om: 'Yaaliin dogoggora baay\'ee' },
-  'auth.loginSuccess':     { en: 'Logged in',                            om: 'Seeneetta' },
-  'auth.logoutSuccess':    { en: 'Logged out',                           om: 'Baheetta' },
+  'auth.loginSuccess':     { en: 'Logged in',                            om: 'Seentetta' },
+  'auth.logoutSuccess':    { en: 'Logged out',                           om: 'Baatetta' },
   'auth.pinInvalid':       { en: 'Invalid phone or PIN',                 om: 'Bilbila ykn PIN dogoggora' },
   'auth.accountSuspended': { en: 'Your account is suspended',            om: 'Herregaan kee dhaabbateera' },
-  'auth.tokenExpired':     { en: 'Session expired, please log in again', om: 'Yeroon darbe, maaloo irra deebi\'ii seeni' },
+  'auth.tokenExpired':     { en: 'Session expired, please log in again', om: 'Yeroon irra darbe, maaloo irra deebi\'ii seeni' },
   'auth.otpMessage':       {
     en: 'Your Odaa verification code is {code}. Valid for {minutes} minutes.',
     om: 'Koodiin mirkaneessaa Odaa kee {code} dha. Daqiiqaa {minutes}f ni hojjeta.',

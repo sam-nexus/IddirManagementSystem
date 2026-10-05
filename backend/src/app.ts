@@ -10,6 +10,10 @@ import authRoutes from './modules/auth/auth.routes';
 import membersRoutes from './modules/members/members.routes';
 import contributionsRoutes from './modules/contributions/contributions.routes';
 import supportRoutes from './modules/support/support.routes';
+import announcementsRoutes from './modules/announcements/announcements.routes';
+import meetingsRoutes from './modules/meetings/meetings.routes';
+import reportsRoutes from './modules/reports/reports.routes';
+
 
 export function createApp(): Express {
   const app = express();
@@ -29,10 +33,13 @@ export function createApp(): Express {
     });
   });
 
-  app.use('/auth',          authRoutes);
-  app.use('/members',       membersRoutes);
+  app.use('/auth', authRoutes);
+  app.use('/members', membersRoutes);
   app.use('/contributions', contributionsRoutes);
-  app.use('/support',       supportRoutes);
+  app.use('/support', supportRoutes);
+  app.use('/announcements', announcementsRoutes);
+  app.use('/meetings', meetingsRoutes);
+  app.use('/reports', reportsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
