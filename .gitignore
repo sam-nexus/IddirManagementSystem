@@ -42,3 +42,5 @@ backend/README.md
 backend/package-lock.json
 backend/package.json
 backend/tsconfig.json
+/backend/package.json
+/backend/package-lock.json

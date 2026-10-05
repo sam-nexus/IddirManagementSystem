@@ -2,10 +2,10 @@ import cron from 'node-cron';
 import { pool, query } from '../config/database';
 import { sendSms } from '../integrations/sms.client';
 import { t } from '../utils/i18n';
-import { broadcast } from '../modules/notifications/notifications.service';
+import { applyAutomaticPenalties } from '../modules/penalties/penalties.service';
 
 export function startJobs(): void {
-  // 1) Monthly dues generation — runs on the 1st of every month at 02:00 server time
+  // 1) Monthly dues generation — 1st of every month at 02:00
   cron.schedule('0 2 1 * *', async () => {
     console.log('[jobs] running monthly dues generation');
     try {
@@ -15,7 +15,7 @@ export function startJobs(): void {
     }
   });
 
-  // 2) Payment reminders — runs every day at 09:00
+  // 2) Payment reminders — every day at 09:00
   cron.schedule('0 9 * * *', async () => {
     console.log('[jobs] running payment reminders');
     try {
@@ -25,7 +25,22 @@ export function startJobs(): void {
     }
   });
 
-  // 3) DB keep-alive — every 4 minutes, prevents Supabase idle disconnect
+  // 3) Automatic penalties — every day at 03:00
+  cron.schedule('0 3 * * *', async () => {
+    console.log('[jobs] running automatic penalties');
+    try {
+      const result = await applyAutomaticPenalties();
+      if (!result.enabled) {
+        console.log('[jobs] penalties disabled by settings — skipped');
+      } else {
+        console.log(`[jobs] penalties applied: ${result.created} created`);
+      }
+    } catch (err: any) {
+      console.error('[jobs] penalties failed:', err.message);
+    }
+  });
+
+  // 4) DB keep-alive — every 4 minutes
   cron.schedule('*/4 * * * *', () => {
     pool.query('SELECT 1').catch(() => {});
   });
@@ -34,7 +49,7 @@ export function startJobs(): void {
 }
 
 // =====================================================================
-// Generate dues for the current month for all active members
+// Monthly dues generation
 // =====================================================================
 async function generateMonthlyDues(): Promise<void> {
   const now = new Date();
@@ -72,7 +87,7 @@ async function generateMonthlyDues(): Promise<void> {
 }
 
 // =====================================================================
-// Send SMS to members who have unpaid dues for the current month
+// Payment reminders
 // =====================================================================
 async function sendPaymentReminders(): Promise<void> {
   const now = new Date();
@@ -111,11 +126,16 @@ async function sendPaymentReminders(): Promise<void> {
 }
 
 // =====================================================================
-// Manual trigger (for testing) — add to package.json scripts
+// Manual triggers (for testing)
 // =====================================================================
 export async function runDuesNow(): Promise<void> {
   await generateMonthlyDues();
 }
+
 export async function runRemindersNow(): Promise<void> {
   await sendPaymentReminders();
+}
+
+export async function runPenaltiesNow(): Promise<{ created: number; skipped: number; enabled: boolean }> {
+  return await applyAutomaticPenalties();
 }

@@ -18,6 +18,7 @@ import auditRoutes from './modules/audit/audit.routes';
 import settingsRoutes from './modules/settings/settings.routes';
 import organizationRoutes from './modules/organization/organization.routes';
 import equipmentRoutes from './modules/equipment/equipment.routes';
+import penaltiesRoutes from './modules/penalties/penalties.routes';
 
 
 export function createApp(): Express {
@@ -50,6 +51,7 @@ export function createApp(): Express {
   app.use('/settings', settingsRoutes);
   app.use('/organization', organizationRoutes);
   app.use('/equipment', equipmentRoutes);
+  app.use('/penalties', penaltiesRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
