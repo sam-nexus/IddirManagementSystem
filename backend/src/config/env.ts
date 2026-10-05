@@ -41,6 +41,20 @@ const schema = z.object({
   SUPPORTED_LANGUAGES: z.string().default('en,om'),
   DEFAULT_MONTHLY_DUES: z.coerce.number().default(100),
   DEFAULT_CURRENCY: z.string().default('ETB'),
+
+  // Supabase Storage
+  SUPABASE_URL: z.string().url().optional().or(z.literal('')),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional().default(''),
+  SUPABASE_STORAGE_BUCKET: z.string().default('payment-proofs'),
+
+  // Penalties
+  PENALTY_ENABLED: z
+    .union([z.boolean(), z.string()])
+    .transform((v) => (typeof v === 'boolean' ? v : v.toLowerCase() === 'true'))
+    .default(false),
+  PENALTY_GRACE_DAYS: z.coerce.number().int().min(0).default(15),
+  PENALTY_AMOUNT: z.coerce.number().min(0).default(20),
+  PENALTY_FREQUENCY_DAYS: z.coerce.number().int().min(1).default(30),
 });
 
 const parsed = schema.safeParse(process.env);
