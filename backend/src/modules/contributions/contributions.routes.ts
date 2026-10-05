@@ -11,8 +11,12 @@ import {
   paymentIdParamSchema,
   verifyPaymentSchema,
 } from './contributions.schemas';
+import { chapaReturn } from './contributions.return.controller';
 
 const router = Router();
+
+router.get('/pay/return', chapaReturn);
+
 router.use(requireAuth);
 
 // Plan (everyone can read)

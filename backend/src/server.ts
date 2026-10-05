@@ -1,6 +1,7 @@
 import { createApp } from './app';
 import { env } from './config/env';
 import { closePool } from './config/database';
+import { startJobs } from './jobs';
 
 import { pool } from './config/database';
 
@@ -17,6 +18,8 @@ async function main(): Promise<void> {
   const server = app.listen(env.PORT, () => {
     console.log(`🚀 Odaa API listening on http://localhost:${env.PORT}  [${env.NODE_ENV}]`);
   });
+
+  startJobs();
 
   const shutdown = async (signal: string) => {
     console.log(`\n[shutdown] received ${signal}, closing gracefully…`);

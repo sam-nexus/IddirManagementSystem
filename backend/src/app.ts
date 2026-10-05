@@ -13,6 +13,8 @@ import supportRoutes from './modules/support/support.routes';
 import announcementsRoutes from './modules/announcements/announcements.routes';
 import meetingsRoutes from './modules/meetings/meetings.routes';
 import reportsRoutes from './modules/reports/reports.routes';
+import notificationsRoutes from './modules/notifications/notifications.routes';
+import auditRoutes from './modules/audit/audit.routes';
 
 
 export function createApp(): Express {
@@ -40,6 +42,8 @@ export function createApp(): Express {
   app.use('/announcements', announcementsRoutes);
   app.use('/meetings', meetingsRoutes);
   app.use('/reports', reportsRoutes);
+  app.use('/notifications', notificationsRoutes);
+  app.use('/audit', auditRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

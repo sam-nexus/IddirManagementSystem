@@ -9,7 +9,7 @@ import { env } from '../../config/env';
 import { sendSms } from '../../integrations/sms.client';
 
 interface Ctx {
-  actorId: string;
+  actorId: string | null;
   ip?: string;
   userAgent?: string;
   lang?: 'en' | 'om';
