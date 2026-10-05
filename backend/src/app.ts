@@ -16,6 +16,8 @@ import reportsRoutes from './modules/reports/reports.routes';
 import notificationsRoutes from './modules/notifications/notifications.routes';
 import auditRoutes from './modules/audit/audit.routes';
 import settingsRoutes from './modules/settings/settings.routes';
+import organizationRoutes from './modules/organization/organization.routes';
+import equipmentRoutes from './modules/equipment/equipment.routes';
 
 
 export function createApp(): Express {
@@ -46,6 +48,8 @@ export function createApp(): Express {
   app.use('/notifications', notificationsRoutes);
   app.use('/audit', auditRoutes);
   app.use('/settings', settingsRoutes);
+  app.use('/organization', organizationRoutes);
+  app.use('/equipment', equipmentRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
