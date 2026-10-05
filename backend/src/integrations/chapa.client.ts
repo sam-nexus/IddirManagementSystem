@@ -43,8 +43,12 @@ export async function initializeTransaction(input: ChapaInitInput): Promise<Chap
         callback_url: input.callbackUrl ?? env.CHAPA_CALLBACK_URL,
         return_url: input.returnUrl ?? env.CHAPA_RETURN_URL,
         customization: {
-            title: (input.title ?? 'Afoosha Odaa Dues').slice(0, 16),
-            description: (input.description ?? 'Monthly contribution').slice(0, 100),
+            title: (input.title ?? 'Afoosha Odaa Dues').replace(/[^A-Za-z0-9\-_. ]/g, ' ').slice(0, 16).trim(),
+            description: (input.description ?? 'Monthly contribution')
+                .replace(/[^A-Za-z0-9\-_. ]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .slice(0, 100),
         },
     };
 

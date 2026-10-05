@@ -22,6 +22,7 @@ export const initPaymentSchema = z.object({
   // How many months to pay (default = oldest unpaid)
   months: z.coerce.number().int().min(1).max(12).default(1),
   email: z.string().email().optional(),
+  include_penalties: z.boolean().default(true),
 });
 
 export const verifyPaymentSchema = z.object({

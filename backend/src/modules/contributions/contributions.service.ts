@@ -16,6 +16,16 @@ interface Ctx {
 }
 
 // =====================================================================
+// Helpers
+// =====================================================================
+function formatPeriod(p: Date | string): string {
+  if (typeof p === 'string') return p.slice(0, 7);
+  const y = p.getUTCFullYear();
+  const m = String(p.getUTCMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+// =====================================================================
 // CONTRIBUTION PLAN
 // =====================================================================
 export async function getCurrentPlan() {
@@ -31,14 +41,6 @@ export async function getCurrentPlan() {
 }
 
 async function getAmountForDate(client: PoolClient | null, date: string): Promise<number> {
-  // TEMP DEBUG — remove after we find the issue
-  const all = await query('SELECT id, amount, effective_from FROM contribution_plans ORDER BY effective_from DESC');
-  console.log('[dues:debug] plans visible to backend:', JSON.stringify(all.rows, null, 2));
-  console.log('[dues:debug] requested period:', date);
-  console.log('[dues:debug] DB url host:', (() => {
-    try { return new URL(process.env.DATABASE_URL || '').hostname; } catch { return '(invalid)'; }
-  })());
-
   const sql = `
     SELECT amount FROM contribution_plans
     WHERE effective_from <= $1
@@ -53,14 +55,12 @@ async function getAmountForDate(client: PoolClient | null, date: string): Promis
 // GENERATE MONTHLY DUES
 // =====================================================================
 export async function generateDues(period: string, ctx: Ctx) {
-  // period is YYYY-MM-01
   const planAmount = await getAmountForDate(null, period);
 
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
-    // Pull all active members
     const members = await client.query<{ id: string; contribution_override: string | null }>(
       `SELECT id, contribution_override FROM members WHERE status = 'active'`
     );
@@ -70,7 +70,6 @@ export async function generateDues(period: string, ctx: Ctx) {
 
     for (const m of members.rows) {
       const amount = m.contribution_override !== null ? Number(m.contribution_override) : planAmount;
-
       const result = await client.query(
         `INSERT INTO contribution_dues (member_id, period, amount_due, amount_paid, status)
          VALUES ($1, $2, $3, 0, 'unpaid')
@@ -78,7 +77,6 @@ export async function generateDues(period: string, ctx: Ctx) {
          RETURNING id`,
         [m.id, period, amount]
       );
-
       if (result.rows[0]) created++;
       else skipped++;
     }
@@ -99,7 +97,7 @@ export async function generateDues(period: string, ctx: Ctx) {
 }
 
 // =====================================================================
-// LIST DUES (admin view)
+// LIST DUES (admin)
 // =====================================================================
 export async function listDues(input: { member_id?: string; period?: string; status?: string; page: number; limit: number }) {
   const where: string[] = [];
@@ -107,8 +105,8 @@ export async function listDues(input: { member_id?: string; period?: string; sta
   let i = 1;
 
   if (input.member_id) { where.push(`d.member_id = $${i}`); params.push(input.member_id); i++; }
-  if (input.period)    { where.push(`d.period = $${i}`);    params.push(input.period);    i++; }
-  if (input.status)    { where.push(`d.status = $${i}`);    params.push(input.status);    i++; }
+  if (input.period) { where.push(`d.period = $${i}`); params.push(input.period); i++; }
+  if (input.status) { where.push(`d.status = $${i}`); params.push(input.status); i++; }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const offset = (input.page - 1) * input.limit;
@@ -135,7 +133,7 @@ export async function listDues(input: { member_id?: string; period?: string; sta
 }
 
 // =====================================================================
-// MY DUES + BALANCE
+// MY DUES + BALANCE (with penalties included)
 // =====================================================================
 export async function getMyDues(memberId: string, period?: string) {
   const where = ['d.member_id = $1'];
@@ -157,24 +155,92 @@ export async function getMyDues(memberId: string, period?: string) {
     [memberId]
   );
 
+  const penalties = await query<{
+    unpaid_total: string;
+    unpaid_count: number;
+    paid_total: string;
+    waived_total: string;
+  }>(
+    `SELECT
+       COALESCE(SUM(amount) FILTER (WHERE status = 'unpaid'), 0)::text AS unpaid_total,
+       COUNT(*) FILTER (WHERE status = 'unpaid')::int                  AS unpaid_count,
+       COALESCE(SUM(amount) FILTER (WHERE status = 'paid'), 0)::text   AS paid_total,
+       COALESCE(SUM(amount) FILTER (WHERE status = 'waived'), 0)::text AS waived_total
+     FROM penalties WHERE member_id = $1`,
+    [memberId]
+  );
+
   const due = Number(totals.rows[0].due);
   const paid = Number(totals.rows[0].paid);
+  const duesBalance = Math.max(0, due - paid);
+  const penaltiesUnpaid = Number(penalties.rows[0].unpaid_total);
 
   return {
     items: rows.rows,
     summary: {
       total_due: due,
       total_paid: paid,
-      balance: Math.max(0, due - paid),
+      dues_balance: duesBalance,
       unpaid_months: rows.rows.filter((r: any) => r.status === 'unpaid' || r.status === 'partial').length,
+      penalties: {
+        unpaid_total: penaltiesUnpaid,
+        unpaid_count: penalties.rows[0].unpaid_count,
+        paid_total: Number(penalties.rows[0].paid_total),
+        waived_total: Number(penalties.rows[0].waived_total),
+      },
+      total_outstanding: duesBalance + penaltiesUnpaid,
     },
   };
 }
 
 // =====================================================================
-// PAY VIA CHAPA — INIT
+// TOTAL OUTSTANDING (dues + penalties)
 // =====================================================================
-export async function initChapaPayment(input: { member_id?: string; months: number, email?: string }, payerId: string, ctx: Ctx) {
+export async function getTotalOutstanding(memberId: string): Promise<{
+  dues: number;
+  penalties: number;
+  total: number;
+  unpaid_dues_count: number;
+  unpaid_penalties_count: number;
+}> {
+  const dues = await query<{ total: string; c: number }>(
+    `SELECT
+       COALESCE(SUM(amount_due - amount_paid), 0)::text AS total,
+       COUNT(*)::int AS c
+     FROM contribution_dues
+     WHERE member_id = $1 AND status IN ('unpaid','partial')`,
+    [memberId]
+  );
+
+  const pen = await query<{ total: string; c: number }>(
+    `SELECT
+       COALESCE(SUM(amount), 0)::text AS total,
+       COUNT(*)::int AS c
+     FROM penalties
+     WHERE member_id = $1 AND status = 'unpaid'`,
+    [memberId]
+  );
+
+  const duesTotal = Number(dues.rows[0].total);
+  const penTotal = Number(pen.rows[0].total);
+
+  return {
+    dues: duesTotal,
+    penalties: penTotal,
+    total: duesTotal + penTotal,
+    unpaid_dues_count: dues.rows[0].c,
+    unpaid_penalties_count: pen.rows[0].c,
+  };
+}
+
+// =====================================================================
+// PAY VIA CHAPA — INIT (dues + penalties)
+// =====================================================================
+export async function initChapaPayment(
+  input: { member_id?: string; months: number; email?: string; include_penalties?: boolean },
+  payerId: string,
+  ctx: Ctx
+) {
   const memberId = input.member_id ?? payerId;
   const member = await query<{ id: string; first_name: string; last_name: string; phone: string }>(
     `SELECT id, first_name, last_name, phone FROM members WHERE id = $1`,
@@ -182,7 +248,7 @@ export async function initChapaPayment(input: { member_id?: string; months: numb
   );
   if (!member.rows[0]) throw new NotFoundError(t('member.notFound', ctx.lang ?? 'en'));
 
-  // Find oldest unpaid/partial dues
+  // Find oldest unpaid/partial dues up to `months`
   const dues = await query<{ id: string; period: string; amount_due: string; amount_paid: string }>(
     `SELECT id, period, amount_due, amount_paid
      FROM contribution_dues
@@ -192,16 +258,33 @@ export async function initChapaPayment(input: { member_id?: string; months: numb
     [memberId, input.months]
   );
 
-  if (dues.rows.length === 0) {
-    throw new BadRequestError('No outstanding dues for the selected months');
-  }
+  const includePenalties = input.include_penalties !== false;
 
-  const total = dues.rows.reduce((s, d) => s + (Number(d.amount_due) - Number(d.amount_paid)), 0);
-  if (total <= 0) throw new BadRequestError('Nothing to pay');
+  // All unpaid penalties (always included unless explicitly excluded)
+  const penalties = includePenalties
+    ? await query<{ id: string; amount: string; reason: string }>(
+      `SELECT id, amount, reason
+         FROM penalties
+         WHERE member_id = $1 AND status = 'unpaid'
+         ORDER BY created_at ASC`,
+      [memberId]
+    )
+    : { rows: [] as { id: string; amount: string; reason: string }[] };
+
+  const duesTotal = dues.rows.reduce(
+    (s, d) => s + (Number(d.amount_due) - Number(d.amount_paid)),
+    0
+  );
+  const penaltiesTotal = penalties.rows.reduce((s, p) => s + Number(p.amount), 0);
+  const total = duesTotal + penaltiesTotal;
+
+  if (total <= 0) {
+    throw new BadRequestError('Nothing to pay — no outstanding dues or penalties');
+  }
 
   const txRef = generateTxRef('odaa');
 
-  // Create a pending payment row
+  // Create pending payment row
   const payment = await query<{ id: string }>(
     `INSERT INTO payments (member_id, amount, currency, method, status, tx_ref)
      VALUES ($1, $2, $3, 'chapa', 'pending', $4)
@@ -209,53 +292,72 @@ export async function initChapaPayment(input: { member_id?: string; months: numb
     [memberId, total, env.CHAPA_CURRENCY, txRef]
   );
 
+  const duesMonths = dues.rows.map((d) => formatPeriod(d.period)).join(' ');
+  const parts: string[] = [];
+  if (duesMonths) parts.push(`Dues ${duesMonths}`);
+  if (penalties.rows.length > 0) parts.push(`Penalties ${penalties.rows.length}`);
+
+  // Chapa allows only: letters, numbers, hyphens, underscores, spaces, dots
+  const rawDescription = parts.join(' ') || 'Odaa payment';
+  const safeDescription = rawDescription
+    .replace(/[^A-Za-z0-9\-_. ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+
   const chapaRes = await initializeTransaction({
     amount: total,
     currency: env.CHAPA_CURRENCY,
     txRef,
+    email: input.email ?? `${member.rows[0].id.slice(0, 8)}@gmail.com`,
     phone: member.rows[0].phone.replace(/^\+/, ''),
     firstName: member.rows[0].first_name,
     lastName: member.rows[0].last_name,
-    email: `${member.rows[0].id.slice(0, 8)}@gmail.com`,
-    description: `Odaa dues for ${dues.rows.map((d) => formatPeriod(d.period)).join(', ')}`,
+    title: 'Odaa Dues',
+    description: safeDescription,
   });
 
   if (!chapaRes.success || !chapaRes.checkoutUrl) {
-  await query(`UPDATE payments SET status = 'failed', raw_response = $2 WHERE id = $1`, [
-    payment.rows[0].id,
-    JSON.stringify(chapaRes.raw ?? { error: chapaRes.error }),
-  ]);
+    await query(`UPDATE payments SET status = 'failed', raw_response = $2 WHERE id = $1`, [
+      payment.rows[0].id,
+      JSON.stringify(chapaRes.raw ?? { error: chapaRes.error }),
+    ]);
 
-  const rawAny = chapaRes.raw as any;
-  const msgField = rawAny?.message;
+    const rawAny = chapaRes.raw as any;
+    const msgField = rawAny?.message;
+    let chapaMessage: string;
+    if (typeof msgField === 'string') chapaMessage = msgField;
+    else if (msgField && typeof msgField === 'object') {
+      chapaMessage = Object.entries(msgField)
+        .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`)
+        .join('; ');
+    } else if (typeof rawAny === 'string') chapaMessage = rawAny;
+    else chapaMessage = JSON.stringify(rawAny);
 
-  // Chapa sometimes returns message as a string, sometimes as an object like:
-  //   { email: ["validation.email"], callback_url: [...] }
-  // Flatten it into one readable string.
-  let chapaMessage: string;
-  if (typeof msgField === 'string') {
-    chapaMessage = msgField;
-  } else if (msgField && typeof msgField === 'object') {
-    chapaMessage = Object.entries(msgField)
-      .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`)
-      .join('; ');
-  } else if (typeof rawAny === 'string') {
-    chapaMessage = rawAny;
-  } else {
-    chapaMessage = JSON.stringify(rawAny);
+    console.error('[chapa] init failed:', chapaMessage);
+    throw new BadRequestError(`Chapa: ${chapaMessage}`);
   }
 
-  console.error('[chapa] init failed:', chapaMessage);
-  throw new BadRequestError(`Chapa: ${chapaMessage}`);
-}
-
-  await query(
-    `UPDATE payments SET raw_response = $2 WHERE id = $1`,
-    [payment.rows[0].id, JSON.stringify(chapaRes.raw)]
-  );
+  await query(`UPDATE payments SET raw_response = $2 WHERE id = $1`, [
+    payment.rows[0].id,
+    JSON.stringify(chapaRes.raw),
+  ]);
 
   await writeAudit(
-    { action: 'PAYMENT_INITIATED', entity: 'payments', entityId: payment.rows[0].id, details: { memberId, total, txRef } },
+    {
+      action: 'PAYMENT_INITIATED',
+      entity: 'payments',
+      entityId: payment.rows[0].id,
+      details: {
+        memberId,
+        dues_total: duesTotal,
+        penalties_total: penaltiesTotal,
+        total,
+        txRef,
+        months: dues.rows.map((d) => formatPeriod(d.period)),
+        penalty_count: penalties.rows.length,
+      },
+    },
     { actorId: ctx.actorId, ip: ctx.ip, userAgent: ctx.userAgent }
   );
 
@@ -264,24 +366,18 @@ export async function initChapaPayment(input: { member_id?: string; months: numb
     tx_ref: txRef,
     amount: total,
     currency: env.CHAPA_CURRENCY,
+    breakdown: {
+      dues: duesTotal,
+      penalties: penaltiesTotal,
+      months: dues.rows.map((d) => formatPeriod(d.period)),
+      penalty_count: penalties.rows.length,
+    },
     checkout_url: chapaRes.checkoutUrl,
   };
 }
 
-
-/**
- * Formats a period value (which pg returns as a Date for `date` columns)
- * as "YYYY-MM".
- */
-function formatPeriod(p: Date | string): string {
-  if (typeof p === 'string') return p.slice(0, 7);
-  const y = p.getUTCFullYear();
-  const m = String(p.getUTCMonth() + 1).padStart(2, '0');
-  return `${y}-${m}`;
-}
-
 // =====================================================================
-// PAY VIA CHAPA — VERIFY
+// PAY VIA CHAPA — VERIFY (allocate dues first, then penalties)
 // =====================================================================
 export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
   const payment = await query<{
@@ -317,7 +413,6 @@ export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
       return { payment_id: row.id, status: 'failed', reason: result.error };
     }
 
-    // Mark payment success
     const receiptNo = `RCT-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
     await client.query(
       `UPDATE payments
@@ -327,7 +422,9 @@ export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
       [row.id, result.reference ?? null, receiptNo, JSON.stringify(result.raw)]
     );
 
-    // Allocate amount to oldest unpaid/partial dues
+    let remaining = Number(row.amount);
+
+    // ---- 1) Allocate to dues (oldest first) ----
     const dues = await client.query<{ id: string; amount_due: string; amount_paid: string }>(
       `SELECT id, amount_due, amount_paid
        FROM contribution_dues
@@ -336,7 +433,7 @@ export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
       [row.member_id]
     );
 
-    let remaining = Number(row.amount);
+    const duesAllocated: Array<{ due_id: string; period: string; amount: number }> = [];
     for (const d of dues.rows) {
       if (remaining <= 0) break;
       const outstanding = Number(d.amount_due) - Number(d.amount_paid);
@@ -355,7 +452,41 @@ export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
         [d.id, newPaid, newStatus]
       );
 
+      duesAllocated.push({ due_id: d.id, period: formatPeriod((d as any).period ?? ''), amount: allocate });
       remaining -= allocate;
+    }
+
+    // ---- 2) Remaining goes to penalties (oldest first) ----
+    const penaltiesAllocated: Array<{ penalty_id: string; amount: number }> = [];
+    if (remaining > 0) {
+      const penalties = await client.query<{ id: string; amount: string }>(
+        `SELECT id, amount FROM penalties
+         WHERE member_id = $1 AND status = 'unpaid'
+         ORDER BY created_at ASC`,
+        [row.member_id]
+      );
+
+      for (const p of penalties.rows) {
+        if (remaining <= 0) break;
+        const pAmount = Number(p.amount);
+        const allocate = Math.min(remaining, pAmount);
+
+        await client.query(
+          `INSERT INTO payment_penalty_allocations (payment_id, penalty_id, amount)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (payment_id, penalty_id) DO UPDATE
+             SET amount = payment_penalty_allocations.amount + EXCLUDED.amount`,
+          [row.id, p.id, allocate]
+        );
+
+        // Mark as paid only when fully covered
+        if (allocate >= pAmount) {
+          await client.query(`UPDATE penalties SET status = 'paid' WHERE id = $1`, [p.id]);
+        }
+
+        penaltiesAllocated.push({ penalty_id: p.id, amount: allocate });
+        remaining -= allocate;
+      }
     }
 
     await writeAudit(
@@ -363,12 +494,19 @@ export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
         action: 'PAYMENT_VERIFIED',
         entity: 'payments',
         entityId: row.id,
-        details: { txRef, amount: row.amount, receiptNo, chapaRef: result.reference },
+        details: {
+          txRef,
+          amount: row.amount,
+          receiptNo,
+          chapaRef: result.reference,
+          dues_allocated: duesAllocated,
+          penalties_allocated: penaltiesAllocated,
+          remaining_unallocated: remaining,
+        },
       },
       { actorId: ctx.actorId, ip: ctx.ip, userAgent: ctx.userAgent, client }
     );
 
-    // Get member phone + language for SMS
     const member = await client.query<{ phone: string; language: 'en' | 'om' }>(
       `SELECT phone, language FROM members WHERE id = $1`,
       [row.member_id]
@@ -382,10 +520,19 @@ export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
         currency: row.currency,
         receipt: receiptNo,
       });
-      sendSms(member.rows[0].phone, smsText).catch(() => {});
+      sendSms(member.rows[0].phone, smsText).catch(() => { });
     }
 
-    return { payment_id: row.id, status: 'success', receipt_no: receiptNo };
+    return {
+      payment_id: row.id,
+      status: 'success',
+      receipt_no: receiptNo,
+      allocated: {
+        dues: duesAllocated,
+        penalties: penaltiesAllocated,
+        remaining_unallocated: remaining,
+      },
+    };
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -395,9 +542,12 @@ export async function verifyChapaPayment(txRef: string, ctx: Ctx) {
 }
 
 // =====================================================================
-// CASH PAYMENT (treasurer)
+// CASH PAYMENT (treasurer) — unchanged
 // =====================================================================
-export async function recordCashPayment(input: { member_id: string; amount: number; note?: string; periods?: string[] }, ctx: Ctx) {
+export async function recordCashPayment(
+  input: { member_id: string; amount: number; note?: string; periods?: string[] },
+  ctx: Ctx
+) {
   const member = await query(`SELECT id FROM members WHERE id = $1`, [input.member_id]);
   if (!member.rows[0]) throw new NotFoundError(t('member.notFound', ctx.lang ?? 'en'));
 
@@ -414,7 +564,6 @@ export async function recordCashPayment(input: { member_id: string; amount: numb
       [receiptNo, input.member_id, input.amount, env.CHAPA_CURRENCY, ctx.actorId, input.note ?? null]
     );
 
-    // Pick dues to allocate
     let dues;
     if (input.periods && input.periods.length > 0) {
       dues = await client.query(
@@ -455,12 +604,16 @@ export async function recordCashPayment(input: { member_id: string; amount: numb
     }
 
     await writeAudit(
-      { action: 'CASH_PAYMENT_RECORDED', entity: 'payments', entityId: payment.rows[0].id, details: { memberId: input.member_id, amount: input.amount, receiptNo } },
+      {
+        action: 'CASH_PAYMENT_RECORDED',
+        entity: 'payments',
+        entityId: payment.rows[0].id,
+        details: { memberId: input.member_id, amount: input.amount, receiptNo, remaining_unallocated: remaining },
+      },
       { actorId: ctx.actorId, ip: ctx.ip, userAgent: ctx.userAgent, client }
     );
 
     await client.query('COMMIT');
-
     return { payment_id: payment.rows[0].id, receipt_no: receiptNo, amount: input.amount };
   } catch (err) {
     await client.query('ROLLBACK');
@@ -479,8 +632,8 @@ export async function listPayments(input: { member_id?: string; method?: string;
   let i = 1;
 
   if (input.member_id) { where.push(`p.member_id = $${i}`); params.push(input.member_id); i++; }
-  if (input.method)    { where.push(`p.method = $${i}`);    params.push(input.method);    i++; }
-  if (input.status)    { where.push(`p.status = $${i}`);    params.push(input.status);    i++; }
+  if (input.method) { where.push(`p.method = $${i}`); params.push(input.method); i++; }
+  if (input.status) { where.push(`p.status = $${i}`); params.push(input.status); i++; }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const offset = (input.page - 1) * input.limit;
@@ -523,8 +676,18 @@ export async function getReceipt(paymentId: string) {
     [paymentId]
   );
 
+  const penaltyAllocations = await query(
+    `SELECT ppa.amount, p.id AS penalty_id, p.amount AS penalty_amount, p.reason
+     FROM payment_penalty_allocations ppa
+     JOIN penalties p ON p.id = ppa.penalty_id
+     WHERE ppa.payment_id = $1
+     ORDER BY p.created_at ASC`,
+    [paymentId]
+  );
+
   return {
     payment: payment.rows[0],
     allocations: allocations.rows,
+    penalty_allocations: penaltyAllocations.rows,
   };
 }
