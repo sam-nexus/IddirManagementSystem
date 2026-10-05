@@ -19,6 +19,7 @@ import settingsRoutes from './modules/settings/settings.routes';
 import organizationRoutes from './modules/organization/organization.routes';
 import equipmentRoutes from './modules/equipment/equipment.routes';
 import penaltiesRoutes from './modules/penalties/penalties.routes';
+import manualPaymentRoutes from './modules/contributions/manual.routes';
 
 
 export function createApp(): Express {
@@ -52,6 +53,7 @@ export function createApp(): Express {
   app.use('/organization', organizationRoutes);
   app.use('/equipment', equipmentRoutes);
   app.use('/penalties', penaltiesRoutes);
+  app.use('/contributions/manual', manualPaymentRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
