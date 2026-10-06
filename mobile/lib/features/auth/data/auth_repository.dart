@@ -9,6 +9,12 @@ abstract interface class AuthRepository {
     required String deviceId,
   });
 
+  Future<AuthResult> changePin({
+    required String accessToken,
+    required String currentPin,
+    required String newPin,
+  });
+
   Future<void> logout();
 }
 
@@ -33,7 +39,8 @@ class MockAuthRepository implements AuthRepository {
 
     // Active lock check
     if (_lockedUntil != null && _lockedUntil!.isAfter(DateTime.now())) {
-      return AuthErr(AuthFailure(AuthError.accountLocked, lockedUntil: _lockedUntil));
+      return AuthErr(
+          AuthFailure(AuthError.accountLocked, lockedUntil: _lockedUntil),);
     }
 
     // Normalize (accept 09..., 9..., +2519...)
@@ -60,21 +67,62 @@ class MockAuthRepository implements AuthRepository {
       if (_wrongAttempts >= 3) {
         _lockedUntil = DateTime.now().add(const Duration(minutes: 15));
         _wrongAttempts = 0;
-        return AuthErr(AuthFailure(AuthError.accountLocked, lockedUntil: _lockedUntil));
+        return AuthErr(
+            AuthFailure(AuthError.accountLocked, lockedUntil: _lockedUntil),);
       }
       return const AuthErr(AuthFailure(AuthError.wrongCredentials));
+    }
+
+        // Test path: login with 0000 gives mustChangePin
+    if (pin == '0000') {
+      return const AuthOk(AuthSession(
+        accessToken: 'mock-access-token',
+        refreshToken: 'mock-refresh-token',
+        memberId: 'mock-member-id',
+        firstName: 'Abebe',
+        lastName: 'Kebede',
+        mustChangePin: true,
+      ));
     }
 
     _wrongAttempts = 0;
     _lockedUntil = null;
 
+    return const AuthOk(
+      AuthSession(
+        accessToken: 'mock-access-token',
+        refreshToken: 'mock-refresh-token',
+        memberId: 'mock-member-id',
+        firstName: 'Abebe',
+        lastName: 'Kebede',
+        mustChangePin: true,
+      ),
+    );
+  }
+
+  @override
+  Future<AuthResult> changePin({
+    required String accessToken,
+    required String currentPin,
+    required String newPin,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+
+    if (currentPin != '1234') {
+      return const AuthErr(AuthFailure(AuthError.wrongCredentials));
+    }
+    // In real API the server would reject weak PINs too; the client blocks
+    // them earlier, but the mock mirrors the same guard for symmetry.
+    if (newPin.length != 4) {
+      return const AuthErr(AuthFailure(AuthError.wrongCredentials));
+    }
     return const AuthOk(AuthSession(
       accessToken: 'mock-access-token',
       refreshToken: 'mock-refresh-token',
       memberId: 'mock-member-id',
       firstName: 'Abebe',
       lastName: 'Kebede',
-      mustChangePin: false,
+      mustChangePin: false, // now cleared
     ),);
   }
 

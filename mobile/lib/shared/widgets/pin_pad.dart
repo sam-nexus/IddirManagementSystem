@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:odaa_mobile/core/theme/app_motion.dart';
 import 'package:odaa_mobile/core/theme/app_radii.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/shared/widgets/pin_dots.dart';
 
 /// A custom 3×4 numeric pad for entering a 4-digit PIN.
 class PinPad extends StatefulWidget {
@@ -86,7 +86,7 @@ class _PinPadState extends State<PinPad> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _DotsRow(length: widget.length, filled: _value.length),
+                PinDots(length: widget.length, filled: _value.length),
         const SizedBox(height: 32),
         _NumericGrid(
           enabled: widget.enabled,
@@ -98,40 +98,7 @@ class _PinPadState extends State<PinPad> {
   }
 }
 
-class _DotsRow extends StatelessWidget {
-  const _DotsRow({required this.length, required this.filled});
 
-  final int length;
-  final int filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(length, (i) {
-        final active = i < filled;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: AnimatedContainer(
-            duration: AppMotion.scale(context, AppMotion.fast),
-            curve: AppMotion.standard,
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: active ? tokens.primaryAction : Colors.transparent,
-              border: Border.all(
-                color: active ? tokens.primaryAction : tokens.divider,
-                width: 2,
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
 
 class _NumericGrid extends StatelessWidget {
   const _NumericGrid({

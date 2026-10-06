@@ -186,5 +186,16 @@
   "profileChangePin": "Change PIN",
   "profileDevices": "My devices",
   "profileLogout": "Log out",
-  "profileVersion": "Version {version}"
+  "profileVersion": "Version {version}",
+  "authChangePinTitle": "Choose a new PIN",
+"@authChangePinTitle": {},
+
+"authChangePinBody": "Your PIN was set by the committee. Pick your own 4 digits.",
+"@authChangePinBody": {},
+
+"authPinMismatch": "The two PINs do not match.",
+"@authPinMismatch": {},
+
+"authPinWeak": "That PIN is easy to guess. Try a different one.",
+"@authPinWeak": {}
 }
