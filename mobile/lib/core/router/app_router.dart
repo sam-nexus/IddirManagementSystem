@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:odaa_mobile/features/auth/presentation/login_screen.dart';
 import 'package:odaa_mobile/features/splash/presentation/language_screen.dart';
 import 'package:odaa_mobile/features/splash/presentation/splash_screen.dart';
 import 'package:odaa_mobile/shared/widgets/empty_view.dart';
@@ -24,7 +25,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const _PlaceholderScreen(name: 'Login'),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: '/change-pin',
