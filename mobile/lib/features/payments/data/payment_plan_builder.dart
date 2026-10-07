@@ -22,7 +22,7 @@ abstract final class PaymentPlanBuilder {
     final windowOpen = PaymentWindow.isAnyWindowOpen(now);
 
     // Oldest-first list of everything unpaid or partial.
-    final unpaid = sorted.where((r) => r.isUnpaidOrPartial).toList();
+    final unpaid = sorted.where((r) => r.isUnpaid).toList();
 
     // Rule 1: chronological lock. Walk from the oldest; the first one is
     // always eligible. Later ones are eligible only if every earlier one

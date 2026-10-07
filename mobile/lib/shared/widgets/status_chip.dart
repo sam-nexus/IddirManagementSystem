@@ -4,14 +4,7 @@ import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
 
-enum ContributionState {
-  paid,
-  partial,
-  unpaid,
-  waived,
-  pending,
-  suspended,
-}
+enum ContributionState { paid, unpaid, waived, pending, suspended }
 
 class StatusChip extends StatelessWidget {
   const StatusChip({
@@ -30,7 +23,6 @@ class StatusChip extends StatelessWidget {
     final tokens = context.tokens;
     final (fg, bg) = switch (state) {
       ContributionState.paid => (tokens.statePaid, tokens.statePaidBg),
-      ContributionState.partial => (tokens.statePartial, tokens.statePartialBg),
       ContributionState.unpaid => (tokens.stateUnpaid, tokens.stateUnpaidBg),
       ContributionState.waived => (tokens.stateWaived, tokens.stateWaivedBg),
       ContributionState.pending => (tokens.statePending, tokens.statePendingBg),

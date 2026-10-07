@@ -3,7 +3,6 @@ import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
 
 /// A thin horizontal band representing the year — one segment per month.
-/// Months fill from left to right. Optional tap callback per month.
 class GrowthRing extends StatelessWidget {
   const GrowthRing({
     required this.months,
@@ -27,7 +26,6 @@ class GrowthRing extends StatelessWidget {
           children: List.generate(months.length, (i) {
             final color = switch (months[i]) {
               ContributionState.paid => tokens.statePaid,
-              ContributionState.partial => tokens.statePartial,
               ContributionState.unpaid => tokens.divider,
               ContributionState.waived => tokens.stateWaivedBg,
               ContributionState.pending => tokens.statePending,

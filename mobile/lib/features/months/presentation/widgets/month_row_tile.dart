@@ -19,11 +19,7 @@ class MonthRowTile extends StatelessWidget {
   });
 
   final MonthRow row;
-
-  /// True if any earlier month in the same list is unpaid or partial.
   final bool hasOlderUnpaid;
-
-  /// Whether the "Pay" button should appear on this row.
   final bool canPayNow;
 
   @override

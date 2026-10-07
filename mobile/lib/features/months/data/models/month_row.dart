@@ -22,15 +22,10 @@ class MonthRow {
   final double amountDue;
   final double amountPaid;
   final String currency;
-
-  /// Penalties attached to this month (late-payment fees).
   final double penaltyAmount;
-
   final DateTime? paidAt;
 
   double get outstanding => (amountDue - amountPaid).clamp(0, amountDue);
-
-  /// Total owed for this month including penalties.
   double get outstandingWithPenalty => outstanding + penaltyAmount;
 
   bool get isCurrentMonth {
@@ -51,27 +46,20 @@ class MonthRow {
   bool get isFullyPaid =>
       state == ContributionState.paid || state == ContributionState.waived;
 
-  bool get isUnpaidOrPartial =>
-      state == ContributionState.unpaid || state == ContributionState.partial;
+  bool get isUnpaid => state == ContributionState.unpaid;
 }
 
-/// The four states the UI shows. Raw DB states get collapsed here.
 enum DisplayState { paid, unpaid, suspended, comingSoon }
 
 extension MonthRowDisplay on MonthRow {
-  /// [hasOlderUnpaid] must be true if any month before this one is unpaid.
-  /// The screen computes that once per row by looking at earlier rows in the
-  /// same list.
   DisplayState resolveDisplayState({required bool hasOlderUnpaid}) {
     if (isFullyPaid) return DisplayState.paid;
     if (isFutureMonth) return DisplayState.comingSoon;
     if (isPastMonth) return DisplayState.unpaid;
-    // Current month, not fully paid:
     return hasOlderUnpaid ? DisplayState.suspended : DisplayState.unpaid;
   }
 }
 
-/// The 27th → 2nd payment window helper.
 abstract final class PaymentWindow {
   static const openDay = 27;
   static const closeDay = 2;

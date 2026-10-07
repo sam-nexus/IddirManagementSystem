@@ -554,6 +554,30 @@ abstract class AppLocalizations {
   /// **'Committee'**
   String get aboutCommittee;
 
+  /// No description provided for @payDues.
+  ///
+  /// In en, this message translates to:
+  /// **'Dues'**
+  String get payDues;
+
+  /// No description provided for @payPenalties.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties'**
+  String get payPenalties;
+
+  /// No description provided for @payNothingToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'You are all caught up'**
+  String get payNothingToPay;
+
+  /// No description provided for @payNothingToPayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'There is nothing to pay right now.'**
+  String get payNothingToPayBody;
+
   /// No description provided for @stateSuspended.
   ///
   /// In en, this message translates to:

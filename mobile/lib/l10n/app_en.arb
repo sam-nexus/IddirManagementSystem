@@ -101,6 +101,11 @@
   "aboutBylaws": "Bylaws",
   "aboutCommittee": "Committee",
 
+  "payDues": "Dues",
+"payPenalties": "Penalties",
+"payNothingToPay": "You are all caught up",
+"payNothingToPayBody": "There is nothing to pay right now.",
+
   "stateSuspended": "Suspended",
 "stateComingSoon": "Coming soon",
 "monthsPay": "Pay",

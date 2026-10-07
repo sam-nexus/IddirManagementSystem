@@ -64,6 +64,11 @@
   "stateWaived": "Dhiifame",
   "statePending": "Eegaa jira",
 
+  "payDues": "Kaffaltii",
+"payPenalties": "Adabbii",
+"payNothingToPay": "Hundi kaffalameera",
+"payNothingToPayBody": "Amma kaffaltiin hin jiru.",
+
   "errorGeneric": "Wanti tokko dogoggora. Maaloo irra deebi'ii yaali.",
   "errorNetwork": "Interneetiin hin jiru.",
   "errorRetry": "Irra deebi'ii yaali",

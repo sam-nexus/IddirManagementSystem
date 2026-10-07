@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
 
-/// A single month drawn as a leaf. Filled, half-filled, outlined, or x-marked.
-/// Use in the Odaa tree and in the month list.
 class MonthLeaf extends StatelessWidget {
   const MonthLeaf({
     required this.state,
@@ -46,7 +44,6 @@ class _LeafPainter extends CustomPainter {
 
     final fillColor = switch (state) {
       ContributionState.paid => tokens.statePaid as Color,
-      ContributionState.partial => tokens.statePartial as Color,
       ContributionState.unpaid => Colors.transparent,
       ContributionState.waived => Colors.transparent,
       ContributionState.pending => tokens.statePending as Color,
@@ -55,37 +52,16 @@ class _LeafPainter extends CustomPainter {
 
     final strokeColor = switch (state) {
       ContributionState.paid => tokens.statePaid as Color,
-      ContributionState.partial => tokens.statePartial as Color,
       ContributionState.unpaid => tokens.stateUnpaid as Color,
       ContributionState.waived => tokens.stateWaived as Color,
       ContributionState.pending => tokens.statePending as Color,
       ContributionState.suspended => tokens.textMuted as Color,
     };
 
-    // Background fill for the "half" state: draw a soft tint.
-    if (state == ContributionState.partial) {
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = (tokens.statePartialBg as Color)
-          ..style = PaintingStyle.fill,
-      );
-    }
-
-    // Half fill: clip to the leaf and paint the left half solid.
-    if (state == ContributionState.partial) {
-      canvas.save();
-      canvas.clipPath(path);
-      canvas.drawRect(
-        Rect.fromLTWH(0, 0, size.width / 2, size.height),
-        Paint()..color = fillColor,
-      );
-      canvas.restore();
-    } else if (fillColor != Colors.transparent) {
+    if (fillColor != Colors.transparent) {
       canvas.drawPath(path, Paint()..color = fillColor);
     }
 
-    // Stroke for everyone except solid paid (which reads better solid).
     if (state != ContributionState.paid) {
       canvas.drawPath(
         path,
@@ -96,7 +72,6 @@ class _LeafPainter extends CustomPainter {
       );
     }
 
-    // Small x for waived state.
     if (state == ContributionState.waived) {
       final p = Paint()
         ..color = strokeColor
@@ -115,7 +90,6 @@ class _LeafPainter extends CustomPainter {
       );
     }
 
-    // Current month gets a subtle halo ring.
     if (isCurrentMonth) {
       canvas.drawPath(
         path,
@@ -131,7 +105,6 @@ class _LeafPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     final path = Path();
-    // Leaf: starts at bottom tip, curves up left, peaks, curves right back down.
     path.moveTo(w * 0.5, h);
     path.cubicTo(w * 0.05, h * 0.75, w * 0.05, h * 0.25, w * 0.5, 0);
     path.cubicTo(w * 0.95, h * 0.25, w * 0.95, h * 0.75, w * 0.5, h);

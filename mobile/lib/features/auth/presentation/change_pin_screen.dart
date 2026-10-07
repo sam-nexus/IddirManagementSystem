@@ -174,7 +174,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
           ),
         const SizedBox(height: AppSpacing.xxl),
         PinPad(
-          key: ValueKey('new-$attempt'),
+          key: const ValueKey('new-$attempt'),
           length: 4,
           showDots: false,
           enabled: !_isLoading,

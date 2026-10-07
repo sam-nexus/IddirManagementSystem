@@ -22,7 +22,6 @@ class MonthsScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Header
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.screenEdge,
@@ -45,8 +44,6 @@ class MonthsScreen extends ConsumerWidget {
             ],
           ),
         ),
-
-        // List
         Expanded(
           child: async.when(
             loading: () => const _MonthsSkeleton(),
@@ -72,10 +69,9 @@ class _MonthsList extends ConsumerWidget {
     final now = DateTime.now();
     final windowOpen = PaymentWindow.isAnyWindowOpen(now);
 
-    // The single actionable month is the first one that is unpaid/partial.
     int? payIndex;
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i].isUnpaidOrPartial) {
+      if (rows[i].isUnpaid) {
         payIndex = i;
         break;
       }
@@ -87,16 +83,10 @@ class _MonthsList extends ConsumerWidget {
       separatorBuilder: (_, __) => const Divider(height: 1, indent: 68),
       itemBuilder: (context, i) {
         final row = rows[i];
-
-        // hasOlderUnpaid — any earlier row that is unpaid or partial.
-        final hasOlderUnpaid = rows
-            .take(i)
-            .any((r) => r.isUnpaidOrPartial);
-
-        // canPayNow — only the oldest unpaid month, and only if its window is open.
+        final hasOlderUnpaid =
+            rows.take(i).any((r) => r.isUnpaid);
         final isOldestUnpaid = payIndex == i;
-        final canPayNow =
-            isOldestUnpaid && windowOpen && row.isUnpaidOrPartial;
+        final canPayNow = isOldestUnpaid && windowOpen && row.isUnpaid;
 
         return MonthRowTile(
           row: row,
@@ -119,11 +109,19 @@ class _MonthsSkeleton extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (_, __) => const Row(
         children: [
-          Skeleton(width: 28, height: 36, radius: BorderRadius.all(Radius.circular(4))),
+          Skeleton(
+            width: 28,
+            height: 36,
+            radius: BorderRadius.all(Radius.circular(4)),
+          ),
           SizedBox(width: 16),
           Expanded(child: Skeleton(height: 16)),
           SizedBox(width: 16),
-          Skeleton(width: 56, height: 20, radius: BorderRadius.all(Radius.circular(4))),
+          Skeleton(
+            width: 56,
+            height: 20,
+            radius: BorderRadius.all(Radius.circular(4)),
+          ),
         ],
       ),
     );

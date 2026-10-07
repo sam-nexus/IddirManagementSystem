@@ -2,8 +2,10 @@ import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
 
 abstract interface class MonthsRepository {
-  /// Returns 12 rows for the given year, in calendar order.
-  Future<List<MonthRow>> fetchYear({required int year, required String memberId});
+  Future<List<MonthRow>> fetchYear({
+    required int year,
+    required String memberId,
+  });
 }
 
 class MockMonthsRepository implements MonthsRepository {
@@ -23,21 +25,19 @@ class MockMonthsRepository implements MonthsRepository {
       'Adooleessa', 'Hagayya', 'Fuulbana', 'Onkololeessa', 'Sadaasa', 'Muddee',
     ];
 
-    // Same shape as the mock home summary:
-    // paid, paid, partial, paid, paid, unpaid, paid, waived, paid, paid, paid, pending
     const states = <ContributionState>[
-      ContributionState.paid,
-      ContributionState.paid,
-      ContributionState.partial,
-      ContributionState.paid,
-      ContributionState.paid,
-      ContributionState.unpaid,
-      ContributionState.paid,
-      ContributionState.waived,
-      ContributionState.paid,
-      ContributionState.paid,
-      ContributionState.paid,
-      ContributionState.pending,
+      ContributionState.paid,     // Jan
+      ContributionState.paid,     // Feb
+      ContributionState.unpaid,   // Mar
+      ContributionState.paid,     // Apr
+      ContributionState.paid,     // May
+      ContributionState.unpaid,   // Jun
+      ContributionState.paid,     // Jul
+      ContributionState.waived,   // Aug
+      ContributionState.paid,     // Sep
+      ContributionState.paid,     // Oct
+      ContributionState.unpaid,   // Nov
+      ContributionState.unpaid,   // Dec
     ];
 
     final rows = <MonthRow>[];
@@ -46,16 +46,14 @@ class MockMonthsRepository implements MonthsRepository {
       const due = 100.0;
       final paid = switch (state) {
         ContributionState.paid => 100.0,
-        ContributionState.partial => 60.0,
         ContributionState.waived => 0.0,
         ContributionState.unpaid => 0.0,
         ContributionState.pending => 0.0,
-        ContributionState.suspended => 0.0, 
+        ContributionState.suspended => 0.0,
       };
 
-            final penalty = switch (state) {
+      final penalty = switch (state) {
         ContributionState.unpaid when i < 6 => 20.0,
-        ContributionState.partial => 10.0,
         _ => 0.0,
       };
 

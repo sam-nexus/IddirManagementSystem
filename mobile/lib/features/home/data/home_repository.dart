@@ -5,8 +5,6 @@ abstract interface class HomeRepository {
   Future<HomeSummary> fetchSummary({required String memberId});
 }
 
-/// A realistic mock. Returns a member who has paid 8 of 12 months,
-/// owes for two, has one waived, one pending, and a small penalty on top.
 class MockHomeRepository implements HomeRepository {
   @override
   Future<HomeSummary> fetchSummary({required String memberId}) async {
@@ -20,7 +18,7 @@ class MockHomeRepository implements HomeRepository {
         ContributionState.paid,     // Mar
         ContributionState.paid,     // Apr
         ContributionState.paid,     // May
-        ContributionState.partial,  // Jun
+        ContributionState.unpaid,   // Jun
         ContributionState.paid,     // Jul
         ContributionState.waived,   // Aug
         ContributionState.paid,     // Sep
@@ -28,8 +26,8 @@ class MockHomeRepository implements HomeRepository {
         ContributionState.unpaid,   // Nov
         ContributionState.pending,  // Dec
       ],
-      currentMonthIndex: 10,        // November
-      duesBalance: 250.00,
+      currentMonthIndex: 10,
+      duesBalance: 200.00,
       penaltiesBalance: 20.00,
       currency: 'ETB',
       monthsPaid: 7,

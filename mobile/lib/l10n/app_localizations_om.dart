@@ -245,6 +245,18 @@ class AppLocalizationsOm extends AppLocalizations {
   String get aboutCommittee => 'Koree';
 
   @override
+  String get payDues => 'Kaffaltii';
+
+  @override
+  String get payPenalties => 'Adabbii';
+
+  @override
+  String get payNothingToPay => 'Hundi kaffalameera';
+
+  @override
+  String get payNothingToPayBody => 'Amma kaffaltiin hin jiru.';
+
+  @override
   String get stateSuspended => 'Dhaabbate';
 
   @override

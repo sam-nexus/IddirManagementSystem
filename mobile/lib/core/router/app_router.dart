@@ -5,6 +5,7 @@ import 'package:odaa_mobile/features/auth/presentation/change_pin_screen.dart';
 import 'package:odaa_mobile/features/auth/presentation/login_screen.dart';
 import 'package:odaa_mobile/features/home/presentation/home_screen.dart';
 import 'package:odaa_mobile/features/months/presentation/months_screen.dart';
+import 'package:odaa_mobile/features/pay/presentation/pay_screen.dart';
 import 'package:odaa_mobile/features/shell/presentation/app_shell.dart';
 import 'package:odaa_mobile/features/shell/presentation/widgets/canopy_bar.dart';
 import 'package:odaa_mobile/features/splash/presentation/language_screen.dart';
@@ -16,10 +17,20 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     debugLogDiagnostics: false,
     routes: [
-      GoRoute(path: '/', name: 'splash', builder: (_, __) => const SplashScreen()),
-      GoRoute(path: '/language', name: 'language', builder: (_, __) => const LanguageScreen()),
-      GoRoute(path: '/login', name: 'login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/change-pin', name: 'changePin', builder: (_, __) => const ChangePinScreen()),
+      GoRoute(
+          path: '/', name: 'splash', builder: (_, __) => const SplashScreen(),),
+      GoRoute(
+          path: '/language',
+          name: 'language',
+          builder: (_, __) => const LanguageScreen(),),
+      GoRoute(
+          path: '/login',
+          name: 'login',
+          builder: (_, __) => const LoginScreen(),),
+      GoRoute(
+          path: '/change-pin',
+          name: 'changePin',
+          builder: (_, __) => const ChangePinScreen(),),
 
       // ---------- Shell with the canopy ----------
       ShellRoute(
@@ -41,7 +52,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/pay',
             name: 'pay',
-            builder: (_, __) => const _PlaceholderScreen(name: 'Pay'),
+            builder: (context, state) => PayScreen(
+              period: state.uri.queryParameters['period'],
+            ),
           ),
           GoRoute(
             path: '/more',

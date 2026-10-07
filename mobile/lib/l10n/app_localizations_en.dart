@@ -244,6 +244,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutCommittee => 'Committee';
 
   @override
+  String get payDues => 'Dues';
+
+  @override
+  String get payPenalties => 'Penalties';
+
+  @override
+  String get payNothingToPay => 'You are all caught up';
+
+  @override
+  String get payNothingToPayBody => 'There is nothing to pay right now.';
+
+  @override
   String get stateSuspended => 'Suspended';
 
   @override

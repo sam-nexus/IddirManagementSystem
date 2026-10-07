@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
 
-/// Everything the Home screen needs, in one object.
-/// Immutable so Riverpod can compare cheaply.
 @immutable
 class HomeSummary {
   const HomeSummary({
@@ -19,22 +17,17 @@ class HomeSummary {
   });
 
   final String firstName;
-
-  /// Exactly 12 entries, calendar order.
   final List<ContributionState> months;
   final int currentMonthIndex;
-
   final double duesBalance;
   final double penaltiesBalance;
-  final String currency;      // 'ETB'
+  final String currency;
   final int monthsPaid;
   final int monthsTotal;
-
   final NoticeTeaser? latestNotice;
   final MeetingTeaser? nextMeeting;
 
   double get totalOwed => duesBalance + penaltiesBalance;
-
   bool get isInGoodStanding => totalOwed <= 0;
 }
 
