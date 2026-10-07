@@ -15,6 +15,24 @@ class AppLocalizationsOm extends AppLocalizations {
   String get appTagline => 'Muka Odaa jalatti walitti qabamnee';
 
   @override
+  String get splashTagline => 'Muka Odaa jalatti walitti qabamnee';
+
+  @override
+  String get languageTitle => 'Afaan kee filadhu';
+
+  @override
+  String get languageSubtitle => 'Yeroo barbaadde jijjiiruu dandeessa.';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageOromo => 'Afaan Oromoo';
+
+  @override
+  String get languageContinue => 'Itti fufi';
+
+  @override
   String get actionContinue => 'Itti fufi';
 
   @override
@@ -45,7 +63,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get greetingEvening => 'Akkam galgala';
 
   @override
-  String greetingName(Object name) {
+  String greetingName(String name) {
     return 'Akkam, $name';
   }
 
@@ -59,7 +77,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get homeMonthsPaid => 'Ji\'oota kaffalame';
 
   @override
-  String homePayNow(Object amount) {
+  String homePayNow(String amount) {
     return 'Amma kaffali · $amount';
   }
 
@@ -88,7 +106,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get authLockedTitle => 'Herregni cufameera';
 
   @override
-  String authLockedBody(Object minutes) {
+  String authLockedBody(String minutes) {
     return 'Daqiiqaa $minutes booda irra deebi\'ii yaali.';
   }
 
@@ -227,6 +245,18 @@ class AppLocalizationsOm extends AppLocalizations {
   String get aboutCommittee => 'Koree';
 
   @override
+  String get stateSuspended => 'Dhaabbate';
+
+  @override
+  String get stateComingSoon => 'Dhiyootti dhufa';
+
+  @override
+  String get monthsPay => 'Kaffali';
+
+  @override
+  String get monthsSuspendedHint => 'Maaloo ji\'oota duraanii dura kaffali.';
+
+  @override
   String get profileTitle => 'Profaayilii';
 
   @override
@@ -239,28 +269,38 @@ class AppLocalizationsOm extends AppLocalizations {
   String get profileDevices => 'Meeshaalee koo';
 
   @override
+  String get authConfirmPinLabel => 'PIN mirkaneessi';
+
+  @override
+  String get authConfirmPinHint => 'PIN haaraa kee irra deebi\'ii galchi.';
+
+  @override
   String get profileLogout => 'Ba\'i';
 
   @override
-  String profileVersion(Object version) {
-    return 'Fooyya\'iinsa $version';
+  String get paymentOpenNow => 'Amma banaa';
+
+  @override
+  String get paymentWindowOpen =>
+      'Kaffaltiin hanga guyyaa 2ffaatti banaa jira.';
+
+  @override
+  String paymentWindowClosed(String date) {
+    return 'Kaffaltiin $date irraa banama.';
   }
 
   @override
-  String get splashTagline => 'Muka Odaa jalatti walitti qabamnee';
+  String get paymentMustPayInOrder => 'Maaloo ji\'oota duraanii dura kaffali.';
 
   @override
-  String get languageTitle => 'Afaan kee filadhu';
+  String get paymentOldestFirst => 'Ji\'a duraa dura';
 
   @override
-  String get languageSubtitle => 'Yeroo barbaadde jijjiiruu dandeessa.';
+  String get errorSessionExpired =>
+      'Yeroon kee darbeera. Maaloo irra deebi\'ii seeni.';
 
   @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageOromo => 'Afaan Oromoo';
-
-  @override
-  String get languageContinue => 'Itti fufi';
+  String profileVersion(String version) {
+    return 'Fooyya\'iinsa $version';
+  }
 }

@@ -110,6 +110,42 @@ abstract class AppLocalizations {
   /// **'Gathered under the Odaa tree'**
   String get appTagline;
 
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Gathered under the Odaa tree'**
+  String get splashTagline;
+
+  /// No description provided for @languageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language'**
+  String get languageTitle;
+
+  /// No description provided for @languageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this at any time.'**
+  String get languageSubtitle;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageOromo.
+  ///
+  /// In en, this message translates to:
+  /// **'Afaan Oromoo'**
+  String get languageOromo;
+
+  /// No description provided for @languageContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get languageContinue;
+
   /// No description provided for @actionContinue.
   ///
   /// In en, this message translates to:
@@ -174,7 +210,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Akkam, {name}'**
-  String greetingName(Object name);
+  String greetingName(String name);
 
   /// No description provided for @homeStanding.
   ///
@@ -198,7 +234,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Pay now · {amount}'**
-  String homePayNow(Object amount);
+  String homePayNow(String amount);
 
   /// No description provided for @homeLatestNotice.
   ///
@@ -252,7 +288,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Please try again in {minutes} minutes.'**
-  String authLockedBody(Object minutes);
+  String authLockedBody(String minutes);
 
   /// No description provided for @authChangePinTitle.
   ///
@@ -518,6 +554,30 @@ abstract class AppLocalizations {
   /// **'Committee'**
   String get aboutCommittee;
 
+  /// No description provided for @stateSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get stateSuspended;
+
+  /// No description provided for @stateComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get stateComingSoon;
+
+  /// No description provided for @monthsPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
+  String get monthsPay;
+
+  /// No description provided for @monthsSuspendedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please clear older months first.'**
+  String get monthsSuspendedHint;
+
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:
@@ -542,53 +602,65 @@ abstract class AppLocalizations {
   /// **'My devices'**
   String get profileDevices;
 
+  /// No description provided for @authConfirmPinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm PIN'**
+  String get authConfirmPinLabel;
+
+  /// No description provided for @authConfirmPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your new PIN again.'**
+  String get authConfirmPinHint;
+
   /// No description provided for @profileLogout.
   ///
   /// In en, this message translates to:
   /// **'Log out'**
   String get profileLogout;
 
+  /// No description provided for @paymentOpenNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open now'**
+  String get paymentOpenNow;
+
+  /// No description provided for @paymentWindowOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is open until the 2nd.'**
+  String get paymentWindowOpen;
+
+  /// No description provided for @paymentWindowClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment opens on {date}.'**
+  String paymentWindowClosed(String date);
+
+  /// No description provided for @paymentMustPayInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Please clear older months first.'**
+  String get paymentMustPayInOrder;
+
+  /// No description provided for @paymentOldestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest month first'**
+  String get paymentOldestFirst;
+
+  /// No description provided for @errorSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Please sign in again.'**
+  String get errorSessionExpired;
+
   /// No description provided for @profileVersion.
   ///
   /// In en, this message translates to:
   /// **'Version {version}'**
-  String profileVersion(Object version);
-
-  /// No description provided for @splashTagline.
-  ///
-  /// In en, this message translates to:
-  /// **'Gathered under the Odaa tree'**
-  String get splashTagline;
-
-  /// No description provided for @languageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your language'**
-  String get languageTitle;
-
-  /// No description provided for @languageSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'You can change this at any time.'**
-  String get languageSubtitle;
-
-  /// No description provided for @languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
-
-  /// No description provided for @languageOromo.
-  ///
-  /// In en, this message translates to:
-  /// **'Afaan Oromoo'**
-  String get languageOromo;
-
-  /// No description provided for @languageContinue.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue'**
-  String get languageContinue;
+  String profileVersion(String version);
 }
 
 class _AppLocalizationsDelegate

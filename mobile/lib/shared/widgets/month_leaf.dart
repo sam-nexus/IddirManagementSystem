@@ -50,6 +50,7 @@ class _LeafPainter extends CustomPainter {
       ContributionState.unpaid => Colors.transparent,
       ContributionState.waived => Colors.transparent,
       ContributionState.pending => tokens.statePending as Color,
+      ContributionState.suspended => Colors.transparent,
     };
 
     final strokeColor = switch (state) {
@@ -58,6 +59,7 @@ class _LeafPainter extends CustomPainter {
       ContributionState.unpaid => tokens.stateUnpaid as Color,
       ContributionState.waived => tokens.stateWaived as Color,
       ContributionState.pending => tokens.statePending as Color,
+      ContributionState.suspended => tokens.textMuted as Color,
     };
 
     // Background fill for the "half" state: draw a soft tint.

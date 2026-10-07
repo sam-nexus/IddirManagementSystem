@@ -15,6 +15,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTagline => 'Gathered under the Odaa tree';
 
   @override
+  String get splashTagline => 'Gathered under the Odaa tree';
+
+  @override
+  String get languageTitle => 'Choose your language';
+
+  @override
+  String get languageSubtitle => 'You can change this at any time.';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageOromo => 'Afaan Oromoo';
+
+  @override
+  String get languageContinue => 'Continue';
+
+  @override
   String get actionContinue => 'Continue';
 
   @override
@@ -45,7 +63,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get greetingEvening => 'Good evening';
 
   @override
-  String greetingName(Object name) {
+  String greetingName(String name) {
     return 'Akkam, $name';
   }
 
@@ -59,7 +77,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeMonthsPaid => 'Months paid';
 
   @override
-  String homePayNow(Object amount) {
+  String homePayNow(String amount) {
     return 'Pay now · $amount';
   }
 
@@ -88,7 +106,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLockedTitle => 'Account locked';
 
   @override
-  String authLockedBody(Object minutes) {
+  String authLockedBody(String minutes) {
     return 'Please try again in $minutes minutes.';
   }
 
@@ -226,6 +244,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutCommittee => 'Committee';
 
   @override
+  String get stateSuspended => 'Suspended';
+
+  @override
+  String get stateComingSoon => 'Coming soon';
+
+  @override
+  String get monthsPay => 'Pay';
+
+  @override
+  String get monthsSuspendedHint => 'Please clear older months first.';
+
+  @override
   String get profileTitle => 'Profile';
 
   @override
@@ -238,28 +268,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileDevices => 'My devices';
 
   @override
+  String get authConfirmPinLabel => 'Confirm PIN';
+
+  @override
+  String get authConfirmPinHint => 'Enter your new PIN again.';
+
+  @override
   String get profileLogout => 'Log out';
 
   @override
-  String profileVersion(Object version) {
-    return 'Version $version';
+  String get paymentOpenNow => 'Open now';
+
+  @override
+  String get paymentWindowOpen => 'Payment is open until the 2nd.';
+
+  @override
+  String paymentWindowClosed(String date) {
+    return 'Payment opens on $date.';
   }
 
   @override
-  String get splashTagline => 'Gathered under the Odaa tree';
+  String get paymentMustPayInOrder => 'Please clear older months first.';
 
   @override
-  String get languageTitle => 'Choose your language';
+  String get paymentOldestFirst => 'Oldest month first';
 
   @override
-  String get languageSubtitle => 'You can change this at any time.';
+  String get errorSessionExpired =>
+      'Your session has expired. Please sign in again.';
 
   @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageOromo => 'Afaan Oromoo';
-
-  @override
-  String get languageContinue => 'Continue';
+  String profileVersion(String version) {
+    return 'Version $version';
+  }
 }

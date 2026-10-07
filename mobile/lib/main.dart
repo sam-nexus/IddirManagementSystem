@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:odaa_mobile/core/l10n/om_fallback_delegates.dart';
 import 'package:odaa_mobile/core/providers/app_providers.dart';
 import 'package:odaa_mobile/core/router/app_router.dart';
 import 'package:odaa_mobile/core/storage/prefs_store.dart';
@@ -31,10 +32,18 @@ class OdaaApp extends ConsumerWidget {
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
       routerConfig: router,
-      locale: lang,
-      supportedLocales: AppLocalizations.supportedLocales,
+      locale: lang ?? const Locale('en'),
+      supportedLocales: const [Locale('en'), Locale('om')],
       localizationsDelegates: const [
+        // Our own generated app strings (app_en.arb / app_om.arb)
         AppLocalizations.delegate,
+
+        // Oromo fallbacks — route 'om' to English for the built-in strings
+        OmMaterialLocalizationsDelegate(),
+        OmWidgetsLocalizationsDelegate(),
+        OmCupertinoLocalizationsDelegate(),
+
+        // Normal delegates for every other locale (including 'en')
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

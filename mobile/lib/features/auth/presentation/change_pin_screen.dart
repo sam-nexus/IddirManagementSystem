@@ -21,139 +21,52 @@ class ChangePinScreen extends ConsumerStatefulWidget {
   ConsumerState<ChangePinScreen> createState() => _ChangePinScreenState();
 }
 
+/// Two-step flow, one step visible at a time.
+enum _Step { newPin, confirmPin }
+
 class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
+  _Step _step = _Step.newPin;
+
   String _newPin = '';
-  String? _confirmPin;
+  String _confirmPin = '';
+
   bool _isLoading = false;
   String? _errorText;
+  int _attempt = 0;
 
   PinStrength get _strength => PinStrengthChecker.check(_newPin);
-
   bool get _isWeak => _newPin.length == 4 && _strength == PinStrength.weak;
   bool get _canMoveToConfirm => _newPin.length == 4 && !_isWeak;
 
-  @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    final l10n = context.l10n;
-
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenEdge,
-            vertical: AppSpacing.xl,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppSpacing.xl),
-              Text(
-                l10n.authChangePinTitle,
-                style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.authChangePinBody,
-                style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              Expanded(
-                child: _confirmPin == null
-                    ? _buildNewPinStep(tokens, l10n)
-                    : _buildConfirmStep(tokens, l10n),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void _goToConfirm() {
+    setState(() {
+      _step = _Step.confirmPin;
+      _confirmPin = '';
+      _errorText = null;
+    });
   }
 
-  Widget _buildNewPinStep(dynamic tokens, dynamic l10n) {
-    return Column(
-      children: [
-        PinDots(length: 4, filled: _newPin.length),
-        const SizedBox(height: AppSpacing.lg),
-        if (_newPin.length == 4)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-            child: PinStrengthBar(
-              strength: _strength,
-              message: PinStrengthChecker.message(
-                _strength,
-                Localizations.localeOf(context).languageCode,
-              ),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.xxl),
-        PinPad(
-          length: 4,
-          enabled: !_isLoading && _newPin.length < 4,
-          onCompleted: (_) {}, // handled by onChanged below
-          onChanged: (value) => setState(() => _newPin = value),
-        ),
-        const Spacer(),
-        PrimaryButton(
-          label: l10n.actionContinue,
-          onPressed: _canMoveToConfirm
-              ? () => setState(() => _confirmPin = '')
-              : null,
-        ),
-        const SizedBox(height: AppSpacing.lg),
-      ],
-    );
-  }
-
-  Widget _buildConfirmStep(dynamic tokens, dynamic l10n) {
-    return Column(
-      children: [
-        PinDots(length: 4, filled: _confirmPin?.length ?? 0),
-        const SizedBox(height: AppSpacing.lg),
-        if (_errorText != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-            child: Text(
-              _errorText!,
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyS.copyWith(color: tokens.error),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.xxl),
-        PinPad(
-          length: 4,
-          enabled: !_isLoading,
-          onChanged: (v) => setState(() => _confirmPin = v),
-          onCompleted: _submit,
-        ),
-        const Spacer(),
-        TextButton(
-          onPressed: _isLoading
-              ? null
-              : () => setState(() {
-                    _confirmPin = null;
-                    _errorText = null;
-                  }),
-          child: Text(
-            l10n.actionBack,
-            style: AppTypography.label.copyWith(color: tokens.primary),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-      ],
-    );
+  void _goBackToNewPin() {
+    setState(() {
+      _step = _Step.newPin;
+      _newPin = '';
+      _confirmPin = '';
+      _errorText = null;
+      _attempt++;
+    });
   }
 
   Future<void> _submit(String confirm) async {
     if (_isLoading) return;
+
     if (confirm != _newPin) {
       setState(() {
         _errorText = context.l10n.authPinMismatch;
         _confirmPin = '';
+        _attempt++;
       });
       return;
     }
-
     setState(() {
       _isLoading = true;
       _errorText = null;
@@ -194,5 +107,125 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
       default:
         return context.l10n.errorGeneric;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final l10n = context.l10n;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenEdge,
+            vertical: AppSpacing.xl,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: AppSpacing.xl),
+
+              // ---------- Header ----------
+              Text(
+                _step == _Step.newPin
+                    ? l10n.authChangePinTitle
+                    : l10n.authConfirmPinLabel,
+                style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                _step == _Step.newPin
+                    ? l10n.authChangePinBody
+                    : l10n.authConfirmPinHint,
+                style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+
+              // ---------- Step content ----------
+              Expanded(
+                child: _step == _Step.newPin
+                    ? _buildNewPinStep(tokens, l10n)
+                    : _buildConfirmStep(tokens, l10n),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewPinStep(dynamic tokens, dynamic l10n) {
+   const int attempt = 0;
+    return Column(
+      children: [
+        PinDots(length: 4, filled: _newPin.length),
+        const SizedBox(height: AppSpacing.lg),
+        if (_newPin.length == 4)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+            child: PinStrengthBar(
+              strength: _strength,
+              message: PinStrengthChecker.message(
+                _strength,
+                Localizations.localeOf(context).languageCode,
+              ),
+            ),
+          ),
+        const SizedBox(height: AppSpacing.xxl),
+        PinPad(
+          key: ValueKey('new-$attempt'),
+          length: 4,
+          showDots: false,
+          enabled: !_isLoading,
+          onChanged: (value) => setState(() => _newPin = value),
+          onCompleted: (_) {
+            // New-PIN step doesn't auto-advance — the Continue button does.
+          },
+        ),
+        const Spacer(),
+        PrimaryButton(
+          label: l10n.actionContinue,
+          onPressed: _canMoveToConfirm ? _goToConfirm : null,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+      ],
+    );
+  }
+
+  Widget _buildConfirmStep(dynamic tokens, dynamic l10n) {
+    return Column(
+      children: [
+        PinDots(length: 4, filled: _confirmPin.length),
+        const SizedBox(height: AppSpacing.lg),
+        if (_errorText != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+            child: Text(
+              _errorText!,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyS.copyWith(color: tokens.error),
+            ),
+          ),
+        const SizedBox(height: AppSpacing.xxl),
+        PinPad(
+          key: ValueKey('confirm-$_attempt'),
+          length: 4,
+          showDots: false,
+          enabled: !_isLoading,
+          onChanged: (v) => setState(() => _confirmPin = v),
+          onCompleted: _submit,
+        ),
+        const Spacer(),
+        TextButton(
+          onPressed: _isLoading ? null : _goBackToNewPin,
+          child: Text(
+            l10n.actionBack,
+            style: AppTypography.label.copyWith(color: tokens.primary),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+      ],
+    );
   }
 }

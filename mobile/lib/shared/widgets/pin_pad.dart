@@ -13,6 +13,7 @@ class PinPad extends StatefulWidget {
     this.onChanged,
     this.initialValue = '',
     this.enabled = true,
+    this.showDots = true,          // ← ADDED
     this.controller,
     super.key,
   });
@@ -22,20 +23,16 @@ class PinPad extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final String initialValue;
   final bool enabled;
-
-  /// Optional external controller for clearing/reading the current value.
+  final bool showDots;             // ← ADDED
   final PinPadController? controller;
 
   @override
   State<PinPad> createState() => _PinPadState();
 }
 
-/// Lets the parent clear or read the current entry (e.g. after a wrong PIN).
 class PinPadController {
   _PinPadState? _state;
-
   String get value => _state?._value ?? '';
-
   void clear() => _state?.clear();
 }
 
@@ -86,8 +83,10 @@ class _PinPadState extends State<PinPad> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-                PinDots(length: widget.length, filled: _value.length),
-        const SizedBox(height: 32),
+        if (widget.showDots) ...[             // ← ADDED
+          PinDots(length: widget.length, filled: _value.length),
+          const SizedBox(height: 32),
+        ],
         _NumericGrid(
           enabled: widget.enabled,
           onDigit: _append,
@@ -97,8 +96,6 @@ class _PinPadState extends State<PinPad> {
     );
   }
 }
-
-
 
 class _NumericGrid extends StatelessWidget {
   const _NumericGrid({
@@ -116,9 +113,9 @@ class _NumericGrid extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _row(context, ['1', '2', '3']),
-        _row(context, ['4', '5', '6']),
-        _row(context, ['7', '8', '9']),
+        _row(['1', '2', '3']),
+        _row(['4', '5', '6']),
+        _row(['7', '8', '9']),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -131,7 +128,7 @@ class _NumericGrid extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, List<String> digits) {
+  Widget _row(List<String> digits) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(

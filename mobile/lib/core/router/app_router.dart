@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/features/auth/presentation/change_pin_screen.dart';
 import 'package:odaa_mobile/features/auth/presentation/login_screen.dart';
+import 'package:odaa_mobile/features/home/presentation/home_screen.dart';
+import 'package:odaa_mobile/features/months/presentation/months_screen.dart';
+import 'package:odaa_mobile/features/shell/presentation/app_shell.dart';
+import 'package:odaa_mobile/features/shell/presentation/widgets/canopy_bar.dart';
 import 'package:odaa_mobile/features/splash/presentation/language_screen.dart';
 import 'package:odaa_mobile/features/splash/presentation/splash_screen.dart';
 import 'package:odaa_mobile/shared/widgets/empty_view.dart';
@@ -12,68 +16,60 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     debugLogDiagnostics: false,
     routes: [
-      GoRoute(
-        path: '/',
-        name: 'splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: '/language',
-        name: 'language',
-        builder: (context, state) => const LanguageScreen(),
-      ),
-      // ---------- Placeholders for screens built in later replies ----------
-      GoRoute(
-        path: '/login',
-        name: 'login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/change-pin',
-        name: 'changePin',
-        builder: (context, state) => const ChangePinScreen(),
-      ),
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        builder: (context, state) => const _PlaceholderScreen(name: 'Home'),
-      ),
-      GoRoute(
-        path: '/months',
-        name: 'months',
-        builder: (context, state) => const _PlaceholderScreen(name: 'Months'),
-      ),
-      GoRoute(
-        path: '/pay',
-        name: 'pay',
-        builder: (context, state) => const _PlaceholderScreen(name: 'Pay'),
-      ),
-      GoRoute(
-        path: '/more',
-        name: 'more',
-        builder: (context, state) => const _PlaceholderScreen(name: 'More'),
+      GoRoute(path: '/', name: 'splash', builder: (_, __) => const SplashScreen()),
+      GoRoute(path: '/language', name: 'language', builder: (_, __) => const LanguageScreen()),
+      GoRoute(path: '/login', name: 'login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/change-pin', name: 'changePin', builder: (_, __) => const ChangePinScreen()),
+
+      // ---------- Shell with the canopy ----------
+      ShellRoute(
+        builder: (context, state, child) {
+          final section = _sectionFromLocation(state.uri.path);
+          return AppShell(section: section, child: child);
+        },
+        routes: [
+          GoRoute(
+            path: '/home',
+            name: 'home',
+            builder: (_, __) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: '/months',
+            name: 'months',
+            builder: (_, __) => const MonthsScreen(),
+          ),
+          GoRoute(
+            path: '/pay',
+            name: 'pay',
+            builder: (_, __) => const _PlaceholderScreen(name: 'Pay'),
+          ),
+          GoRoute(
+            path: '/more',
+            name: 'more',
+            builder: (_, __) => const _PlaceholderScreen(name: 'More'),
+          ),
+        ],
       ),
     ],
-    redirect: (context, state) {
-      // Reserved for future redirect logic (auth guard).
-      return null;
-    },
   );
 });
 
+CanopySection _sectionFromLocation(String path) {
+  if (path.startsWith('/months')) return CanopySection.months;
+  if (path.startsWith('/pay')) return CanopySection.pay;
+  if (path.startsWith('/more')) return CanopySection.more;
+  return CanopySection.home;
+}
+
 class _PlaceholderScreen extends StatelessWidget {
   const _PlaceholderScreen({required this.name});
-
   final String name;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(name)),
-      body: EmptyView(
-        title: '$name — coming soon',
-        body: 'This screen will be built in a later step.',
-      ),
+    return EmptyView(
+      title: '$name — coming soon',
+      body: 'This screen will be built in a later step.',
     );
   }
 }

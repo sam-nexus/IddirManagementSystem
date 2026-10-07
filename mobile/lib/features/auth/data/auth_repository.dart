@@ -82,7 +82,7 @@ class MockAuthRepository implements AuthRepository {
         firstName: 'Abebe',
         lastName: 'Kebede',
         mustChangePin: true,
-      ));
+      ),);
     }
 
     _wrongAttempts = 0;

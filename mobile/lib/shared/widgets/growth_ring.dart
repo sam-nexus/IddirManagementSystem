@@ -31,6 +31,7 @@ class GrowthRing extends StatelessWidget {
               ContributionState.unpaid => tokens.divider,
               ContributionState.waived => tokens.stateWaivedBg,
               ContributionState.pending => tokens.statePending,
+              ContributionState.suspended => tokens.textMuted,
             };
             return Expanded(
               child: GestureDetector(

@@ -30,7 +30,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<void> _route() async {
     if (!mounted) return;
 
-    // Restore the session first.
     await ref.read(sessionProvider.notifier).restore();
     if (!mounted) return;
 
@@ -73,7 +72,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   opacity: _c.value,
                   child: Transform.scale(
                     scale: 0.9 + 0.1 * _c.value,
-                    child: _OdaaMark(tokens: tokens),
+                    child: Image.asset(
+                      'assets/images/oda.png',
+                      height: 140,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                      errorBuilder: (context, error, stack) {
+                        return Icon(
+                          Icons.park_outlined,
+                          size: 100,
+                          color: tokens.primary,
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -93,58 +104,4 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
   }
-}
-
-class _OdaaMark extends StatelessWidget {
-  const _OdaaMark({required this.tokens});
-
-  final dynamic tokens;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(72, 96),
-      painter: _MarkPainter(tokens: tokens),
-    );
-  }
-}
-
-class _MarkPainter extends CustomPainter {
-  _MarkPainter({required this.tokens});
-
-  final dynamic tokens;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final primary = tokens.primary as Color;
-    final accent = tokens.primaryAction as Color;
-
-    // Trunk
-    final trunk = Path()
-      ..moveTo(w * 0.42, h)
-      ..lineTo(w * 0.58, h)
-      ..quadraticBezierTo(w * 0.54, h * 0.55, w * 0.50, h * 0.30)
-      ..quadraticBezierTo(w * 0.46, h * 0.55, w * 0.42, h)
-      ..close();
-    canvas.drawPath(trunk, Paint()..color = primary);
-
-    // Three leaves at the top
-    void leaf(double cx, double cy, double r) {
-      final p = Path()
-        ..moveTo(cx, cy + r)
-        ..cubicTo(cx - r, cy + r * 0.4, cx - r, cy - r * 0.6, cx, cy - r)
-        ..cubicTo(cx + r, cy - r * 0.6, cx + r, cy + r * 0.4, cx, cy + r)
-        ..close();
-      canvas.drawPath(p, Paint()..color = accent);
-    }
-
-    leaf(w * 0.30, h * 0.22, w * 0.14);
-    leaf(w * 0.70, h * 0.22, w * 0.14);
-    leaf(w * 0.50, h * 0.08, w * 0.16);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MarkPainter old) => old.tokens != tokens;
 }

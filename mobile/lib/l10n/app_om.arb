@@ -3,117 +3,15 @@
 
   "appName": "Afoosha Odaa",
   "appTagline": "Muka Odaa jalatti walitti qabamnee",
-  "_comment_appTagline": "NEEDS_NATIVE_REVIEW",
 
-  "actionContinue": "Itti fufi",
-  "actionCancel": "Dhiisi",
-  "actionRetry": "Irra deebi'ii yaali",
-  "actionClose": "Cufi",
-  "actionBack": "Duuba",
-  "actionShare": "Qoodi",
-  "actionSave": "Olkaa'i",
-  "_comment_actions": "NEEDS_NATIVE_REVIEW",
+  "splashTagline": "Muka Odaa jalatti walitti qabamnee",
 
-  "greetingMorning": "Akkam barii",
-  "greetingAfternoon": "Akkam waaree",
-  "greetingEvening": "Akkam galgala",
-  "greetingName": "Akkam, {name}",
-  "_comment_greetings": "NEEDS_NATIVE_REVIEW",
-
-  "homeStanding": "Gaaddisa Odaa jalatti dhaabbatta.",
-  "homeYouOwe": "Kaffaluu qabda",
-  "homeMonthsPaid": "Ji'oota kaffalame",
-  "homePayNow": "Amma kaffali · {amount}",
-  "homeLatestNotice": "Beeksisa haaraa",
-  "homeNextMeeting": "Walga'ii itti aanu",
-  "homeReadMore": "Dabalataan dubbisi",
-  "_comment_home": "NEEDS_NATIVE_REVIEW",
-
-  "authPhoneLabel": "Lakkoofsa bilbilaa",
-  "authPhoneHint": "09xx xxx xxx",
-  "authPinLabel": "PIN",
-  "authLogin": "Seeni",
-  "authLockedTitle": "Herregni cufameera",
-  "authLockedBody": "Daqiiqaa {minutes} booda irra deebi'ii yaali.",
-  "authChangePinTitle": "PIN haaraa filadhu",
-  "authChangePinBody": "PIN kee koreen kenneefteetta. Lakkoofsa 4 filadhu.",
-  "authPinWeak": "PIN kun salphaatti tilmaamama. Kan biraa filadhu.",
-  "authPinMismatch": "PIN lamaan wal hin fakkaatan.",
-  "_comment_auth": "NEEDS_NATIVE_REVIEW",
-
-  "navHome": "Mana",
-  "navMonths": "Ji'oota",
-  "navPay": "Kaffali",
-  "navMore": "Dabalata",
-  "_comment_nav": "NEEDS_NATIVE_REVIEW",
-
-  "statePaid": "Kaffalame",
-  "statePartial": "Walakkaa",
-  "stateUnpaid": "Hin kaffalamne",
-  "stateWaived": "Dhiifame",
-  "statePending": "Eegaa jira",
-  "_comment_states": "NEEDS_NATIVE_REVIEW",
-
-  "errorGeneric": "Wanti tokko dogoggora. Maaloo irra deebi'ii yaali.",
-  "errorNetwork": "Interneetiin hin jiru.",
-  "errorRetry": "Irra deebi'ii yaali",
-  "_comment_errors": "NEEDS_NATIVE_REVIEW",
-
-  "monthsTitle": "Waggaa kee",
-  "monthsSubtitle": "Baalli tokko tokko ji'a tokko.",
-  "monthsThisYear": "Bara kana",
-  "monthsPastYears": "Bara darbe",
-  "monthsReceipts": "Nagahee",
-  "_comment_months": "NEEDS_NATIVE_REVIEW",
-
-  "payTitle": "Kaffaltii",
-  "paySelectMonths": "Ji'oota kam?",
-  "paySummary": "Cuunfaa",
-  "payTotal": "Waliigala",
-  "payOpen": "Fuula kaffaltii bani",
-  "paySuccessTitle": "Kaffaltiin fudhatameera",
-  "paySuccessBody": "Galatoomi. Nagaheen kee qophiidha.",
-  "payFailedTitle": "Kaffaltiin hin milkoofne",
-  "payPendingTitle": "Mirkaneessaa eegaa jira",
-  "payPendingBody": "Yeroo mirkanaa'u sitti himna.",
-  "_comment_pay": "NEEDS_NATIVE_REVIEW",
-
-  "receiptTitle": "Nagahee",
-  "receiptNumber": "Lakkoofsa",
-  "receiptDate": "Guyyaa",
-  "receiptAmount": "Maallaqa",
-  "receiptPaidFor": "Kan kaffalameef",
-  "receiptShare": "Nagahee qoodi",
-  "_comment_receipt": "NEEDS_NATIVE_REVIEW",
-
-  "historyTitle": "Seenaa kaffaltii",
-  "historyEmpty": "Amma ammaatti kaffaltiin hin jiru.",
-  "_comment_history": "NEEDS_NATIVE_REVIEW",
-
-  "aboutTitle": "Waa'ee Afoosha Odaa",
-  "aboutMission": "Ergama",
-  "aboutVision": "Mul'ata",
-  "aboutBylaws": "Seera dhaabbataa",
-  "aboutCommittee": "Koree",
-  "_comment_about": "NEEDS_NATIVE_REVIEW",
-
-  "profileTitle": "Profaayilii",
-  "profileLanguage": "Afaan",
-  "profileChangePin": "PIN jijjiiri",
-  "profileDevices": "Meeshaalee koo",
-  "profileLogout": "Ba'i",
-  "profileVersion": "Fooyya'iinsa {version}",
-  "_comment_profile": "NEEDS_NATIVE_REVIEW",
-   "splashTagline": "Muka Odaa jalatti walitti qabamnee",
   "languageTitle": "Afaan kee filadhu",
   "languageSubtitle": "Yeroo barbaadde jijjiiruu dandeessa.",
   "languageEnglish": "English",
   "languageOromo": "Afaan Oromoo",
   "languageContinue": "Itti fufi",
 
-  "appName": "Afoosha Odaa",
-  "appTagline": "Muka Odaa jalatti walitti qabamnee",
-
   "actionContinue": "Itti fufi",
   "actionCancel": "Dhiisi",
   "actionRetry": "Irra deebi'ii yaali",
@@ -126,11 +24,17 @@
   "greetingAfternoon": "Akkam waaree",
   "greetingEvening": "Akkam galgala",
   "greetingName": "Akkam, {name}",
+  "@greetingName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
 
   "homeStanding": "Gaaddisa Odaa jalatti dhaabbatta.",
   "homeYouOwe": "Kaffaluu qabda",
   "homeMonthsPaid": "Ji'oota kaffalame",
   "homePayNow": "Amma kaffali · {amount}",
+  "@homePayNow": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "homeLatestNotice": "Beeksisa haaraa",
   "homeNextMeeting": "Walga'ii itti aanu",
   "homeReadMore": "Dabalataan dubbisi",
@@ -141,6 +45,9 @@
   "authLogin": "Seeni",
   "authLockedTitle": "Herregni cufameera",
   "authLockedBody": "Daqiiqaa {minutes} booda irra deebi'ii yaali.",
+  "@authLockedBody": {
+    "placeholders": { "minutes": { "type": "String" } }
+  },
   "authChangePinTitle": "PIN haaraa filadhu",
   "authChangePinBody": "PIN kee koreen kenneefteetta. Lakkoofsa 4 filadhu.",
   "authPinWeak": "PIN kun salphaatti tilmaamama. Kan biraa filadhu.",
@@ -161,14 +68,38 @@
   "errorNetwork": "Interneetiin hin jiru.",
   "errorRetry": "Irra deebi'ii yaali",
 
+  "stateSuspended": "Dhaabbate",
+"stateComingSoon": "Dhiyootti dhufa",
+"monthsPay": "Kaffali",
+"monthsSuspendedHint": "Maaloo ji'oota duraanii dura kaffali.",
+
+  "stateSuspended": "Dhaabbate",
+"monthsPay": "Kaffali",
+"monthsSuspendedHint": "Maaloo ji'oota duraanii dura kaffali.",
+
   "monthsTitle": "Waggaa kee",
   "monthsSubtitle": "Baalli tokko tokko ji'a tokko.",
   "monthsThisYear": "Bara kana",
   "monthsPastYears": "Bara darbe",
   "monthsReceipts": "Nagahee",
+  "navMonths": "Ji'oota",
+"navPay": "Kaffali",
+"navMore": "Dabalata",
+"navHome": "Mana",
+
+"paymentOpenNow": "Amma banaa",
+"paymentWindowOpen": "Kaffaltiin hanga guyyaa 2ffaatti banaa jira.",
+"paymentWindowClosed": "Kaffaltiin {date} irraa banama.",
+"@paymentWindowClosed": {
+  "placeholders": { "date": { "type": "String" } }
+},
+"paymentMustPayInOrder": "Maaloo ji'oota duraanii dura kaffali.",
+"paymentOldestFirst": "Ji'a duraa dura",
 
   "payTitle": "Kaffaltii",
   "paySelectMonths": "Ji'oota kam?",
+  "authConfirmPinLabel": "PIN mirkaneessi",
+"authConfirmPinHint": "PIN haaraa kee irra deebi'ii galchi.",
   "paySummary": "Cuunfaa",
   "payTotal": "Waliigala",
   "payOpen": "Fuula kaffaltii bani",
@@ -198,6 +129,10 @@
   "profileLanguage": "Afaan",
   "profileChangePin": "PIN jijjiiri",
   "profileDevices": "Meeshaalee koo",
+  "errorSessionExpired": "Yeroon kee darbeera. Maaloo irra deebi'ii seeni.",
   "profileLogout": "Ba'i",
-  "profileVersion": "Fooyya'iinsa {version}"
+  "profileVersion": "Fooyya'iinsa {version}",
+  "@profileVersion": {
+    "placeholders": { "version": { "type": "String" } }
+  }
 }
