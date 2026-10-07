@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:odaa_mobile/core/providers/app_providers.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
@@ -18,18 +19,40 @@ import 'package:odaa_mobile/shared/widgets/growth_ring.dart';
 import 'package:odaa_mobile/shared/widgets/odaa_tree.dart';
 import 'package:odaa_mobile/shared/widgets/primary_button.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
+import 'package:odaa_mobile/shared/widgets/welcome_banner.dart';
+// ... other imports stay ...
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // final tokens = context.tokens;
-    final async = ref.watch(homeSummaryProvider);
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final name = ref.read(welcomeToastProvider);
+      if (name != null && mounted) {
+        WelcomeBanner.show(
+          context,
+          title: 'Akkam, $name',
+          subtitle: 'You are standing in the shade.',
+          icon: Icons.eco_outlined,
+        );
+        ref.read(welcomeToastProvider.notifier).state = null;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(homeSummaryProvider);
     return async.when(
       loading: () => const _HomeSkeleton(),
-      error: (e, _) => ErrorView(
+      error: (_, __) => ErrorView(
         message: context.l10n.errorGeneric,
         onRetry: () => ref.invalidate(homeSummaryProvider),
       ),
@@ -59,7 +82,7 @@ class _HomeBody extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GreetingLine(firstName: summary.firstName),
+          GreetingLine(firstName: _firstNameFromSession(ref)),
           const SizedBox(height: AppSpacing.xl),
 
           // The tree
@@ -121,6 +144,15 @@ class _HomeBody extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _firstNameFromSession(WidgetRef ref) {
+    final session = ref.watch(sessionProvider);
+    return switch (session) {
+      SessionSignedIn(:final firstName) =>
+        firstName.isEmpty ? 'Member' : firstName,
+      _ => 'Member',
+    };
   }
 
   String _nextWindowDate() {

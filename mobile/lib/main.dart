@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaa_mobile/core/l10n/om_fallback_delegates.dart';
@@ -10,6 +11,7 @@ import 'package:odaa_mobile/l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   final prefs = await PrefsStore.open();
   runApp(ProviderScope(
     overrides: [prefsStoreProvider.overrideWithValue(prefs)],

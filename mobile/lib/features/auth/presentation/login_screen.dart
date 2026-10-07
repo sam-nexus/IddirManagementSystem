@@ -60,8 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     final repo = ref.read(authRepositoryProvider);
-    final deviceId = await ref.read(secureStoreProvider).readDeviceId() ??
-        'unknown-device';
+    final deviceId = await ref.read(deviceIdServiceProvider).getOrCreate();
 
     final result = await repo.login(
       phone: _phoneController.text.trim(),
@@ -76,7 +75,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         await ref.read(sessionProvider.notifier).signIn(
               accessToken: s.accessToken,
               refreshToken: s.refreshToken,
+              firstName: s.firstName,
+              lastName: s.lastName,
+              memberId: s.memberId,
             );
+        ref.read(welcomeToastProvider.notifier).state = s.firstName;
         if (!mounted) return;
         if (s.mustChangePin) {
           context.goNamed('changePin');

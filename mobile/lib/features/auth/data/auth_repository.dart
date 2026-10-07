@@ -1,152 +1,92 @@
+
+import 'package:odaa_mobile/core/api/api_client.dart';
+import 'package:odaa_mobile/core/api/api_exception.dart';
 import 'package:odaa_mobile/features/auth/data/models/auth_models.dart';
 
-/// Contract for the auth API. The real implementation will wrap Dio calls
-/// to the backend. For now, a mock drives the UI so screens can be built.
-abstract interface class AuthRepository {
-  Future<AuthResult> login({
-    required String phone,
-    required String pin,
-    required String deviceId,
-  });
+class AuthRepository {
+  AuthRepository(this._api);
 
-  Future<AuthResult> changePin({
-    required String accessToken,
-    required String currentPin,
-    required String newPin,
-  });
+  final ApiClient _api;
 
-  Future<void> logout();
-}
-
-/// In-memory mock. Simulates network latency and the failure modes we need
-/// to design for: wrong PIN, locked account, unknown phone, network drop.
-class MockAuthRepository implements AuthRepository {
-  MockAuthRepository();
-
-  // A tiny state machine to make testing the lockout easy:
-  // three wrong PINs in a row triggers a 15-minute lock.
-  int _wrongAttempts = 0;
-  DateTime? _lockedUntil;
-
-  @override
   Future<AuthResult> login({
     required String phone,
     required String pin,
     required String deviceId,
   }) async {
-    // Simulate network
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    try {
+      final data = await _api.post<Map<String, dynamic>>(
+        '/auth/login',
+        body: {
+          'phone': phone,
+          'pin': pin,
+          'device_id': deviceId,
+          'platform': 'android',
+        },
+      );
 
-    // Active lock check
-    if (_lockedUntil != null && _lockedUntil!.isAfter(DateTime.now())) {
-      return AuthErr(
-          AuthFailure(AuthError.accountLocked, lockedUntil: _lockedUntil),);
-    }
-
-    // Normalize (accept 09..., 9..., +2519...)
-    final normalized = _normalizePhone(phone);
-    if (normalized == null) {
-      return const AuthErr(AuthFailure(AuthError.unknownPhone));
-    }
-
-    // Simulate a server-side account suspended by the committee
-    if (normalized == '+251900000000') {
-      return const AuthErr(AuthFailure(AuthError.accountSuspended));
-    }
-
-    // Simulate an unknown phone
-    if (normalized != '+251911223344' && normalized != '+251922334455') {
-      return const AuthErr(AuthFailure(AuthError.unknownPhone));
-    }
-
-    // Correct PIN for both test numbers
-    const correctPin = '1234';
-
-    if (pin != correctPin) {
-      _wrongAttempts += 1;
-      if (_wrongAttempts >= 3) {
-        _lockedUntil = DateTime.now().add(const Duration(minutes: 15));
-        _wrongAttempts = 0;
-        return AuthErr(
-            AuthFailure(AuthError.accountLocked, lockedUntil: _lockedUntil),);
-      }
-      return const AuthErr(AuthFailure(AuthError.wrongCredentials));
-    }
-
-        // Test path: login with 0000 gives mustChangePin
-    if (pin == '0000') {
-      return const AuthOk(AuthSession(
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token',
-        memberId: 'mock-member-id',
-        firstName: 'Abebe',
-        lastName: 'Kebede',
-        mustChangePin: true,
+      final member = data['member'] as Map<String, dynamic>;
+      return AuthOk(AuthSession(
+        accessToken: data['access_token'] as String,
+        refreshToken: data['refresh_token'] as String,
+        memberId: member['id'] as String,
+        firstName: member['first_name'] as String,
+        lastName: member['last_name'] as String,
+        mustChangePin: member['must_change_pin'] as bool? ?? false,
       ),);
+    } on ApiException catch (e) {
+      return AuthErr(_toFailure(e));
     }
-
-    _wrongAttempts = 0;
-    _lockedUntil = null;
-
-    return const AuthOk(
-      AuthSession(
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token',
-        memberId: 'mock-member-id',
-        firstName: 'Abebe',
-        lastName: 'Kebede',
-        mustChangePin: true,
-      ),
-    );
   }
 
-  @override
   Future<AuthResult> changePin({
     required String accessToken,
     required String currentPin,
     required String newPin,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-
-    if (currentPin != '1234') {
-      return const AuthErr(AuthFailure(AuthError.wrongCredentials));
+    try {
+      await _api.post<Map<String, dynamic>>(
+        '/auth/change-pin',
+        body: {'current_pin': currentPin, 'new_pin': newPin},
+      );
+      // The backend clears must_change_pin; we don't need the response body.
+      return const AuthOk(AuthSession(
+        accessToken: '',
+        refreshToken: '',
+        memberId: '',
+        firstName: '',
+        lastName: '',
+        mustChangePin: false,
+      ),);
+    } on ApiException catch (e) {
+      return AuthErr(_toFailure(e));
     }
-    // In real API the server would reject weak PINs too; the client blocks
-    // them earlier, but the mock mirrors the same guard for symmetry.
-    if (newPin.length != 4) {
-      return const AuthErr(AuthFailure(AuthError.wrongCredentials));
-    }
-    return const AuthOk(AuthSession(
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
-      memberId: 'mock-member-id',
-      firstName: 'Abebe',
-      lastName: 'Kebede',
-      mustChangePin: false, // now cleared
-    ),);
   }
 
-  @override
-  Future<void> logout() async {
-    await Future<void>.delayed(const Duration(milliseconds: 200));
-    _wrongAttempts = 0;
-    _lockedUntil = null;
+  Future<void> logout({String? refreshToken}) async {
+    try {
+      await _api.post<Map<String, dynamic>>(
+        '/auth/logout',
+        body: refreshToken == null ? null : {'refresh_token': refreshToken},
+      );
+    } catch (_) {
+      // Logout is best-effort on the network side.
+    }
   }
 
-  String? _normalizePhone(String input) {
-    var s = input.replaceAll(RegExp(r'[\s\-()]'), '');
-    s = s.replaceAll(RegExp(r'\D'), '');
-    if (s.length == 9 && (s.startsWith('9') || s.startsWith('7'))) {
-      return '+251$s';
+  AuthFailure _toFailure(ApiException e) {
+    final kind = switch (e.kind) {
+      ApiErrorKind.network => AuthError.network,
+      ApiErrorKind.unauthorized => AuthError.wrongCredentials,
+      ApiErrorKind.forbidden => AuthError.accountSuspended,
+      _ => AuthError.unknown,
+    };
+    // Locked accounts come back as 403 with a "minutes" message.
+    if (e.kind == ApiErrorKind.forbidden && e.minutesRemaining != null) {
+      return AuthFailure(
+        AuthError.accountLocked,
+        lockedUntil: DateTime.now().add(Duration(minutes: e.minutesRemaining!)),
+      );
     }
-    if (s.length == 10 && s.startsWith('0')) {
-      final body = s.substring(1);
-      if (body.startsWith('9') || body.startsWith('7')) return '+251$body';
-    }
-    if (s.length == 12 && s.startsWith('251')) {
-      final body = s.substring(3);
-      if (body.startsWith('9') || body.startsWith('7')) return '+251$body';
-    }
-    return null;
+    return AuthFailure(kind);
   }
 }

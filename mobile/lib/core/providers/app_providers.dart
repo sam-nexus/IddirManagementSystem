@@ -1,56 +1,102 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:odaa_mobile/core/api/api_client.dart';
+import 'package:odaa_mobile/core/storage/device_id.dart';
 import 'package:odaa_mobile/core/storage/prefs_store.dart';
 import 'package:odaa_mobile/core/storage/secure_store.dart';
 
-// ---------- Infrastructure ----------
 final secureStoreProvider = Provider<SecureStore>((ref) => SecureStore());
 
 final prefsStoreProvider = Provider<PrefsStore>((ref) {
   throw UnimplementedError('Override prefsStoreProvider in main()');
 });
 
-// ---------- Language ----------
-/// The user's selected language. `null` until chosen.
+final deviceIdServiceProvider = Provider<DeviceIdService>((ref) {
+  return DeviceIdService(ref.watch(secureStoreProvider));
+});
+
+final apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient(secure: ref.watch(secureStoreProvider));
+});
+
+/// A one-shot flag set on login, consumed by Home to show a welcome toast.
+final welcomeToastProvider = StateProvider<String?>((ref) => null);
+
+// Language
 class LanguageNotifier extends StateNotifier<Locale?> {
-  LanguageNotifier(this._prefs) : super(null) {
+  LanguageNotifier(this._prefs, this._ref) : super(null) {
     final stored = _prefs.readLanguage();
     if (stored != null && stored.isNotEmpty) {
       state = Locale(stored);
+      _ref.read(apiClientProvider).setLanguage(stored);
     }
   }
 
   final PrefsStore _prefs;
+  final Ref _ref;
 
   Future<void> setLanguage(String code) async {
     state = Locale(code);
+    _ref.read(apiClientProvider).setLanguage(code);
     await _prefs.writeLanguage(code);
   }
 }
 
 final languageProvider =
     StateNotifierProvider<LanguageNotifier, Locale?>((ref) {
-  return LanguageNotifier(ref.watch(prefsStoreProvider));
+  return LanguageNotifier(ref.watch(prefsStoreProvider), ref);
 });
 
-// ---------- Auth session ----------
-/// Whether we have a valid access token on disk. Populated on app start.
+// Session (unchanged)
 class SessionNotifier extends StateNotifier<SessionState> {
-  SessionNotifier(this._secure) : super(const SessionState.unknown());
-
+  SessionNotifier(this._secure, this._ref) : super(const SessionState.unknown());
   final SecureStore _secure;
+  final Ref _ref;
 
   Future<void> restore() async {
     final token = await _secure.readAccessToken();
-    state = token == null
-        ? const SessionState.signedOut()
-        : SessionState.signedIn(token: token);
+    if (token == null || token.isEmpty) {
+      state = const SessionState.signedOut();
+      return;
+    }
+
+    // Try to fetch the profile so we know the member's name.
+    // If it fails, still mark as signed in with an empty name — Home will
+    // show "Member" and the user can still browse until the token expires.
+    try {
+      final api = _ref.read(apiClientProvider);
+      final me = await api.get<Map<String, dynamic>>('/auth/me');
+      state = SessionState.signedIn(
+        token: token,
+        firstName: (me['first_name'] as String?) ?? '',
+        lastName: (me['last_name'] as String?) ?? '',
+        memberId: (me['id'] as String?) ?? '',
+      );
+    } catch (_) {
+      state = SessionState.signedIn(
+        token: token,
+        firstName: '',
+        lastName: '',
+        memberId: '',
+      );
+    }
   }
 
-  Future<void> signIn({required String accessToken, required String refreshToken}) async {
+  Future<void> signIn({
+    required String accessToken,
+    required String refreshToken,
+    required String firstName,
+    required String lastName,
+    required String memberId,
+  }) async {
     await _secure.writeAccessToken(accessToken);
     await _secure.writeRefreshToken(refreshToken);
-    state = SessionState.signedIn(token: accessToken);
+    state = SessionState.signedIn(
+      token: accessToken,
+      firstName: firstName,
+      lastName: lastName,
+      memberId: memberId,
+    );
   }
 
   Future<void> signOut() async {
@@ -62,16 +108,19 @@ class SessionNotifier extends StateNotifier<SessionState> {
 
 final sessionProvider =
     StateNotifierProvider<SessionNotifier, SessionState>((ref) {
-  return SessionNotifier(ref.watch(secureStoreProvider));
+  return SessionNotifier(ref.watch(secureStoreProvider), ref);
 });
 
-/// Sealed state for session.
 sealed class SessionState {
   const SessionState();
-
   const factory SessionState.unknown() = SessionUnknown;
   const factory SessionState.signedOut() = SessionSignedOut;
-  const factory SessionState.signedIn({required String token}) = SessionSignedIn;
+  const factory SessionState.signedIn({
+    required String token,
+    required String firstName,
+    required String lastName,
+    required String memberId,
+  }) = SessionSignedIn;
 }
 
 class SessionUnknown extends SessionState {
@@ -83,6 +132,14 @@ class SessionSignedOut extends SessionState {
 }
 
 class SessionSignedIn extends SessionState {
-  const SessionSignedIn({required this.token});
+  const SessionSignedIn({
+    required this.token,
+    required this.firstName,
+    required this.lastName,
+    required this.memberId,
+  });
   final String token;
+  final String firstName;
+  final String lastName;
+  final String memberId;
 }
