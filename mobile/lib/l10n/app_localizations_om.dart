@@ -245,6 +245,27 @@ class AppLocalizationsOm extends AppLocalizations {
   String get aboutCommittee => 'Koree';
 
   @override
+  String get aboutShort => 'Waa\'ee';
+
+  @override
+  String get profileShort => 'Profaayilii';
+
+  @override
+  String get roleChairperson => 'Hoji-Guddaa';
+
+  @override
+  String get roleSecretary => 'Barreessaa';
+
+  @override
+  String get roleTreasurer => 'Sa\'umsaa';
+
+  @override
+  String get roleAuditor => 'Qorataa';
+
+  @override
+  String get profileLogoutConfirm => 'Dhuguma ba\'uu barbaadda?';
+
+  @override
   String get historyMethodChapa => 'Chapa';
 
   @override

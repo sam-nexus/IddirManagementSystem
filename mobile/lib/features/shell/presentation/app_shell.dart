@@ -65,7 +65,14 @@ class _AppShellState extends ConsumerState<AppShell> {
                 CanopySegment(label: l10n.profileTitle, value: 'profile'),
               ],
               selected: _moreSegment,
-              onSelected: (v) => setState(() => _moreSegment = v),
+              onSelected: (v) {
+                setState(() => _moreSegment = v);
+                if (v == 'profile') {
+                  context.goNamed('profile');
+                } else {
+                  context.goNamed('more');
+                }
+              },
             ),
 
           // The actual screen

@@ -121,6 +121,14 @@
   "receiptPaidFor": "Kan kaffalameef",
   "receiptShare": "Nagahee qoodi",
 
+  "aboutShort": "Waa'ee",
+"profileShort": "Profaayilii",
+"roleChairperson": "Hoji-Guddaa",
+"roleSecretary": "Barreessaa",
+"roleTreasurer": "Sa'umsaa",
+"roleAuditor": "Qorataa",
+"profileLogoutConfirm": "Dhuguma ba'uu barbaadda?",
+
   "historyMethodChapa": "Chapa",
 "historyMethodCash": "Qarshii",
 "historyMethodManual": "Harkaan",

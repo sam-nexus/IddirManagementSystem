@@ -244,6 +244,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutCommittee => 'Committee';
 
   @override
+  String get aboutShort => 'About';
+
+  @override
+  String get profileShort => 'Profile';
+
+  @override
+  String get roleChairperson => 'Chairperson';
+
+  @override
+  String get roleSecretary => 'Secretary';
+
+  @override
+  String get roleTreasurer => 'Treasurer';
+
+  @override
+  String get roleAuditor => 'Auditor';
+
+  @override
+  String get profileLogoutConfirm => 'Are you sure you want to log out?';
+
+  @override
   String get historyMethodChapa => 'Chapa';
 
   @override

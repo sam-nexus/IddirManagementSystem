@@ -101,6 +101,14 @@
   "aboutBylaws": "Bylaws",
   "aboutCommittee": "Committee",
 
+  "aboutShort": "About",
+"profileShort": "Profile",
+"roleChairperson": "Chairperson",
+"roleSecretary": "Secretary",
+"roleTreasurer": "Treasurer",
+"roleAuditor": "Auditor",
+"profileLogoutConfirm": "Are you sure you want to log out?",
+
   "historyMethodChapa": "Chapa",
 "historyMethodCash": "Cash",
 "historyMethodManual": "Manual transfer",

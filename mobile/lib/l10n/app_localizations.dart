@@ -554,6 +554,48 @@ abstract class AppLocalizations {
   /// **'Committee'**
   String get aboutCommittee;
 
+  /// No description provided for @aboutShort.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutShort;
+
+  /// No description provided for @profileShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileShort;
+
+  /// No description provided for @roleChairperson.
+  ///
+  /// In en, this message translates to:
+  /// **'Chairperson'**
+  String get roleChairperson;
+
+  /// No description provided for @roleSecretary.
+  ///
+  /// In en, this message translates to:
+  /// **'Secretary'**
+  String get roleSecretary;
+
+  /// No description provided for @roleTreasurer.
+  ///
+  /// In en, this message translates to:
+  /// **'Treasurer'**
+  String get roleTreasurer;
+
+  /// No description provided for @roleAuditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Auditor'**
+  String get roleAuditor;
+
+  /// No description provided for @profileLogoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get profileLogoutConfirm;
+
   /// No description provided for @historyMethodChapa.
   ///
   /// In en, this message translates to:
