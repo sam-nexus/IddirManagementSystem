@@ -39,6 +39,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           SizedBox(height: MediaQuery.of(context).padding.top),
 
           // The contextual sub-bar — only for Months and More
+
           if (widget.section == CanopySection.months)
             CanopySubbar(
               segments: [
@@ -47,7 +48,14 @@ class _AppShellState extends ConsumerState<AppShell> {
                 CanopySegment(label: l10n.monthsReceipts, value: 'receipts'),
               ],
               selected: _monthsSegment,
-              onSelected: (v) => setState(() => _monthsSegment = v),
+              onSelected: (v) {
+                setState(() => _monthsSegment = v);
+                if (v == 'receipts') {
+                  context.goNamed('history');
+                } else {
+                  context.goNamed('months');
+                }
+              },
             ),
 
           if (widget.section == CanopySection.more)

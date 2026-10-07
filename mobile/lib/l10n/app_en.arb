@@ -101,6 +101,15 @@
   "aboutBylaws": "Bylaws",
   "aboutCommittee": "Committee",
 
+  "historyMethodChapa": "Chapa",
+"historyMethodCash": "Cash",
+"historyMethodManual": "Manual transfer",
+"historyEmptyBody": "Once you make a payment, it will appear here.",
+"receiptMethod": "Method",
+"receiptNote": "Note",
+"receiptThanks": "Thank you for your contribution.",
+"receiptNotFound": "Receipt not found",
+
   "payDues": "Dues",
 "payPenalties": "Penalties",
 "payNothingToPay": "You are all caught up",

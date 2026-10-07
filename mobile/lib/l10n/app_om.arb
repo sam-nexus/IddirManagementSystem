@@ -121,6 +121,15 @@
   "receiptPaidFor": "Kan kaffalameef",
   "receiptShare": "Nagahee qoodi",
 
+  "historyMethodChapa": "Chapa",
+"historyMethodCash": "Qarshii",
+"historyMethodManual": "Harkaan",
+"historyEmptyBody": "Yeroo kaffaltii raawwattu asitti mul'ata.",
+"receiptMethod": "Mala",
+"receiptNote": "Yaadannoo",
+"receiptThanks": "Gumaacha keetiif galatoomi.",
+"receiptNotFound": "Nagaheen hin argamne",
+
   "historyTitle": "Seenaa kaffaltii",
   "historyEmpty": "Amma ammaatti kaffaltiin hin jiru.",
 

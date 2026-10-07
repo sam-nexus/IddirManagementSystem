@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/features/auth/presentation/change_pin_screen.dart';
 import 'package:odaa_mobile/features/auth/presentation/login_screen.dart';
+import 'package:odaa_mobile/features/history/presentation/history_screen.dart';
 import 'package:odaa_mobile/features/home/presentation/home_screen.dart';
 import 'package:odaa_mobile/features/months/presentation/months_screen.dart';
 import 'package:odaa_mobile/features/pay/presentation/pay_screen.dart';
+import 'package:odaa_mobile/features/receipt/presentation/receipt_screen.dart';
 import 'package:odaa_mobile/features/shell/presentation/app_shell.dart';
 import 'package:odaa_mobile/features/shell/presentation/widgets/canopy_bar.dart';
 import 'package:odaa_mobile/features/splash/presentation/language_screen.dart';
@@ -18,19 +20,25 @@ final routerProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: false,
     routes: [
       GoRoute(
-          path: '/', name: 'splash', builder: (_, __) => const SplashScreen(),),
+        path: '/',
+        name: 'splash',
+        builder: (_, __) => const SplashScreen(),
+      ),
       GoRoute(
-          path: '/language',
-          name: 'language',
-          builder: (_, __) => const LanguageScreen(),),
+        path: '/language',
+        name: 'language',
+        builder: (_, __) => const LanguageScreen(),
+      ),
       GoRoute(
-          path: '/login',
-          name: 'login',
-          builder: (_, __) => const LoginScreen(),),
+        path: '/login',
+        name: 'login',
+        builder: (_, __) => const LoginScreen(),
+      ),
       GoRoute(
-          path: '/change-pin',
-          name: 'changePin',
-          builder: (_, __) => const ChangePinScreen(),),
+        path: '/change-pin',
+        name: 'changePin',
+        builder: (_, __) => const ChangePinScreen(),
+      ),
 
       // ---------- Shell with the canopy ----------
       ShellRoute(
@@ -60,6 +68,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/more',
             name: 'more',
             builder: (_, __) => const _PlaceholderScreen(name: 'More'),
+          ),
+          GoRoute(
+            path: '/months/history',
+            name: 'history',
+            builder: (_, __) => const HistoryScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'receipt',
+                builder: (context, state) => ReceiptScreen(
+                  paymentId: state.pathParameters['id'] ?? '',
+                ),
+              ),
+            ],
           ),
         ],
       ),

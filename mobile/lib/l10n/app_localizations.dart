@@ -554,6 +554,54 @@ abstract class AppLocalizations {
   /// **'Committee'**
   String get aboutCommittee;
 
+  /// No description provided for @historyMethodChapa.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapa'**
+  String get historyMethodChapa;
+
+  /// No description provided for @historyMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get historyMethodCash;
+
+  /// No description provided for @historyMethodManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual transfer'**
+  String get historyMethodManual;
+
+  /// No description provided for @historyEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Once you make a payment, it will appear here.'**
+  String get historyEmptyBody;
+
+  /// No description provided for @receiptMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get receiptMethod;
+
+  /// No description provided for @receiptNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get receiptNote;
+
+  /// No description provided for @receiptThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your contribution.'**
+  String get receiptThanks;
+
+  /// No description provided for @receiptNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt not found'**
+  String get receiptNotFound;
+
   /// No description provided for @payDues.
   ///
   /// In en, this message translates to:

@@ -245,6 +245,30 @@ class AppLocalizationsOm extends AppLocalizations {
   String get aboutCommittee => 'Koree';
 
   @override
+  String get historyMethodChapa => 'Chapa';
+
+  @override
+  String get historyMethodCash => 'Qarshii';
+
+  @override
+  String get historyMethodManual => 'Harkaan';
+
+  @override
+  String get historyEmptyBody => 'Yeroo kaffaltii raawwattu asitti mul\'ata.';
+
+  @override
+  String get receiptMethod => 'Mala';
+
+  @override
+  String get receiptNote => 'Yaadannoo';
+
+  @override
+  String get receiptThanks => 'Gumaacha keetiif galatoomi.';
+
+  @override
+  String get receiptNotFound => 'Nagaheen hin argamne';
+
+  @override
   String get payDues => 'Kaffaltii';
 
   @override

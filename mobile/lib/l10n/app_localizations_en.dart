@@ -244,6 +244,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutCommittee => 'Committee';
 
   @override
+  String get historyMethodChapa => 'Chapa';
+
+  @override
+  String get historyMethodCash => 'Cash';
+
+  @override
+  String get historyMethodManual => 'Manual transfer';
+
+  @override
+  String get historyEmptyBody =>
+      'Once you make a payment, it will appear here.';
+
+  @override
+  String get receiptMethod => 'Method';
+
+  @override
+  String get receiptNote => 'Note';
+
+  @override
+  String get receiptThanks => 'Thank you for your contribution.';
+
+  @override
+  String get receiptNotFound => 'Receipt not found';
+
+  @override
   String get payDues => 'Dues';
 
   @override
