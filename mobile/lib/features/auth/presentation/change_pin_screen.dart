@@ -10,6 +10,7 @@ import 'package:odaa_mobile/features/auth/data/pin_strength.dart';
 import 'package:odaa_mobile/features/auth/domain/auth_providers.dart';
 import 'package:odaa_mobile/features/auth/presentation/widgets/pin_strength_bar.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
+import 'package:odaa_mobile/shared/widgets/inline_spinner.dart';
 import 'package:odaa_mobile/shared/widgets/pin_dots.dart';
 import 'package:odaa_mobile/shared/widgets/pin_pad.dart';
 import 'package:odaa_mobile/shared/widgets/primary_button.dart';
@@ -21,7 +22,6 @@ class ChangePinScreen extends ConsumerStatefulWidget {
   ConsumerState<ChangePinScreen> createState() => _ChangePinScreenState();
 }
 
-/// Two-step flow, one step visible at a time.
 enum _Step { newPin, confirmPin }
 
 class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
@@ -32,6 +32,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
 
   bool _isLoading = false;
   String? _errorText;
+  bool _isWeakPin = false;
   int _attempt = 0;
 
   PinStrength get _strength => PinStrengthChecker.check(_newPin);
@@ -67,6 +68,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
       });
       return;
     }
+
     setState(() {
       _isLoading = true;
       _errorText = null;
@@ -81,7 +83,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.changePin(
       accessToken: token,
-      currentPin: '1234', // mock expects the temporary PIN
+      currentPin: '1234',
       newPin: _newPin,
     );
 
@@ -125,8 +127,6 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: AppSpacing.xl),
-
-              // ---------- Header ----------
               Text(
                 _step == _Step.newPin
                     ? l10n.authChangePinTitle
@@ -141,8 +141,6 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
                 style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
               ),
               const SizedBox(height: AppSpacing.xxl),
-
-              // ---------- Step content ----------
               Expanded(
                 child: _step == _Step.newPin
                     ? _buildNewPinStep(tokens, l10n)
@@ -156,37 +154,82 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
   }
 
   Widget _buildNewPinStep(dynamic tokens, dynamic l10n) {
-   const int attempt = 0;
     return Column(
       children: [
+        // Dots: reflect the current entry length (0 after a weak-PIN reset).
         PinDots(length: 4, filled: _newPin.length),
         const SizedBox(height: AppSpacing.lg),
-        if (_newPin.length == 4)
+
+        // Strength feedback shows either while typing 4 digits or after a
+        // weak entry has been rejected.
+        if (_newPin.length == 4 || _isWeakPin)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
             child: PinStrengthBar(
-              strength: _strength,
-              message: PinStrengthChecker.message(
-                _strength,
-                Localizations.localeOf(context).languageCode,
-              ),
+              strength: _isWeakPin
+                  ? PinStrength.weak
+                  : PinStrengthChecker.check(_newPin),
+              message: _isWeakPin
+                  ? PinStrengthChecker.message(
+                      PinStrength.weak,
+                      Localizations.localeOf(context).languageCode,
+                    )
+                  : PinStrengthChecker.message(
+                      PinStrengthChecker.check(_newPin),
+                      Localizations.localeOf(context).languageCode,
+                    ),
             ),
           ),
         const SizedBox(height: AppSpacing.xxl),
-        PinPad(
-          key: const ValueKey('new-$attempt'),
-          length: 4,
-          showDots: false,
-          enabled: !_isLoading,
-          onChanged: (value) => setState(() => _newPin = value),
-          onCompleted: (_) {
-            // New-PIN step doesn't auto-advance — the Continue button does.
-          },
-        ),
+        if (_isLoading)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
+            child: Center(
+              child: InlineSpinner(
+                size: 32,
+                color: tokens.primaryAction as Color,
+                strokeWidth: 3,
+              ),
+            ),
+          )
+        else
+          PinPad(
+            key: ValueKey('new-$_attempt'),
+            length: 4,
+            showDots: false,
+            enabled: !_isLoading,
+            onChanged: (value) {
+              // Clear the weak flag as soon as the user types anything new.
+              if (_isWeakPin) {
+                setState(() => _isWeakPin = false);
+              }
+
+              setState(() => _newPin = value);
+
+              if (value.length == 4) {
+                final strength = PinStrengthChecker.check(value);
+                if (strength == PinStrength.weak) {
+                  // Clear everything: dots, pad, and keep the message.
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    setState(() {
+                      _newPin = '';
+                      _isWeakPin = true;
+                      _attempt++;
+                    });
+                  });
+                }
+              }
+            },
+            onCompleted: (_) {
+              // The Continue button drives progression.
+            },
+          ),
         const Spacer(),
         PrimaryButton(
           label: l10n.actionContinue,
-          onPressed: _canMoveToConfirm ? _goToConfirm : null,
+          isLoading: _isLoading,
+          onPressed: _canMoveToConfirm && !_isLoading ? _goToConfirm : null,
         ),
         const SizedBox(height: AppSpacing.lg),
       ],
@@ -204,26 +247,40 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
             child: Text(
               _errorText!,
               textAlign: TextAlign.center,
-              style: AppTypography.bodyS.copyWith(color: tokens.error),
+              style: AppTypography.bodyS.copyWith(color: tokens.error as Color),
             ),
           ),
         const SizedBox(height: AppSpacing.xxl),
-        PinPad(
-          key: ValueKey('confirm-$_attempt'),
-          length: 4,
-          showDots: false,
-          enabled: !_isLoading,
-          onChanged: (v) => setState(() => _confirmPin = v),
-          onCompleted: _submit,
-        ),
-        const Spacer(),
-        TextButton(
-          onPressed: _isLoading ? null : _goBackToNewPin,
-          child: Text(
-            l10n.actionBack,
-            style: AppTypography.label.copyWith(color: tokens.primary),
+        if (_isLoading)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
+            child: Center(
+              child: InlineSpinner(
+                size: 32,
+                color: tokens.primaryAction as Color,
+                strokeWidth: 3,
+              ),
+            ),
+          )
+        else
+          PinPad(
+            key: ValueKey('confirm-$_attempt'),
+            length: 4,
+            showDots: false,
+            enabled: !_isLoading,
+            onChanged: (v) => setState(() => _confirmPin = v),
+            onCompleted: _submit,
           ),
-        ),
+        const Spacer(),
+        if (!_isLoading)
+          TextButton(
+            onPressed: _goBackToNewPin,
+            child: Text(
+              l10n.actionBack,
+              style:
+                  AppTypography.label.copyWith(color: tokens.primary as Color),
+            ),
+          ),
         const SizedBox(height: AppSpacing.lg),
       ],
     );

@@ -21,9 +21,9 @@ async function main(): Promise<void> {
     console.error('[fatal] uncaught exception:', err);
   });
 
-  process.on('unhandledRejection', (reason) => {
-    console.error('[fatal] unhandled rejection:', reason);
-  });
+  // process.on('unhandledRejection', (reason) => {
+  //   console.error('[fatal] unhandled rejection:', reason);
+  // });
 
   const server = app.listen(env.PORT, () => {
     console.log(`🚀 Odaa API listening on http://localhost:${env.PORT}  [${env.NODE_ENV}]`);

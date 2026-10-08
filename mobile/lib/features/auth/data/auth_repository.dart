@@ -1,4 +1,3 @@
-
 import 'package:odaa_mobile/core/api/api_client.dart';
 import 'package:odaa_mobile/core/api/api_exception.dart';
 import 'package:odaa_mobile/features/auth/data/models/auth_models.dart';
@@ -25,14 +24,16 @@ class AuthRepository {
       );
 
       final member = data['member'] as Map<String, dynamic>;
-      return AuthOk(AuthSession(
-        accessToken: data['access_token'] as String,
-        refreshToken: data['refresh_token'] as String,
-        memberId: member['id'] as String,
-        firstName: member['first_name'] as String,
-        lastName: member['last_name'] as String,
-        mustChangePin: member['must_change_pin'] as bool? ?? false,
-      ),);
+      return AuthOk(
+        AuthSession(
+          accessToken: data['access_token'] as String,
+          refreshToken: data['refresh_token'] as String,
+          memberId: member['id'] as String,
+          firstName: member['first_name'] as String,
+          lastName: member['last_name'] as String,
+          mustChangePin: member['must_change_pin'] as bool? ?? false,
+        ),
+      );
     } on ApiException catch (e) {
       return AuthErr(_toFailure(e));
     }
@@ -44,11 +45,10 @@ class AuthRepository {
     required String newPin,
   }) async {
     try {
-      await _api.post<Map<String, dynamic>>(
+      await _api.post<dynamic>(
         '/auth/change-pin',
         body: {'current_pin': currentPin, 'new_pin': newPin},
       );
-      // The backend clears must_change_pin; we don't need the response body.
       return const AuthOk(AuthSession(
         accessToken: '',
         refreshToken: '',

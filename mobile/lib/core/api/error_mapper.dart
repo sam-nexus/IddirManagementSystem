@@ -7,16 +7,21 @@ ApiException mapDioError(DioException err) {
   if (err.response == null) {
     if (err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.receiveTimeout ||
-        err.type == DioExceptionType.sendTimeout ||
-        err.type == DioExceptionType.connectionError) {
+        err.type == DioExceptionType.sendTimeout) {
+      return const ApiException(
+        kind: ApiErrorKind.network,
+        message: 'The server is taking too long to respond. Please try again.',
+      );
+    }
+    if (err.type == DioExceptionType.connectionError) {
       return const ApiException(
         kind: ApiErrorKind.network,
         message: 'You appear to be offline. Please check your connection.',
       );
     }
     return const ApiException(
-      kind: ApiErrorKind.unknown,
-      message: 'Something went wrong. Please try again.',
+      kind: ApiErrorKind.network,
+      message: 'Could not reach the server. Please try again.',
     );
   }
 

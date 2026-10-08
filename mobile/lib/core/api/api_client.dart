@@ -167,18 +167,23 @@ class ApiClient {
     try {
       final res = await call();
       final body = res.data;
+
       if (body == null) {
-        // 304 or empty body — return an empty map so callers don't crash.
-        return <String, dynamic>{} as T;
+        return _emptyFor<T>();
       }
+
       if (body is Map && body.containsKey('data')) {
-        return body['data'] as T;
+        final inner = body['data'];
+        if (inner == null) {
+          return _emptyFor<T>();
+        }
+        return inner as T;
       }
+
       return body as T;
     } on DioException catch (e) {
       throw mapDioError(e);
     } catch (e, st) {
-      // A cast or parse error — log for debugging, throw a clear error.
       // ignore: avoid_print
       print('[api] parse error: $e\n$st');
       throw const ApiException(
@@ -188,10 +193,21 @@ class ApiClient {
     }
   }
 
-  /// Extracts a list of items from a backend response that may be:
-  ///   - a bare array:            [ ... ]
-  ///   - a paginated object:      { items: [ ... ], pagination: { ... } }
-  ///   - a wrapped object:        { data: [...] } (already unwrapped by _run, but just in case)
+  /// Returns a null-safe fallback for [T] when the backend sends `data: null`.
+    T _emptyFor<T>() {
+    final map = <String, dynamic>{};
+    if (map is T) return map as T;
+
+    final list = <dynamic>[];
+    if (list is T) return list as T;
+
+    throw const ApiException(
+      kind: ApiErrorKind.unknown,
+      message: 'The server returned no data where some was expected.',
+    );
+  }
+
+  //- a wrapped object:        { data: [...] } (already unwrapped by _run, but just in case)
 }
 
 List<Map<String, dynamic>> extractList(dynamic raw) {
