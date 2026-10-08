@@ -26,12 +26,11 @@ class PlanSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (plan.duesTotal > 0)
-            _row(
-              context,
-              label: l10n.payDues,
-              value: Money.etb(plan.duesTotal),
-            ),
+          _row(
+            context,
+            label: l10n.payDues,
+            value: Money.etb(plan.duesTotal),
+          ),
           if (plan.penaltiesTotal > 0)
             _row(
               context,

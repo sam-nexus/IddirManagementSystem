@@ -34,14 +34,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final name = ref.read(welcomeToastProvider);
+      final name = ref.read(firstNameProvider);
+      final l10n = context.l10n;
       if (name != null && mounted) {
         WelcomeBanner.show(
           context,
-          title: 'Akkam, $name',
-          subtitle: 'You are standing in the shade.',
+          title: l10n.greetingName(name),
+          subtitle: l10n.homeStanding,
           icon: Icons.eco_outlined,
         );
+
         ref.read(welcomeToastProvider.notifier).state = null;
       }
     });
@@ -82,7 +84,7 @@ class _HomeBody extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GreetingLine(firstName: _firstNameFromSession(ref)),
+          GreetingLine(firstName: ref.watch(firstNameProvider) ?? 'Member'),
           const SizedBox(height: AppSpacing.xl),
 
           // The tree
@@ -146,14 +148,7 @@ class _HomeBody extends ConsumerWidget {
     );
   }
 
-  String _firstNameFromSession(WidgetRef ref) {
-    final session = ref.watch(sessionProvider);
-    return switch (session) {
-      SessionSignedIn(:final firstName) =>
-        firstName.isEmpty ? 'Member' : firstName,
-      _ => 'Member',
-    };
-  }
+  
 
   String _nextWindowDate() {
     final now = DateTime.now();

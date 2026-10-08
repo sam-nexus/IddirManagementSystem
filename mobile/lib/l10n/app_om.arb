@@ -1,160 +1,145 @@
 {
   "@@locale": "om",
-
   "appName": "Afoosha Odaa",
-  "appTagline": "Muka Odaa jalatti walitti qabamnee",
-
-  "splashTagline": "Muka Odaa jalatti walitti qabamnee",
-
+  "appTagline": "Muka Odaa jalatti walitti qabamne",
+  "splashTagline": "Muka Odaa jalatti walitti qabamne",
   "languageTitle": "Afaan kee filadhu",
-  "languageSubtitle": "Yeroo barbaadde jijjiiruu dandeessa.",
+  "languageSubtitle": "Yeroo barbaaddetti kamittuu jijjiiruu ni dandeessa.",
   "languageEnglish": "English",
   "languageOromo": "Afaan Oromoo",
   "languageContinue": "Itti fufi",
-
   "actionContinue": "Itti fufi",
   "actionCancel": "Dhiisi",
   "actionRetry": "Irra deebi'ii yaali",
   "actionClose": "Cufi",
-  "actionBack": "Duuba",
+  "actionBack": "Duubatti deebi'i",
   "actionShare": "Qoodi",
   "actionSave": "Olkaa'i",
-
-  "greetingMorning": "Akkam barii",
-  "greetingAfternoon": "Akkam waaree",
-  "greetingEvening": "Akkam galgala",
-  "greetingName": "Akkam, {name}",
+  "greetingMorning": "Akkam bulte",
+  "greetingAfternoon": "Akkam ooltee",
+  "greetingEvening": "Galgala gaarii",
+  "greetingName": "Akkam jirta, {name}",
   "@greetingName": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": { "type": "String" }
+    }
   },
-
-  "homeStanding": "Gaaddisa Odaa jalatti dhaabbatta.",
+  "homeStanding": "Gaaddisa jalatti dhaabbatta.",
   "homeYouOwe": "Kaffaluu qabda",
-  "homeMonthsPaid": "Ji'oota kaffalame",
+  "homeMonthsPaid": "Ji'oota kaffalaman",
   "homePayNow": "Amma kaffali · {amount}",
   "@homePayNow": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
   },
   "homeLatestNotice": "Beeksisa haaraa",
   "homeNextMeeting": "Walga'ii itti aanu",
   "homeReadMore": "Dabalataan dubbisi",
-
   "authPhoneLabel": "Lakkoofsa bilbilaa",
   "authPhoneHint": "09xx xxx xxx",
   "authPinLabel": "PIN",
   "authLogin": "Seeni",
-  "authLockedTitle": "Herregni cufameera",
-  "authLockedBody": "Daqiiqaa {minutes} booda irra deebi'ii yaali.",
+  "authLockedTitle": "Herregni kee cufameera",
+  "authLockedBody": "Maaloo daqiiqaa {minutes} booda irra deebi'ii yaali.",
   "@authLockedBody": {
-    "placeholders": { "minutes": { "type": "String" } }
+    "placeholders": {
+      "minutes": { "type": "String" }
+    }
   },
   "authChangePinTitle": "PIN haaraa filadhu",
-  "authChangePinBody": "PIN kee koreen kenneefteetta. Lakkoofsa 4 filadhu.",
+  "authChangePinBody": "PIN kee koreen kaa'eera. Lakkoofsa afur kan ofii kee filadhu.",
   "authPinWeak": "PIN kun salphaatti tilmaamama. Kan biraa filadhu.",
   "authPinMismatch": "PIN lamaan wal hin fakkaatan.",
-
+  "authConfirmPinLabel": "PIN mirkaneessi",
+  "authConfirmPinHint": "PIN haaraa kee irra deebi'ii galchi.",
   "navHome": "Mana",
   "navMonths": "Ji'oota",
   "navPay": "Kaffali",
   "navMore": "Dabalata",
-
   "statePaid": "Kaffalame",
-  "statePartial": "Walakkaa",
+  "statePartial": "Kutaan kaffalame",
   "stateUnpaid": "Hin kaffalamne",
   "stateWaived": "Dhiifame",
   "statePending": "Eegaa jira",
-
-  "payDues": "Kaffaltii",
-"payPenalties": "Adabbii",
-"payNothingToPay": "Hundi kaffalameera",
-"payNothingToPayBody": "Amma kaffaltiin hin jiru.",
-
-  "errorGeneric": "Wanti tokko dogoggora. Maaloo irra deebi'ii yaali.",
-  "errorNetwork": "Interneetiin hin jiru.",
+  "stateSuspended": "Dhaabame",
+  "stateComingSoon": "Dhiyootti dhufa",
+  "payDues": "Gumaacha",
+  "payPenalties": "Adabbii",
+  "payNothingToPay": "Hundi kaffalameera",
+  "payNothingToPayBody": "Amma kaffaltiin hin jiru.",
+  "errorGeneric": "Rakkoon tokko uumameera. Maaloo irra deebi'ii yaali.",
+  "errorNetwork": "Interneetiin hin jiru fakkaata.",
   "errorRetry": "Irra deebi'ii yaali",
-
-  "stateSuspended": "Dhaabbate",
-"stateComingSoon": "Dhiyootti dhufa",
-"monthsPay": "Kaffali",
-"monthsSuspendedHint": "Maaloo ji'oota duraanii dura kaffali.",
-
-  "stateSuspended": "Dhaabbate",
-"monthsPay": "Kaffali",
-"monthsSuspendedHint": "Maaloo ji'oota duraanii dura kaffali.",
-
-  "monthsTitle": "Waggaa kee",
-  "monthsSubtitle": "Baalli tokko tokko ji'a tokko.",
+  "errorSessionExpired": "Yeroon seensa keetii dhumeera. Maaloo irra deebi'ii seeni.",
+  "monthsTitle": "Gumaacha kee",
+  "monthsSubtitle": "Ji'oota kee gaaddisa Odaa jalatti",
   "monthsThisYear": "Bara kana",
-  "monthsPastYears": "Bara darbe",
+  "monthsPastYears": "Baroota darban",
   "monthsReceipts": "Nagahee",
-  "navMonths": "Ji'oota",
-"navPay": "Kaffali",
-"navMore": "Dabalata",
-"navHome": "Mana",
-
-"paymentOpenNow": "Amma banaa",
-"paymentWindowOpen": "Kaffaltiin hanga guyyaa 2ffaatti banaa jira.",
-"paymentWindowClosed": "Kaffaltiin {date} irraa banama.",
-"@paymentWindowClosed": {
-  "placeholders": { "date": { "type": "String" } }
-},
-"paymentMustPayInOrder": "Maaloo ji'oota duraanii dura kaffali.",
-"paymentOldestFirst": "Ji'a duraa dura",
-
-  "payTitle": "Kaffaltii",
+  "monthsPay": "Kaffali",
+  "monthsSuspendedHint": "Maaloo ji'oota duraanii dura kaffali.",
+  "monthsNothingThisYear": "Bara kana amma homaa hin jiru",
+  "monthsNothingThisYearBody": "Bara kanaaf galmeen gumaacha kee hin jiru.",
+  "pastYearsEmpty": "Asitti amma homaa hin jiru",
+  "pastYearsEmptyBody": "Seenaan Afoosha kee bara kee jalqabaa booda asitti mul'ata.",
+  "paymentOpenNow": "Amma banaadha",
+  "paymentWindowOpen": "Kaffaltiin hanga guyyaa 2ffaatti banaa jira.",
+  "paymentWindowClosed": "Kaffaltiin guyyaa {date} irraa eegalee banama.",
+  "@paymentWindowClosed": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "paymentMustPayInOrder": "Maaloo ji'oota duraanii dura kaffali.",
+  "paymentOldestFirst": "Ji'a durii dursa",
+  "payTitle": "Kaffali",
   "paySelectMonths": "Ji'oota kam?",
-  "authConfirmPinLabel": "PIN mirkaneessi",
-"authConfirmPinHint": "PIN haaraa kee irra deebi'ii galchi.",
   "paySummary": "Cuunfaa",
   "payTotal": "Waliigala",
   "payOpen": "Fuula kaffaltii bani",
   "paySuccessTitle": "Kaffaltiin fudhatameera",
   "paySuccessBody": "Galatoomi. Nagaheen kee qophiidha.",
   "payFailedTitle": "Kaffaltiin hin milkoofne",
-  "payPendingTitle": "Mirkaneessaa eegaa jira",
+  "payPendingTitle": "Mirkaneessa eegaa jira",
   "payPendingBody": "Yeroo mirkanaa'u sitti himna.",
-
   "receiptTitle": "Nagahee",
   "receiptNumber": "Lakkoofsa",
   "receiptDate": "Guyyaa",
-  "receiptAmount": "Maallaqa",
+  "receiptAmount": "Hanga maallaqaa",
   "receiptPaidFor": "Kan kaffalameef",
   "receiptShare": "Nagahee qoodi",
-
-  "aboutShort": "Waa'ee",
-"profileShort": "Profaayilii",
-"roleChairperson": "Hoji-Guddaa",
-"roleSecretary": "Barreessaa",
-"roleTreasurer": "Sa'umsaa",
-"roleAuditor": "Qorataa",
-"profileLogoutConfirm": "Dhuguma ba'uu barbaadda?",
-
-  "historyMethodChapa": "Chapa",
-"historyMethodCash": "Qarshii",
-"historyMethodManual": "Harkaan",
-"historyEmptyBody": "Yeroo kaffaltii raawwattu asitti mul'ata.",
-"receiptMethod": "Mala",
-"receiptNote": "Yaadannoo",
-"receiptThanks": "Gumaacha keetiif galatoomi.",
-"receiptNotFound": "Nagaheen hin argamne",
-
+  "receiptMethod": "Mala",
+  "receiptNote": "Yaadannoo",
+  "receiptThanks": "Gumaacha keetiif galatoomi.",
+  "receiptNotFound": "Nagaheen hin argamne",
   "historyTitle": "Seenaa kaffaltii",
   "historyEmpty": "Amma ammaatti kaffaltiin hin jiru.",
-
+  "historyEmptyBody": "Yeroo kaffaltii raawwattu asitti mul'ata.",
+  "historyMethodChapa": "Chapa",
+  "historyMethodCash": "Maallaqa harkaa",
+  "historyMethodManual": "Dabarsa harkaa",
+  "aboutShort": "Waa'ee",
   "aboutTitle": "Waa'ee Afoosha Odaa",
   "aboutMission": "Ergama",
   "aboutVision": "Mul'ata",
   "aboutBylaws": "Seera dhaabbataa",
   "aboutCommittee": "Koree",
-
+  "roleChairperson": "Dura Taa'aa",
+  "roleSecretary": "Barreessaa",
+  "roleTreasurer": "Qabaa Maallaqaa",
+  "roleAuditor": "Qorataa Herregaa",
+  "profileShort": "Profaayilii",
   "profileTitle": "Profaayilii",
   "profileLanguage": "Afaan",
   "profileChangePin": "PIN jijjiiri",
   "profileDevices": "Meeshaalee koo",
-  "errorSessionExpired": "Yeroon kee darbeera. Maaloo irra deebi'ii seeni.",
   "profileLogout": "Ba'i",
-  "profileVersion": "Fooyya'iinsa {version}",
+  "profileLogoutConfirm": "Dhuguma ba'uu barbaaddaa?",
+  "profileVersion": "Versiyoonii {version}",
   "@profileVersion": {
-    "placeholders": { "version": { "type": "String" } }
+    "placeholders": {
+      "version": { "type": "String" }
+    }
   }
 }

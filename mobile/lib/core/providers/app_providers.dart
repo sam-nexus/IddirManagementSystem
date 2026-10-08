@@ -143,3 +143,13 @@ class SessionSignedIn extends SessionState {
   final String lastName;
   final String memberId;
 }
+/// The signed-in member's first name, or null if unavailable.
+/// Derived from the session so widgets don't need to pattern-match.
+final firstNameProvider = Provider<String?>((ref) {
+  final session = ref.watch(sessionProvider);
+  return switch (session) {
+    SessionSignedIn(:final firstName) =>
+      firstName.isEmpty ? null : firstName,
+    _ => null,
+  };
+});

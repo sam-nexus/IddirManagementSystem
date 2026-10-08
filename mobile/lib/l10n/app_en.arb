@@ -23,7 +23,7 @@
   "greetingMorning": "Good morning",
   "greetingAfternoon": "Good afternoon",
   "greetingEvening": "Good evening",
-  "greetingName": "Akkam, {name}",
+  "greetingName": "Hello, {name}",
   "@greetingName": {
     "placeholders": { "name": { "type": "String" } }
   },
@@ -68,8 +68,8 @@
   "errorNetwork": "You appear to be offline.",
   "errorRetry": "Try again",
 
-  "monthsTitle": "Your year",
-  "monthsSubtitle": "Every leaf is a month.",
+  "monthsTitle": "Your Contributions",
+  "monthsSubtitle": "Twelve months we've stood together",
   "monthsThisYear": "This year",
   "monthsPastYears": "Past years",
   "monthsReceipts": "Receipts",
@@ -100,6 +100,11 @@
   "aboutVision": "Vision",
   "aboutBylaws": "Bylaws",
   "aboutCommittee": "Committee",
+
+  "pastYearsEmpty": "Nothing here yet",
+"pastYearsEmptyBody": "Your Afoosha history will appear here after your first year.",
+"monthsNothingThisYear": "Nothing this year yet",
+"monthsNothingThisYearBody": "You have no contributions recorded for this year.",
 
   "aboutShort": "About",
 "profileShort": "Profile",

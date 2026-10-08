@@ -46,12 +46,7 @@ class _PayScreenState extends ConsumerState<PayScreen> {
         body: l10n.errorRetry,
       ),
       data: (plan) {
-        if (!plan.hasAnythingToPay) {
-          return EmptyView(
-            title: l10n.payNothingToPay,
-            body: l10n.payNothingToPayBody,
-          );
-        }
+        final hasPayment = plan.hasAnythingToPay;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
@@ -69,27 +64,38 @@ class _PayScreenState extends ConsumerState<PayScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                l10n.paySummary,
+                hasPayment ? l10n.paySummary : l10n.payNothingToPay,
                 style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
               ),
               const SizedBox(height: AppSpacing.xxl),
-
               PlanSummary(plan: plan),
               const SizedBox(height: AppSpacing.xl),
-
               PrimaryButton(
                 label: l10n.payOpen,
-                onPressed: () {
-                  final periods = plan.payableRows
-                      .map((r) => r.period.toIso8601String().split('T').first)
-                      .toList();
-                  ref.read(paymentSessionProvider.notifier).init(
-                        memberId: 'mock-member-id',
-                        amount: plan.total,
-                        periods: periods,
-                      );
-                },
+                onPressed: hasPayment
+                    ? () {
+                        final periods = plan.payableRows
+                            .map((r) =>
+                                r.period.toIso8601String().split('T').first,)
+                            .toList();
+                        ref.read(paymentSessionProvider.notifier).init(
+                              memberId: 'mock-member-id',
+                              amount: plan.total,
+                              periods: periods,
+                            );
+                      }
+                    : null, // ← disabled when nothing to pay
               ),
+              if (!hasPayment) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  l10n.payNothingToPayBody,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.caption.copyWith(
+                    color: tokens.textMuted,
+                  ),
+                ),
+              ],
             ],
           ),
         );
@@ -174,8 +180,11 @@ class _SuccessPanel extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_outline,
-                size: 56, color: tokens.statePaid,),
+            Icon(
+              Icons.check_circle_outline,
+              size: 56,
+              color: tokens.statePaid,
+            ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               l10n.paySuccessTitle,

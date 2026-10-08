@@ -12,16 +12,17 @@ class AppLocalizationsOm extends AppLocalizations {
   String get appName => 'Afoosha Odaa';
 
   @override
-  String get appTagline => 'Muka Odaa jalatti walitti qabamnee';
+  String get appTagline => 'Muka Odaa jalatti walitti qabamne';
 
   @override
-  String get splashTagline => 'Muka Odaa jalatti walitti qabamnee';
+  String get splashTagline => 'Muka Odaa jalatti walitti qabamne';
 
   @override
   String get languageTitle => 'Afaan kee filadhu';
 
   @override
-  String get languageSubtitle => 'Yeroo barbaadde jijjiiruu dandeessa.';
+  String get languageSubtitle =>
+      'Yeroo barbaaddetti kamittuu jijjiiruu ni dandeessa.';
 
   @override
   String get languageEnglish => 'English';
@@ -45,7 +46,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionClose => 'Cufi';
 
   @override
-  String get actionBack => 'Duuba';
+  String get actionBack => 'Duubatti deebi\'i';
 
   @override
   String get actionShare => 'Qoodi';
@@ -54,27 +55,27 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionSave => 'Olkaa\'i';
 
   @override
-  String get greetingMorning => 'Akkam barii';
+  String get greetingMorning => 'Akkam bulte';
 
   @override
-  String get greetingAfternoon => 'Akkam waaree';
+  String get greetingAfternoon => 'Akkam ooltee';
 
   @override
-  String get greetingEvening => 'Akkam galgala';
+  String get greetingEvening => 'Galgala gaarii';
 
   @override
   String greetingName(String name) {
-    return 'Akkam, $name';
+    return 'Akkam jirta, $name';
   }
 
   @override
-  String get homeStanding => 'Gaaddisa Odaa jalatti dhaabbatta.';
+  String get homeStanding => 'Gaaddisa jalatti dhaabbatta.';
 
   @override
   String get homeYouOwe => 'Kaffaluu qabda';
 
   @override
-  String get homeMonthsPaid => 'Ji\'oota kaffalame';
+  String get homeMonthsPaid => 'Ji\'oota kaffalaman';
 
   @override
   String homePayNow(String amount) {
@@ -103,11 +104,11 @@ class AppLocalizationsOm extends AppLocalizations {
   String get authLogin => 'Seeni';
 
   @override
-  String get authLockedTitle => 'Herregni cufameera';
+  String get authLockedTitle => 'Herregni kee cufameera';
 
   @override
   String authLockedBody(String minutes) {
-    return 'Daqiiqaa $minutes booda irra deebi\'ii yaali.';
+    return 'Maaloo daqiiqaa $minutes booda irra deebi\'ii yaali.';
   }
 
   @override
@@ -115,7 +116,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get authChangePinBody =>
-      'PIN kee koreen kenneefteetta. Lakkoofsa 4 filadhu.';
+      'PIN kee koreen kaa\'eera. Lakkoofsa afur kan ofii kee filadhu.';
 
   @override
   String get authPinWeak => 'PIN kun salphaatti tilmaamama. Kan biraa filadhu.';
@@ -139,7 +140,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get statePaid => 'Kaffalame';
 
   @override
-  String get statePartial => 'Walakkaa';
+  String get statePartial => 'Kutaan kaffalame';
 
   @override
   String get stateUnpaid => 'Hin kaffalamne';
@@ -152,31 +153,31 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get errorGeneric =>
-      'Wanti tokko dogoggora. Maaloo irra deebi\'ii yaali.';
+      'Rakkoon tokko uumameera. Maaloo irra deebi\'ii yaali.';
 
   @override
-  String get errorNetwork => 'Interneetiin hin jiru.';
+  String get errorNetwork => 'Interneetiin hin jiru fakkaata.';
 
   @override
   String get errorRetry => 'Irra deebi\'ii yaali';
 
   @override
-  String get monthsTitle => 'Waggaa kee';
+  String get monthsTitle => 'Gumaacha kee';
 
   @override
-  String get monthsSubtitle => 'Baalli tokko tokko ji\'a tokko.';
+  String get monthsSubtitle => 'Ji\'oota kee gaaddisa Odaa jalatti';
 
   @override
   String get monthsThisYear => 'Bara kana';
 
   @override
-  String get monthsPastYears => 'Bara darbe';
+  String get monthsPastYears => 'Baroota darban';
 
   @override
   String get monthsReceipts => 'Nagahee';
 
   @override
-  String get payTitle => 'Kaffaltii';
+  String get payTitle => 'Kaffali';
 
   @override
   String get paySelectMonths => 'Ji\'oota kam?';
@@ -200,7 +201,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get payFailedTitle => 'Kaffaltiin hin milkoofne';
 
   @override
-  String get payPendingTitle => 'Mirkaneessaa eegaa jira';
+  String get payPendingTitle => 'Mirkaneessa eegaa jira';
 
   @override
   String get payPendingBody => 'Yeroo mirkanaa\'u sitti himna.';
@@ -215,7 +216,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get receiptDate => 'Guyyaa';
 
   @override
-  String get receiptAmount => 'Maallaqa';
+  String get receiptAmount => 'Hanga maallaqaa';
 
   @override
   String get receiptPaidFor => 'Kan kaffalameef';
@@ -245,34 +246,48 @@ class AppLocalizationsOm extends AppLocalizations {
   String get aboutCommittee => 'Koree';
 
   @override
+  String get pastYearsEmpty => 'Asitti amma homaa hin jiru';
+
+  @override
+  String get pastYearsEmptyBody =>
+      'Seenaan Afoosha kee bara kee jalqabaa booda asitti mul\'ata.';
+
+  @override
+  String get monthsNothingThisYear => 'Bara kana amma homaa hin jiru';
+
+  @override
+  String get monthsNothingThisYearBody =>
+      'Bara kanaaf galmeen gumaacha kee hin jiru.';
+
+  @override
   String get aboutShort => 'Waa\'ee';
 
   @override
   String get profileShort => 'Profaayilii';
 
   @override
-  String get roleChairperson => 'Hoji-Guddaa';
+  String get roleChairperson => 'Dura Taa\'aa';
 
   @override
   String get roleSecretary => 'Barreessaa';
 
   @override
-  String get roleTreasurer => 'Sa\'umsaa';
+  String get roleTreasurer => 'Qabaa Maallaqaa';
 
   @override
-  String get roleAuditor => 'Qorataa';
+  String get roleAuditor => 'Qorataa Herregaa';
 
   @override
-  String get profileLogoutConfirm => 'Dhuguma ba\'uu barbaadda?';
+  String get profileLogoutConfirm => 'Dhuguma ba\'uu barbaaddaa?';
 
   @override
   String get historyMethodChapa => 'Chapa';
 
   @override
-  String get historyMethodCash => 'Qarshii';
+  String get historyMethodCash => 'Maallaqa harkaa';
 
   @override
-  String get historyMethodManual => 'Harkaan';
+  String get historyMethodManual => 'Dabarsa harkaa';
 
   @override
   String get historyEmptyBody => 'Yeroo kaffaltii raawwattu asitti mul\'ata.';
@@ -290,7 +305,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get receiptNotFound => 'Nagaheen hin argamne';
 
   @override
-  String get payDues => 'Kaffaltii';
+  String get payDues => 'Gumaacha';
 
   @override
   String get payPenalties => 'Adabbii';
@@ -302,7 +317,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get payNothingToPayBody => 'Amma kaffaltiin hin jiru.';
 
   @override
-  String get stateSuspended => 'Dhaabbate';
+  String get stateSuspended => 'Dhaabame';
 
   @override
   String get stateComingSoon => 'Dhiyootti dhufa';
@@ -335,7 +350,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get profileLogout => 'Ba\'i';
 
   @override
-  String get paymentOpenNow => 'Amma banaa';
+  String get paymentOpenNow => 'Amma banaadha';
 
   @override
   String get paymentWindowOpen =>
@@ -343,21 +358,21 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String paymentWindowClosed(String date) {
-    return 'Kaffaltiin $date irraa banama.';
+    return 'Kaffaltiin guyyaa $date irraa eegalee banama.';
   }
 
   @override
   String get paymentMustPayInOrder => 'Maaloo ji\'oota duraanii dura kaffali.';
 
   @override
-  String get paymentOldestFirst => 'Ji\'a duraa dura';
+  String get paymentOldestFirst => 'Ji\'a durii dursa';
 
   @override
   String get errorSessionExpired =>
-      'Yeroon kee darbeera. Maaloo irra deebi\'ii seeni.';
+      'Yeroon seensa keetii dhumeera. Maaloo irra deebi\'ii seeni.';
 
   @override
   String profileVersion(String version) {
-    return 'Fooyya\'iinsa $version';
+    return 'Versiyoonii $version';
   }
 }

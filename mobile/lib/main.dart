@@ -27,6 +27,11 @@ class OdaaApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     final lang = ref.watch(languageProvider);
 
+    final api = ref.watch(apiClientProvider);
+    api.onSessionExpired = () {
+      router.goNamed('login');
+    };
+
     return MaterialApp.router(
       title: 'Afoosha Odaa',
       debugShowCheckedModeBanner: false,

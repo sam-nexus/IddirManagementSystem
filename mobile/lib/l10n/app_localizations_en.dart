@@ -64,7 +64,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String greetingName(String name) {
-    return 'Akkam, $name';
+    return 'Hello, $name';
   }
 
   @override
@@ -160,10 +160,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorRetry => 'Try again';
 
   @override
-  String get monthsTitle => 'Your year';
+  String get monthsTitle => 'Your Contributions';
 
   @override
-  String get monthsSubtitle => 'Every leaf is a month.';
+  String get monthsSubtitle => 'Twelve months we\'ve stood together';
 
   @override
   String get monthsThisYear => 'This year';
@@ -242,6 +242,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutCommittee => 'Committee';
+
+  @override
+  String get pastYearsEmpty => 'Nothing here yet';
+
+  @override
+  String get pastYearsEmptyBody =>
+      'Your Afoosha history will appear here after your first year.';
+
+  @override
+  String get monthsNothingThisYear => 'Nothing this year yet';
+
+  @override
+  String get monthsNothingThisYearBody =>
+      'You have no contributions recorded for this year.';
 
   @override
   String get aboutShort => 'About';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:odaa_mobile/core/theme/app_elevation.dart';
-import 'package:odaa_mobile/core/theme/app_motion.dart';
 import 'package:odaa_mobile/core/theme/app_radii.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';

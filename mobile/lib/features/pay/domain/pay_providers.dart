@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:odaa_mobile/core/providers/app_providers.dart';
 import 'package:odaa_mobile/features/pay/data/models/payment_session.dart';
 import 'package:odaa_mobile/features/pay/data/payment_repository.dart';
 
 final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
-  return MockPaymentRepository();
+  return PaymentRepository(ref.watch(apiClientProvider));
 });
 
 class PaymentSessionNotifier extends StateNotifier<PaymentSession> {
-  PaymentSessionNotifier(this._repo) : super(const PaymentSession(status: PaymentSessionStatus.idle));
+  PaymentSessionNotifier(this._repo)
+      : super(const PaymentSession(status: PaymentSessionStatus.idle));
 
   final PaymentRepository _repo;
 
@@ -18,12 +20,11 @@ class PaymentSessionNotifier extends StateNotifier<PaymentSession> {
   }) async {
     state = state.copyWith(status: PaymentSessionStatus.initializing);
     try {
-      final session = await _repo.initChapa(
+      state = await _repo.initChapa(
         memberId: memberId,
         amount: amount,
         periods: periods,
       );
-      state = session;
     } catch (e) {
       state = state.copyWith(
         status: PaymentSessionStatus.failed,
@@ -35,8 +36,7 @@ class PaymentSessionNotifier extends StateNotifier<PaymentSession> {
   Future<void> verify(String txRef) async {
     state = state.copyWith(status: PaymentSessionStatus.verifying);
     try {
-      final session = await _repo.verifyChapa(txRef: txRef);
-      state = session;
+      state = await _repo.verifyChapa(txRef: txRef);
     } catch (e) {
       state = state.copyWith(
         status: PaymentSessionStatus.failed,

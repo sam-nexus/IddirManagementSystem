@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// No description provided for @greetingName.
   ///
   /// In en, this message translates to:
-  /// **'Akkam, {name}'**
+  /// **'Hello, {name}'**
   String greetingName(String name);
 
   /// No description provided for @homeStanding.
@@ -389,13 +389,13 @@ abstract class AppLocalizations {
   /// No description provided for @monthsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your year'**
+  /// **'Your Contributions'**
   String get monthsTitle;
 
   /// No description provided for @monthsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Every leaf is a month.'**
+  /// **'Twelve months we\'ve stood together'**
   String get monthsSubtitle;
 
   /// No description provided for @monthsThisYear.
@@ -553,6 +553,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Committee'**
   String get aboutCommittee;
+
+  /// No description provided for @pastYearsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get pastYearsEmpty;
+
+  /// No description provided for @pastYearsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Afoosha history will appear here after your first year.'**
+  String get pastYearsEmptyBody;
+
+  /// No description provided for @monthsNothingThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing this year yet'**
+  String get monthsNothingThisYear;
+
+  /// No description provided for @monthsNothingThisYearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no contributions recorded for this year.'**
+  String get monthsNothingThisYearBody;
 
   /// No description provided for @aboutShort.
   ///

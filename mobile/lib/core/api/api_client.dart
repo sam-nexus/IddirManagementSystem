@@ -17,15 +17,19 @@ class ApiClient {
     String? baseUrl,
   })  : _secure = secure,
         _dio = dio ??
-            Dio(BaseOptions(
-              baseUrl: baseUrl ?? dotenv.env['API_BASE_URL'] ?? 'http://localhost:4000',
-              connectTimeout: const Duration(seconds: 15),
-              receiveTimeout: const Duration(seconds: 20),
-              sendTimeout: const Duration(seconds: 20),
-              contentType: 'application/json',
-              responseType: ResponseType.json,
-              headers: {'X-Lang': 'en'},
-            ),) {
+            Dio(
+              BaseOptions(
+                baseUrl: baseUrl ??
+                    dotenv.env['API_BASE_URL'] ??
+                    'http://localhost:4000',
+                connectTimeout: const Duration(seconds: 15),
+                receiveTimeout: const Duration(seconds: 20),
+                sendTimeout: const Duration(seconds: 20),
+                contentType: 'application/json',
+                responseType: ResponseType.json,
+                headers: {'X-Lang': 'en'},
+              ),
+            ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: _onRequest,
@@ -36,6 +40,12 @@ class ApiClient {
 
   final Dio _dio;
   final SecureStore _secure;
+
+  Future<String?>? _refreshing;
+
+  /// Called when tokens are cleared because the session is truly dead.
+  /// Wired from main() to send the user to the login screen.
+  void Function()? onSessionExpired;
 
   Dio get raw => _dio;
 
@@ -66,6 +76,7 @@ class ApiClient {
   }
 
   // ---------- Error: refresh on 401 ----------
+
   Future<void> _onError(
     DioException err,
     ErrorInterceptorHandler handler,
@@ -75,41 +86,19 @@ class ApiClient {
     final isAuthPath = err.requestOptions.path.contains('/auth/');
 
     if (!is401 || isAuthPath) {
-      // Not a refresh-worthy case.
       return handler.reject(err);
     }
 
     try {
-      final refresh = await _secure.readRefreshToken();
-      if (refresh == null || refresh.isEmpty) {
+      final newToken = await _refreshOnce();
+      if (newToken == null) {
         await _clearTokens();
         return handler.reject(err);
       }
 
-      // Use a fresh Dio to avoid interceptor recursion.
-      final refreshDio = Dio(BaseOptions(baseUrl: _dio.options.baseUrl));
-      final refreshRes = await refreshDio.post(
-        '/auth/refresh',
-        data: {'refresh_token': refresh},
-      );
-
-      final data = refreshRes.data as Map?;
-      final newAccess = data?['data']?['access_token'] as String?;
-      final newRefresh = data?['data']?['refresh_token'] as String?;
-
-      if (newAccess == null) {
-        await _clearTokens();
-        return handler.reject(err);
-      }
-
-      await _secure.writeAccessToken(newAccess);
-      if (newRefresh != null) {
-        await _secure.writeRefreshToken(newRefresh);
-      }
-
-      // Retry the original request with the new token.
+      // Retry the original request with the fresh token.
       final opts = err.requestOptions;
-      opts.headers['Authorization'] = 'Bearer $newAccess';
+      opts.headers['Authorization'] = 'Bearer $newToken';
       final retry = await _dio.fetch(opts);
       return handler.resolve(retry);
     } catch (_) {
@@ -118,9 +107,47 @@ class ApiClient {
     }
   }
 
+  /// Performs at most one refresh at a time. Concurrent callers share the result.
+  Future<String?> _refreshOnce() {
+    // If a refresh is already running, piggyback on it.
+    final existing = _refreshing;
+    if (existing != null) return existing;
+
+    // Otherwise start a new one and cache the future.
+    final future = _doRefresh();
+    _refreshing = future;
+    future.whenComplete(() => _refreshing = null);
+    return future;
+  }
+
+  Future<String?> _doRefresh() async {
+    final refresh = await _secure.readRefreshToken();
+    if (refresh == null || refresh.isEmpty) return null;
+
+    // Use a fresh Dio so the interceptor doesn't recurse.
+    final refreshDio = Dio(BaseOptions(baseUrl: _dio.options.baseUrl));
+    final refreshRes = await refreshDio.post(
+      '/auth/refresh',
+      data: {'refresh_token': refresh},
+    );
+
+    final data = refreshRes.data as Map?;
+    final newAccess = data?['data']?['access_token'] as String?;
+    final newRefresh = data?['data']?['refresh_token'] as String?;
+
+    if (newAccess == null) return null;
+
+    await _secure.writeAccessToken(newAccess);
+    if (newRefresh != null) {
+      await _secure.writeRefreshToken(newRefresh);
+    }
+    return newAccess;
+  }
+
   Future<void> _clearTokens() async {
     await _secure.deleteAccessToken();
     await _secure.deleteRefreshToken();
+    onSessionExpired?.call();
   }
 
   /// Convenience: GET returning the `data` field or throwing ApiException.
@@ -136,7 +163,7 @@ class ApiClient {
   Future<T> delete<T>(String path, {Map<String, dynamic>? query}) =>
       _run<T>(() => _dio.delete(path, queryParameters: query));
 
-    Future<T> _run<T>(Future<Response> Function() call) async {
+  Future<T> _run<T>(Future<Response> Function() call) async {
     try {
       final res = await call();
       final body = res.data;
@@ -161,4 +188,38 @@ class ApiClient {
     }
   }
 
+  /// Extracts a list of items from a backend response that may be:
+  ///   - a bare array:            [ ... ]
+  ///   - a paginated object:      { items: [ ... ], pagination: { ... } }
+  ///   - a wrapped object:        { data: [...] } (already unwrapped by _run, but just in case)
+}
+
+List<Map<String, dynamic>> extractList(dynamic raw) {
+  if (raw == null) return const [];
+
+  // Bare array.
+  if (raw is List) {
+    return raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList();
+  }
+
+  // Paginated object with .items
+  if (raw is Map) {
+    final items = raw['items'];
+    if (items is List) {
+      return items
+          .whereType<Map>()
+          .map((e) => e.cast<String, dynamic>())
+          .toList();
+    }
+    // Nested under .data.items
+    final data = raw['data'];
+    if (data is Map && data['items'] is List) {
+      return (data['items'] as List)
+          .whereType<Map>()
+          .map((e) => e.cast<String, dynamic>())
+          .toList();
+    }
+  }
+
+  return const [];
 }

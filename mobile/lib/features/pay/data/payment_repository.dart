@@ -1,57 +1,59 @@
+import 'package:odaa_mobile/core/api/api_client.dart';
 import 'package:odaa_mobile/features/pay/data/models/payment_session.dart';
 
-abstract interface class PaymentRepository {
-  /// Init a Chapa payment. Returns the session with a checkout URL.
-  Future<PaymentSession> initChapa({
-    required String memberId,
-    required double amount,
-    required List<String> periods,
-  });
+class PaymentRepository {
+  PaymentRepository(this._api);
 
-  /// Verify a Chapa payment by tx_ref. Returns the updated session.
-  Future<PaymentSession> verifyChapa({required String txRef});
-}
+  final ApiClient _api;
 
-/// Mock — simulates the real backend.
-class MockPaymentRepository implements PaymentRepository {
-  @override
   Future<PaymentSession> initChapa({
     required String memberId,
     required double amount,
     required List<String> periods,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-
-    final txRef = 'odaa-${DateTime.now().millisecondsSinceEpoch}';
+    final raw = await _api.post<dynamic>(
+      '/contributions/pay/init',
+      body: {
+        'months': periods.length,
+        'include_penalties': true,
+      },
+    );
+    final data = raw is Map ? raw : <String, dynamic>{};
 
     return PaymentSession(
       status: PaymentSessionStatus.awaitingUser,
-      txRef: txRef,
-      // A real Chapa URL would be returned here.
-      checkoutUrl: 'https://checkout.chapa.co/checkout/demo?tx_ref=$txRef',
-      amount: amount,
+      txRef: data['tx_ref'] as String?,
+      checkoutUrl: data['checkout_url'] as String?,
+      amount: double.tryParse('${data['amount']}') ?? 0,
+      currency: (data['currency'] as String?) ?? 'ETB',
     );
   }
 
-  @override
   Future<PaymentSession> verifyChapa({required String txRef}) async {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    final raw = await _api.post<dynamic>(
+      '/contributions/pay/verify',
+      body: {'tx_ref': txRef},
+    );
+    final data = raw is Map ? raw : <String, dynamic>{};
 
-    // Mock: 80% success.
-    final success = DateTime.now().millisecond % 5 != 0;
-
-    if (success) {
+    final status = (data['status'] as String?) ?? 'pending';
+    if (status == 'success') {
       return PaymentSession(
         status: PaymentSessionStatus.success,
         txRef: txRef,
-        paymentId: 'mock-payment-${txRef.hashCode}',
-        receiptNo: 'RCT-2026-${txRef.hashCode.toString().padLeft(6, '0').substring(0, 6)}',
+        paymentId: data['payment_id'] as String?,
+        receiptNo: data['receipt_no'] as String?,
       );
-    } else {
+    } else if (status == 'failed') {
       return PaymentSession(
         status: PaymentSessionStatus.failed,
         txRef: txRef,
         errorMessage: 'Payment did not go through.',
+      );
+    } else {
+      return PaymentSession(
+        status: PaymentSessionStatus.awaitingUser,
+        txRef: txRef,
       );
     }
   }

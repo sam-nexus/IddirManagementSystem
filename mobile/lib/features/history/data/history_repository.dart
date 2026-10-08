@@ -1,59 +1,60 @@
+import 'package:odaa_mobile/core/api/api_client.dart';
 import 'package:odaa_mobile/features/history/data/models/payment_record.dart';
 
-abstract interface class HistoryRepository {
-  Future<List<PaymentRecord>> fetchHistory({required String memberId});
-}
+class HistoryRepository {
+  HistoryRepository(this._api);
 
-class MockHistoryRepository implements HistoryRepository {
-  @override
+  final ApiClient _api;
+
   Future<List<PaymentRecord>> fetchHistory({required String memberId}) async {
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    final raw = await _api.get<dynamic>('/contributions/payments');
+    final items = extractList(raw);
 
-    final now = DateTime.now();
+    return items.map((json) => _toRecord(json)).toList();
+  }
 
-    return [
-      PaymentRecord(
-        id: 'p-1',
-        receiptNo: 'RCT-2026-004812',
-        amount: 220.00,
-        currency: 'ETB',
-        method: PaymentMethod.chapa,
-        status: PaymentStatus.success,
-        paidAt: now.subtract(const Duration(days: 8)),
-        periodsCovered: const ['2026-09-01', '2026-10-01'],
-      ),
-      PaymentRecord(
-        id: 'p-2',
-        receiptNo: 'RCT-2026-003301',
-        amount: 100.00,
-        currency: 'ETB',
-        method: PaymentMethod.cash,
-        status: PaymentStatus.success,
-        paidAt: now.subtract(const Duration(days: 45)),
-        periodsCovered: const ['2026-08-01'],
-        note: 'Paid at committee meeting',
-      ),
-      PaymentRecord(
-        id: 'p-3',
-        receiptNo: 'RCT-2026-002105',
-        amount: 300.00,
-        currency: 'ETB',
-        method: PaymentMethod.chapa,
-        status: PaymentStatus.success,
-        paidAt: now.subtract(const Duration(days: 82)),
-        periodsCovered: const ['2026-06-01', '2026-07-01', '2026-08-01'],
-      ),
-      PaymentRecord(
-        id: 'p-4',
-        receiptNo: null,
-        amount: 100.00,
-        currency: 'ETB',
-        method: PaymentMethod.manual,
-        status: PaymentStatus.pending,
-        paidAt: now.subtract(const Duration(hours: 3)),
-        periodsCovered: const ['2026-05-01'],
-        note: 'Bank transfer — awaiting review',
-      ),
-    ];
+  PaymentRecord _toRecord(Map<String, dynamic> json) {
+    return PaymentRecord(
+      id: json['id'] as String,
+      receiptNo: json['receipt_no'] as String?,
+      amount: double.tryParse('${json['amount']}') ?? 0,
+      currency: (json['currency'] as String?) ?? 'ETB',
+      method: _toMethod(json['method'] as String?),
+      status: _toStatus(json['status'] as String?),
+      paidAt: _parseDate(json['paid_at'] ?? json['created_at']),
+      periodsCovered: const [], // not returned by the list endpoint
+      note: json['note'] as String?,
+    );
+  }
+
+  PaymentMethod _toMethod(String? s) {
+    switch (s) {
+      case 'cash':
+        return PaymentMethod.cash;
+      case 'manual':
+        return PaymentMethod.manual;
+      case 'chapa':
+      default:
+        return PaymentMethod.chapa;
+    }
+  }
+
+  PaymentStatus _toStatus(String? s) {
+    switch (s) {
+      case 'success':
+        return PaymentStatus.success;
+      case 'failed':
+        return PaymentStatus.failed;
+      case 'pending':
+      default:
+        return PaymentStatus.pending;
+    }
+  }
+
+  DateTime _parseDate(Object? raw) {
+    if (raw is String) {
+      return DateTime.tryParse(raw)?.toLocal() ?? DateTime.now();
+    }
+    return DateTime.now();
   }
 }

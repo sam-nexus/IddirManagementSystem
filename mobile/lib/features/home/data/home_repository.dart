@@ -14,8 +14,8 @@ class HomeRepository {
       _api.get<Map<String, dynamic>>('/announcements', query: {'limit': 1}),
     ]);
 
-    final dues = results[0] as Map<String, dynamic>;
-    final announcementsResponse = results[1] as Map<String, dynamic>;
+    final dues = results[0];
+    final announcementsResponse = results[1];
     final announcements =
         (announcementsResponse['items'] as List<dynamic>?) ?? const <dynamic>[];
 
@@ -40,9 +40,9 @@ class HomeRepository {
     });
 
     final penalties = summary['penalties'] as Map<String, dynamic>? ?? {};
-    final duesBalance = (summary['dues_balance'] as num).toDouble();
+    final duesBalance = double.tryParse('${summary['dues_balance']}') ?? 0;
     final penaltiesBalance =
-        (penalties['unpaid_total'] as num?)?.toDouble() ?? 0.0;
+        double.tryParse('${penalties['unpaid_total']}') ?? 0;
     final monthsPaid = months.where((m) => m == ContributionState.paid).length;
 
     NoticeTeaser? notice;

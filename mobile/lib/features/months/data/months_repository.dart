@@ -1,20 +1,48 @@
+import 'package:odaa_mobile/core/api/api_client.dart';
 import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
 
-abstract interface class MonthsRepository {
-  Future<List<MonthRow>> fetchYear({
-    required int year,
-    required String memberId,
+/// Summary returned by /contributions/my-dues.
+class MyDuesSummary {
+  const MyDuesSummary({
+    required this.duesBalance,
+    required this.penaltiesUnpaid,
+    required this.totalOutstanding,
   });
+
+  final double duesBalance;
+  final double penaltiesUnpaid;
+  final double totalOutstanding;
 }
 
-class MockMonthsRepository implements MonthsRepository {
-  @override
-  Future<List<MonthRow>> fetchYear({
-    required int year,
-    required String memberId,
-  }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+class MonthsRepository {
+  MonthsRepository(this._api);
+
+  final ApiClient _api;
+
+  // ------------- Public API -------------
+
+  /// Fetches everything once and returns:
+  ///   - `years`: distinct years the member has dues for, descending
+  ///   - `byYear`: Map<year, List<MonthRow>> with 12 rows per year
+  Future<({List<int> years, Map<int, List<MonthRow>> byYear})> fetchAll() async {
+    final data = await _api.get<Map<String, dynamic>>('/contributions/my-dues');
+    final rawItems = data['items'];
+    final items = rawItems is List
+        ? rawItems
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .toList()
+        : <Map<String, dynamic>>[];
+
+    // Group backend rows by year.
+    final rowsByYear = <int, Map<int, Map<String, dynamic>>>{};
+    for (final row in items) {
+      final iso = row['period'] as String?;
+      if (iso == null) continue;
+      final dt = DateTime.parse(iso).toLocal();
+      rowsByYear.putIfAbsent(dt.year, () => {})[dt.month] = row;
+    }
 
     const namesEn = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -25,52 +53,84 @@ class MockMonthsRepository implements MonthsRepository {
       'Adooleessa', 'Hagayya', 'Fuulbana', 'Onkololeessa', 'Sadaasa', 'Muddee',
     ];
 
-    const states = <ContributionState>[
-      ContributionState.paid,     // Jan
-      ContributionState.paid,     // Feb
-      ContributionState.unpaid,   // Mar
-      ContributionState.paid,     // Apr
-      ContributionState.paid,     // May
-      ContributionState.unpaid,   // Jun
-      ContributionState.paid,     // Jul
-      ContributionState.waived,   // Aug
-      ContributionState.paid,     // Sep
-      ContributionState.paid,     // Oct
-      ContributionState.unpaid,   // Nov
-      ContributionState.unpaid,   // Dec
-    ];
+    final now = DateTime.now();
+    final byYear = <int, List<MonthRow>>{};
 
-    final rows = <MonthRow>[];
-    for (var i = 0; i < 12; i++) {
-      final state = states[i];
-      const due = 100.0;
-      final paid = switch (state) {
-        ContributionState.paid => 100.0,
-        ContributionState.waived => 0.0,
-        ContributionState.unpaid => 0.0,
-        ContributionState.pending => 0.0,
-        ContributionState.suspended => 0.0,
-      };
+    for (final entry in rowsByYear.entries) {
+      final year = entry.key;
+      final months = entry.value;
 
-      final penalty = switch (state) {
-        ContributionState.unpaid when i < 6 => 20.0,
-        _ => 0.0,
-      };
+      final yearRows = <MonthRow>[];
+      for (var i = 0; i < 12; i++) {
+        final month = i + 1;
+        final backend = months[month];
 
-      rows.add(MonthRow(
-        period: DateTime(year, i + 1, 1),
-        monthNameEn: namesEn[i],
-        monthNameOm: namesOm[i],
-        state: state,
-        amountDue: due,
-        amountPaid: paid,
-        currency: 'ETB',
-        penaltyAmount: penalty,
-        paidAt: state == ContributionState.paid
-            ? DateTime(year, i + 1, 5)
-            : null,
-      ),);
+        ContributionState state;
+        double amountDue = 0;
+        double amountPaid = 0;
+
+        if (backend != null) {
+          state = _toState(backend['status'] as String?);
+          amountDue = double.tryParse('${backend['amount_due']}') ?? 0;
+          amountPaid = double.tryParse('${backend['amount_paid']}') ?? 0;
+        } else {
+          final isFuture =
+              (year > now.year) || (year == now.year && month > now.month);
+          state = isFuture
+              ? ContributionState.pending
+              : ContributionState.waived;
+          amountDue = 0;
+        }
+
+        yearRows.add(MonthRow(
+          period: DateTime(year, month, 1),
+          monthNameEn: namesEn[i],
+          monthNameOm: namesOm[i],
+          state: state,
+          amountDue: amountDue,
+          amountPaid: amountPaid,
+          currency: 'ETB',
+          penaltyAmount: 0,
+          paidAt: null,
+        ),);
+      }
+      byYear[year] = yearRows;
     }
-    return rows;
+
+    final years = byYear.keys.toList()..sort((a, b) => b.compareTo(a));
+    return (years: years, byYear: byYear);
+  }
+
+  /// Fetches a single year's rows. Used by older callers.
+  Future<List<MonthRow>> fetchYear({required int year}) async {
+    final all = await fetchAll();
+    return all.byYear[year] ?? const <MonthRow>[];
+  }
+
+  /// The my-dues summary. Used for penalties and total-outstanding.
+  Future<MyDuesSummary> fetchSummary() async {
+    final data = await _api.get<Map<String, dynamic>>('/contributions/my-dues');
+    final summary = data['summary'] as Map<String, dynamic>? ?? const {};
+    final penalties = summary['penalties'] as Map<String, dynamic>? ?? const {};
+
+    return MyDuesSummary(
+      duesBalance: double.tryParse('${summary['dues_balance']}') ?? 0,
+      penaltiesUnpaid: double.tryParse('${penalties['unpaid_total']}') ?? 0,
+      totalOutstanding: double.tryParse('${summary['total_outstanding']}') ?? 0,
+    );
+  }
+
+  ContributionState _toState(String? s) {
+    switch (s) {
+      case 'paid':
+        return ContributionState.paid;
+      case 'waived':
+        return ContributionState.waived;
+      case 'unpaid':
+      case 'partial':
+        return ContributionState.unpaid;
+      default:
+        return ContributionState.unpaid;
+    }
   }
 }
