@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { verifyChapaPayment } from './contributions.service';
 
+
+
 // Our references look like ODA-1700000000000-ab12cd34. Reject anything else.
 const TX_REF_PATTERN = /^[A-Za-z0-9._-]{5,80}$/;
 
@@ -28,6 +30,7 @@ function pickTxRef(query: Request['query']): string | null {
  */
 export async function chapaReturn(req: Request, res: Response) {
   res.setHeader('Cache-Control', 'no-store');
+  console.log('[chapa-return]', req.method, req.originalUrl, '| ua:', req.get('user-agent'));
 
   const txRef = pickTxRef(req.query);
   if (!txRef) {
