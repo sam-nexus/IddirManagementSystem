@@ -83,9 +83,7 @@ class _PayScreenState extends ConsumerState<PayScreen> {
                                   r.period.toIso8601String().split('T').first,
                             )
                             .toList();
-                        // TODO: remove the mock member id when the real
-                        // repository is connected (the backend takes the
-                        // member from the login token).
+                 
                         ref.read(paymentSessionProvider.notifier).init(
                               memberId: 'mock-member-id',
                               amount: plan.total,

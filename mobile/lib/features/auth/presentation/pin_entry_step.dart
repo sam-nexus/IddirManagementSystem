@@ -3,7 +3,6 @@ import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
-import 'package:odaa_mobile/shared/widgets/inline_spinner.dart';
 import 'package:odaa_mobile/shared/widgets/pin_pad.dart';
 
 class PinEntryStep extends StatefulWidget {
@@ -13,6 +12,7 @@ class PinEntryStep extends StatefulWidget {
     required this.onBack,
     required this.isLoading,
     required this.errorText,
+    this.onUseAnotherNumber,
     this.controller,
     super.key,
   });
@@ -22,6 +22,12 @@ class PinEntryStep extends StatefulWidget {
   final VoidCallback onBack;
   final bool isLoading;
   final String? errorText;
+
+  /// When non-null, shows a "Not you? Use another number" link that
+  /// returns the user to the phone step. Only set when the app is in
+  /// PIN-only mode (remembered phone).
+  final VoidCallback? onUseAnotherNumber;
+
   final PinPadController? controller;
 
   @override
@@ -31,22 +37,23 @@ class PinEntryStep extends StatefulWidget {
 class _PinEntryStepState extends State<PinEntryStep> {
   final _padController = PinPadController();
 
-  void _onCompleted(String pin) {
-    if (widget.isLoading) return;
-    widget.onSubmit(pin);
+  @override
+  void didUpdateWidget(covariant PinEntryStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Clear the pad whenever a new error arrives so the user can retry.
+    if (widget.errorText != null &&
+        widget.errorText!.isNotEmpty &&
+        widget.errorText != oldWidget.errorText) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _padController.clear();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final l10n = context.l10n;
-
-    // When the parent sets an error, clear the pad so the user can retry.
-    if (widget.errorText != null && widget.errorText!.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _padController.clear();
-      });
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,7 +69,6 @@ class _PinEntryStepState extends State<PinEntryStep> {
           style: AppTypography.body.copyWith(color: tokens.textMuted),
         ),
         const SizedBox(height: AppSpacing.xxl),
-
         if (widget.errorText != null && widget.errorText!.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -72,42 +78,36 @@ class _PinEntryStepState extends State<PinEntryStep> {
               style: AppTypography.bodyS.copyWith(color: tokens.error),
             ),
           ),
-
-        if (widget.isLoading)
-          // Show a spinner in place of the pad while signing in.
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
-            child: Center(
-              child: InlineSpinner(
-                size: 32,
-                color: tokens.primaryAction,
-                strokeWidth: 3,
+        Center(
+          child: PinPad(
+            length: 4,
+            controller: _padController,
+            enabled: !widget.isLoading,
+            onCompleted: widget.onSubmit,
+          ),
+        ),
+        const Spacer(),
+        if (widget.onUseAnotherNumber != null)
+          Center(
+            child: TextButton(
+              onPressed:
+                  widget.isLoading ? null : widget.onUseAnotherNumber,
+              child: Text(
+                l10n.authUseAnotherNumber,
+                style: AppTypography.label.copyWith(color: tokens.primary),
               ),
             ),
           )
         else
           Center(
-            child: PinPad(
-              length: 4,
-              controller: _padController,
-              enabled: !widget.isLoading,
-              onCompleted: _onCompleted,
-            ),
-          ),
-
-        const Spacer(),
-
-        if (!widget.isLoading)
-          Center(
             child: TextButton(
-              onPressed: widget.onBack,
+              onPressed: widget.isLoading ? null : widget.onBack,
               child: Text(
                 l10n.actionBack,
                 style: AppTypography.label.copyWith(color: tokens.primary),
               ),
             ),
           ),
-
         const SizedBox(height: AppSpacing.lg),
       ],
     );

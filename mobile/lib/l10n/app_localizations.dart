@@ -194,6 +194,12 @@ abstract class AppLocalizations {
   /// **'I paid'**
   String get payIPaid;
 
+  /// No description provided for @authUseAnotherNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Not you? Use another number'**
+  String get authUseAnotherNumber;
+
   /// No description provided for @payExternalBlocked.
   ///
   /// In en, this message translates to:

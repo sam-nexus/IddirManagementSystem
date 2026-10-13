@@ -24,10 +24,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _phoneController = TextEditingController();
 
   _Step _step = _Step.phone;
+  bool _rememberedPhoneUsed = false;
   bool _isLoading = false;
   String? _errorText;
   AuthError _lastError = AuthError.none;
   DateTime? _lockedUntil;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // If a phone is remembered, pre-fill it and jump to the PIN step.
+    final remembered = ref.read(rememberedPhoneProvider);
+    if (remembered != null && remembered.isNotEmpty) {
+      _phoneController.text = remembered;
+      _step = _Step.pin;
+      _rememberedPhoneUsed = true;
+    }
+  }
 
   @override
   void dispose() {
@@ -38,6 +52,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _onContinueFromPhone() {
     setState(() {
       _step = _Step.pin;
+      _errorText = null;
+      _lastError = AuthError.none;
+    });
+  }
+
+  /// Called when the user taps "Not you?" — return to the phone step and
+  /// forget the remembered phone.
+  Future<void> _onUseAnotherNumber() async {
+    await ref.read(rememberedPhoneProvider.notifier).forget();
+    if (!mounted) return;
+    setState(() {
+      _phoneController.clear();
+      _step = _Step.phone;
+      _rememberedPhoneUsed = false;
       _errorText = null;
       _lastError = AuthError.none;
     });
@@ -61,9 +89,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final repo = ref.read(authRepositoryProvider);
     final deviceId = await ref.read(deviceIdServiceProvider).getOrCreate();
+    final phone = _phoneController.text.trim();
 
     final result = await repo.login(
-      phone: _phoneController.text.trim(),
+      phone: phone,
       pin: pin,
       deviceId: deviceId,
     );
@@ -72,6 +101,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     switch (result) {
       case AuthOk(session: final s):
+        // Remember the phone number for next launch.
+        await ref.read(rememberedPhoneProvider.notifier).remember(phone);
+
         await ref.read(sessionProvider.notifier).signIn(
               accessToken: s.accessToken,
               refreshToken: s.refreshToken,
@@ -79,7 +111,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               lastName: s.lastName,
               memberId: s.memberId,
             );
-        ref.read(welcomeToastProvider.notifier).state = s.firstName;
         if (!mounted) return;
         if (s.mustChangePin) {
           context.goNamed('changePin');
@@ -112,13 +143,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthError.server:
       case AuthError.unknown:
       case AuthError.none:
-        return null; // handled elsewhere
+        return null;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // final tokens = context.tokens;
     final l10n = context.l10n;
     final isLocked = _lastError == AuthError.accountLocked;
 
@@ -132,10 +162,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Back arrow appears only on the PIN step
+              // Back arrow only when we are on the phone step's PIN
+              // sub-step — and only if we are NOT in PIN-only mode.
               SizedBox(
                 height: 44,
-                child: _step == _Step.pin
+                child: (_step == _Step.pin && !_rememberedPhoneUsed)
                     ? Align(
                         alignment: Alignment.centerLeft,
                         child: BackStepButton(onTap: _onBackToPhone),
@@ -172,6 +203,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           errorText: _errorText,
                           onSubmit: _submitPin,
                           onBack: _onBackToPhone,
+                          onUseAnotherNumber:
+                              _rememberedPhoneUsed ? _onUseAnotherNumber : null,
                         ),
                 ),
               ),
@@ -189,3 +222,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return diff <= 0 ? '0' : diff.toString();
   }
 }
+

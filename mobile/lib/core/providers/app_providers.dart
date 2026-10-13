@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaa_mobile/core/api/api_client.dart';
+import 'package:odaa_mobile/core/api/api_exception.dart';
 import 'package:odaa_mobile/core/storage/device_id.dart';
 import 'package:odaa_mobile/core/storage/prefs_store.dart';
 import 'package:odaa_mobile/core/storage/secure_store.dart';
@@ -19,10 +20,9 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(secure: ref.watch(secureStoreProvider));
 });
 
-/// A one-shot flag set on login, consumed by Home to show a welcome toast.
-final welcomeToastProvider = StateProvider<String?>((ref) => null);
-
-// Language
+// ============================================================================
+// LANGUAGE
+// ============================================================================
 class LanguageNotifier extends StateNotifier<Locale?> {
   LanguageNotifier(this._prefs, this._ref) : super(null) {
     final stored = _prefs.readLanguage();
@@ -47,9 +47,40 @@ final languageProvider =
   return LanguageNotifier(ref.watch(prefsStoreProvider), ref);
 });
 
-// Session (unchanged)
+// ============================================================================
+// REMEMBERED PHONE
+// ============================================================================
+/// The phone number we last logged in with. When set, the login screen
+/// opens directly on the PIN step — the member only needs to re-enter
+/// their PIN.
+class RememberedPhoneNotifier extends StateNotifier<String?> {
+  RememberedPhoneNotifier(this._prefs) : super(_prefs.readPhone());
+
+  final PrefsStore _prefs;
+
+  Future<void> remember(String phone) async {
+    state = phone;
+    await _prefs.writePhone(phone);
+  }
+
+  Future<void> forget() async {
+    state = null;
+    await _prefs.clearPhone();
+  }
+}
+
+final rememberedPhoneProvider =
+    StateNotifierProvider<RememberedPhoneNotifier, String?>((ref) {
+  return RememberedPhoneNotifier(ref.watch(prefsStoreProvider));
+});
+
+// ============================================================================
+// SESSION
+// ============================================================================
 class SessionNotifier extends StateNotifier<SessionState> {
-  SessionNotifier(this._secure, this._ref) : super(const SessionState.unknown());
+  SessionNotifier(this._secure, this._ref)
+      : super(const SessionState.unknown());
+
   final SecureStore _secure;
   final Ref _ref;
 
@@ -60,9 +91,6 @@ class SessionNotifier extends StateNotifier<SessionState> {
       return;
     }
 
-    // Try to fetch the profile so we know the member's name.
-    // If it fails, still mark as signed in with an empty name — Home will
-    // show "Member" and the user can still browse until the token expires.
     try {
       final api = _ref.read(apiClientProvider);
       final me = await api.get<Map<String, dynamic>>('/auth/me');
@@ -72,6 +100,21 @@ class SessionNotifier extends StateNotifier<SessionState> {
         lastName: (me['last_name'] as String?) ?? '',
         memberId: (me['id'] as String?) ?? '',
       );
+    } on ApiException catch (e) {
+      if (e.kind == ApiErrorKind.unauthorized ||
+          e.kind == ApiErrorKind.forbidden) {
+        await _secure.deleteAccessToken();
+        await _secure.deleteRefreshToken();
+        state = const SessionState.signedOut();
+      } else {
+        // Network error — keep the session but tolerate an empty name.
+        state = SessionState.signedIn(
+          token: token,
+          firstName: '',
+          lastName: '',
+          memberId: '',
+        );
+      }
     } catch (_) {
       state = SessionState.signedIn(
         token: token,
@@ -143,13 +186,20 @@ class SessionSignedIn extends SessionState {
   final String lastName;
   final String memberId;
 }
-/// The signed-in member's first name, or null if unavailable.
-/// Derived from the session so widgets don't need to pattern-match.
-final firstNameProvider = Provider<String?>((ref) {
+
+
+/// The current member's first name, or "Member" if unknown.
+final firstNameProvider = Provider<String>((ref) {
   final session = ref.watch(sessionProvider);
   return switch (session) {
     SessionSignedIn(:final firstName) =>
-      firstName.isEmpty ? null : firstName,
-    _ => null,
+      firstName.isEmpty ? 'Member' : firstName,
+    _ => 'Member',
   };
 });
+
+
+// ============================================================================
+// WELCOME TOAST (one-shot)
+// ============================================================================
+final welcomeToastProvider = StateProvider<String?>((ref) => null);

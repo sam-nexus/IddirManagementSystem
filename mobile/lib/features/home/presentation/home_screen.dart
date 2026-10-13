@@ -18,8 +18,8 @@ import 'package:odaa_mobile/shared/widgets/error_view.dart';
 import 'package:odaa_mobile/shared/widgets/growth_ring.dart';
 import 'package:odaa_mobile/shared/widgets/odaa_tree.dart';
 import 'package:odaa_mobile/shared/widgets/primary_button.dart';
+import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
-import 'package:odaa_mobile/shared/widgets/welcome_banner.dart';
 // ... other imports stay ...
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -30,33 +30,25 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final name = ref.read(firstNameProvider);
-      final l10n = context.l10n;
-      if (name != null && mounted) {
-        WelcomeBanner.show(
-          context,
-          title: l10n.greetingName(name),
-          subtitle: l10n.homeStanding,
-          icon: Icons.eco_outlined,
-        );
-
-        ref.read(welcomeToastProvider.notifier).state = null;
-      }
-    });
-  }
+  
 
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(homeSummaryProvider);
     return async.when(
       loading: () => const _HomeSkeleton(),
-      error: (_, __) => ErrorView(
-        message: context.l10n.errorGeneric,
-        onRetry: () => ref.invalidate(homeSummaryProvider),
+      error: (_, __) => RefreshableScroll(
+        onRefresh: () async {
+          ref.invalidate(homeSummaryProvider);
+          await ref.read(homeSummaryProvider.future);
+        },
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: ErrorView(
+            message: context.l10n.errorGeneric,
+            onRetry: () => ref.invalidate(homeSummaryProvider),
+          ),
+        ),
       ),
       data: (summary) => _HomeBody(summary: summary),
     );
@@ -74,13 +66,17 @@ class _HomeBody extends ConsumerWidget {
     final l10n = context.l10n;
     final windowOpen = PaymentWindow.isAnyWindowOpen(DateTime.now());
 
-    return SingleChildScrollView(
+    return RefreshableScroll(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenEdge,
         AppSpacing.lg,
         AppSpacing.screenEdge,
         AppSpacing.xxxl,
       ),
+      onRefresh: () async {
+        ref.invalidate(homeSummaryProvider);
+        await ref.read(homeSummaryProvider.future);
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -147,8 +143,6 @@ class _HomeBody extends ConsumerWidget {
       ),
     );
   }
-
-  
 
   String _nextWindowDate() {
     final now = DateTime.now();

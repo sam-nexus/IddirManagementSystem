@@ -58,6 +58,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get payIPaid => 'Ani kaffaleera';
 
   @override
+  String get authUseAnotherNumber => 'Ati miti? Lakkoofsa biraa fayyadami';
+
+  @override
   String get payExternalBlocked =>
       'Filannoon kun app keessatti banamuu hin danda\'u. Maaloo fuula irratti filannoo kaffaltii biraa filadhu.';
 

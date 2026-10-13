@@ -57,6 +57,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payIPaid => 'I paid';
 
   @override
+  String get authUseAnotherNumber => 'Not you? Use another number';
+
+  @override
   String get payExternalBlocked =>
       'This option cannot open inside the app. Please choose another payment option on the page.';
 
