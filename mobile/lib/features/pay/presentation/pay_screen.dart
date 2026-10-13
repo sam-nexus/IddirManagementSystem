@@ -138,6 +138,7 @@ class _PayFlow extends ConsumerWidget {
             : PayWebView(
                 url: session.checkoutUrl!,
                 expectedTxRef: session.txRef!,
+                //returnUrl: dotenv.maybeGet('CHAPA_RETURN_URL'),
                 // Optional: add `returnUrl` to PaymentSession and pass it
                 // here for the most reliable detection of a finished payment.
                 onTxRefCaptured: (captured) {
