@@ -55,6 +55,55 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionSave => 'Olkaa\'i';
 
   @override
+  String get announcementsTitle => 'Beeksisa';
+
+  @override
+  String get announcementsSubtitle => 'Beeksisa koree irraa.';
+
+  @override
+  String get announcementsShort => 'Beeksisa';
+
+  @override
+  String get announcementsEmpty => 'Amma ammaatti beeksisni hin jiru';
+
+  @override
+  String get announcementsEmptyBody => 'Beeksisni koree asitti mul\'ata.';
+
+  @override
+  String get reportsTitle => 'Gabaasa maallaqaa';
+
+  @override
+  String get reportsSubtitle => 'Cuunfaa galii fi baasii.';
+
+  @override
+  String get reportsShort => 'Gabaasa';
+
+  @override
+  String get reportsEmpty => 'Amma ammaatti gabaasni hin jiru';
+
+  @override
+  String get reportsEmptyBody =>
+      'Gabaasni maallaqaa maxxanfame asitti mul\'ata.';
+
+  @override
+  String get reportIncome => 'Galii';
+
+  @override
+  String get reportExpenses => 'Baasii';
+
+  @override
+  String get reportPayouts => 'Kaffaltii';
+
+  @override
+  String get reportBalance => 'Hafte';
+
+  @override
+  String get supportShort => 'Deeggarsa';
+
+  @override
+  String get meetingsShort => 'Walga\'ii';
+
+  @override
   String get payIPaid => 'Ani kaffaleera';
 
   @override

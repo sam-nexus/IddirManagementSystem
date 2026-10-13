@@ -54,6 +54,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionSave => 'Save';
 
   @override
+  String get announcementsTitle => 'Announcements';
+
+  @override
+  String get announcementsSubtitle => 'Notices from the committee.';
+
+  @override
+  String get announcementsShort => 'Notices';
+
+  @override
+  String get announcementsEmpty => 'No announcements yet';
+
+  @override
+  String get announcementsEmptyBody => 'Committee notices will appear here.';
+
+  @override
+  String get reportsTitle => 'Financial reports';
+
+  @override
+  String get reportsSubtitle => 'Summary of income and expenses.';
+
+  @override
+  String get reportsShort => 'Reports';
+
+  @override
+  String get reportsEmpty => 'No reports yet';
+
+  @override
+  String get reportsEmptyBody =>
+      'Published financial reports will appear here.';
+
+  @override
+  String get reportIncome => 'Income';
+
+  @override
+  String get reportExpenses => 'Expenses';
+
+  @override
+  String get reportPayouts => 'Payouts';
+
+  @override
+  String get reportBalance => 'Balance';
+
+  @override
+  String get supportShort => 'Support';
+
+  @override
+  String get meetingsShort => 'Meetings';
+
+  @override
   String get payIPaid => 'I paid';
 
   @override

@@ -34,7 +34,6 @@ class _AppShellState extends ConsumerState<AppShell> {
       body: Column(
         children: [
           SizedBox(height: MediaQuery.of(context).padding.top),
-
           if (widget.section == CanopySection.months)
             Consumer(
               builder: (context, ref, _) {
@@ -70,24 +69,39 @@ class _AppShellState extends ConsumerState<AppShell> {
                 );
               },
             ),
-
           if (widget.section == CanopySection.more)
             CanopySubbar(
+              scrollable: true,
               segments: [
                 CanopySegment(label: l10n.aboutShort, value: 'about'),
+                CanopySegment(
+                  label: l10n.announcementsShort,
+                  value: 'announcements',
+                ),
+                CanopySegment(label: l10n.reportsShort, value: 'reports'),
+                CanopySegment(label: l10n.supportShort, value: 'support'),
+                CanopySegment(label: l10n.meetingsShort, value: 'meetings'),
                 CanopySegment(label: l10n.profileShort, value: 'profile'),
               ],
               selected: _moreSegment,
               onSelected: (v) {
                 setState(() => _moreSegment = v);
-                if (v == 'profile') {
-                  context.goNamed('profile');
-                } else {
-                  context.goNamed('more');
+                switch (v) {
+                  case 'about':
+                    context.goNamed('more');
+                  case 'announcements':
+                    context.goNamed('announcements');
+                  case 'reports':
+                    context.goNamed('reports');
+                  case 'support':
+                    context.goNamed('more'); // placeholder until Reply 15
+                  case 'meetings':
+                    context.goNamed('more'); // placeholder until Reply 16
+                  case 'profile':
+                    context.goNamed('profile');
                 }
               },
             ),
-
           Expanded(child: widget.child),
         ],
       ),

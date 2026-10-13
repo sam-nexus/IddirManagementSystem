@@ -188,6 +188,102 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get actionSave;
 
+  /// No description provided for @announcementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get announcementsTitle;
+
+  /// No description provided for @announcementsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notices from the committee.'**
+  String get announcementsSubtitle;
+
+  /// No description provided for @announcementsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Notices'**
+  String get announcementsShort;
+
+  /// No description provided for @announcementsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No announcements yet'**
+  String get announcementsEmpty;
+
+  /// No description provided for @announcementsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Committee notices will appear here.'**
+  String get announcementsEmptyBody;
+
+  /// No description provided for @reportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial reports'**
+  String get reportsTitle;
+
+  /// No description provided for @reportsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary of income and expenses.'**
+  String get reportsSubtitle;
+
+  /// No description provided for @reportsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reportsShort;
+
+  /// No description provided for @reportsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports yet'**
+  String get reportsEmpty;
+
+  /// No description provided for @reportsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Published financial reports will appear here.'**
+  String get reportsEmptyBody;
+
+  /// No description provided for @reportIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportIncome;
+
+  /// No description provided for @reportExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get reportExpenses;
+
+  /// No description provided for @reportPayouts.
+  ///
+  /// In en, this message translates to:
+  /// **'Payouts'**
+  String get reportPayouts;
+
+  /// No description provided for @reportBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get reportBalance;
+
+  /// No description provided for @supportShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get supportShort;
+
+  /// No description provided for @meetingsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Meetings'**
+  String get meetingsShort;
+
   /// No description provided for @payIPaid.
   ///
   /// In en, this message translates to:

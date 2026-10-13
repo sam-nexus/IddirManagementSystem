@@ -131,6 +131,25 @@
   "roleAuditor": "Qorataa Herregaa",
   "profileShort": "Profaayilii",
   "profileTitle": "Profaayilii",
+
+  "announcementsTitle": "Beeksisa",
+"announcementsSubtitle": "Beeksisa koree irraa.",
+"announcementsShort": "Beeksisa",
+"announcementsEmpty": "Amma ammaatti beeksisni hin jiru",
+"announcementsEmptyBody": "Beeksisni koree asitti mul'ata.",
+
+"reportsTitle": "Gabaasa maallaqaa",
+"reportsSubtitle": "Cuunfaa galii fi baasii.",
+"reportsShort": "Gabaasa",
+"reportsEmpty": "Amma ammaatti gabaasni hin jiru",
+"reportsEmptyBody": "Gabaasni maallaqaa maxxanfame asitti mul'ata.",
+"reportIncome": "Galii",
+"reportExpenses": "Baasii",
+"reportPayouts": "Kaffaltii",
+"reportBalance": "Hafte",
+
+"supportShort": "Deeggarsa",
+"meetingsShort": "Walga'ii",
   
   "payIPaid": "Ani kaffaleera",
   "authUseAnotherNumber": "Ati miti? Lakkoofsa biraa fayyadami",

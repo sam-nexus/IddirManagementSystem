@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/features/about/presentation/about_screen.dart';
+import 'package:odaa_mobile/features/announcements/presentation/announcement_detail_screen.dart';
+import 'package:odaa_mobile/features/announcements/presentation/announcements_screen.dart';
 import 'package:odaa_mobile/features/auth/presentation/change_pin_screen.dart';
 import 'package:odaa_mobile/features/auth/presentation/login_screen.dart';
 import 'package:odaa_mobile/features/history/presentation/history_screen.dart';
@@ -10,11 +11,13 @@ import 'package:odaa_mobile/features/months/presentation/months_screen.dart';
 import 'package:odaa_mobile/features/pay/presentation/pay_screen.dart';
 import 'package:odaa_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:odaa_mobile/features/receipt/presentation/receipt_screen.dart';
+import 'package:odaa_mobile/features/reports/presentation/report_detail_screen.dart';
+import 'package:odaa_mobile/features/reports/presentation/reports_screen.dart';
 import 'package:odaa_mobile/features/shell/presentation/app_shell.dart';
 import 'package:odaa_mobile/features/shell/presentation/widgets/canopy_bar.dart';
 import 'package:odaa_mobile/features/splash/presentation/language_screen.dart';
 import 'package:odaa_mobile/features/splash/presentation/splash_screen.dart';
-import 'package:odaa_mobile/shared/widgets/empty_view.dart';
+
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -76,6 +79,34 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'profile',
                 builder: (_, __) => const ProfileScreen(),
               ),
+              GoRoute(
+                path: 'announcements',
+                name: 'announcements',
+                builder: (_, __) => const AnnouncementsScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    name: 'announcementDetail',
+                    builder: (context, state) => AnnouncementDetailScreen(
+                      id: state.pathParameters['id'] ?? '',
+                    ),
+                  ),
+                ],
+              ),
+              GoRoute(
+                path: 'reports',
+                name: 'reports',
+                builder: (_, __) => const ReportsScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    name: 'reportDetail',
+                    builder: (context, state) => ReportDetailScreen(
+                      id: state.pathParameters['id'] ?? '',
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           GoRoute(
@@ -105,15 +136,15 @@ CanopySection _sectionFromLocation(String path) {
   return CanopySection.home;
 }
 
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.name});
-  final String name;
+// class _PlaceholderScreen extends StatelessWidget {
+//   const _PlaceholderScreen({required this.name});
+//   final String name;
 
-  @override
-  Widget build(BuildContext context) {
-    return EmptyView(
-      title: '$name — coming soon',
-      body: 'This screen will be built in a later step.',
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return EmptyView(
+//       title: '$name — coming soon',
+//       body: 'This screen will be built in a later step.',
+//     );
+//   }
+// }

@@ -20,6 +20,25 @@
   "actionShare": "Share",
   "actionSave": "Save",
 
+  "announcementsTitle": "Announcements",
+"announcementsSubtitle": "Notices from the committee.",
+"announcementsShort": "Notices",
+"announcementsEmpty": "No announcements yet",
+"announcementsEmptyBody": "Committee notices will appear here.",
+
+"reportsTitle": "Financial reports",
+"reportsSubtitle": "Summary of income and expenses.",
+"reportsShort": "Reports",
+"reportsEmpty": "No reports yet",
+"reportsEmptyBody": "Published financial reports will appear here.",
+"reportIncome": "Income",
+"reportExpenses": "Expenses",
+"reportPayouts": "Payouts",
+"reportBalance": "Balance",
+
+"supportShort": "Support",
+"meetingsShort": "Meetings",
+
   "payIPaid": "I paid",
   "authUseAnotherNumber": "Not you? Use another number",
   "payExternalBlocked": "This option cannot open inside the app. Please choose another payment option on the page.",
