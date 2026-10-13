@@ -188,6 +188,18 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get actionSave;
 
+  /// No description provided for @payIPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'I paid'**
+  String get payIPaid;
+
+  /// No description provided for @payExternalBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This option cannot open inside the app. Please choose another payment option on the page.'**
+  String get payExternalBlocked;
+
   /// No description provided for @greetingMorning.
   ///
   /// In en, this message translates to:

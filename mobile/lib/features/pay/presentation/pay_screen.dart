@@ -32,10 +32,13 @@ class _PayScreenState extends ConsumerState<PayScreen> {
     final planAsync = ref.watch(paymentPlanProvider);
     final session = ref.watch(paymentSessionProvider);
 
-    // If the user is in the middle of a payment, show the webview step.
+    // CHANGED: success and failed are now part of the flow, so the result
+    // panels are actually shown after verification finishes.
     if (session.status == PaymentSessionStatus.initializing ||
         session.status == PaymentSessionStatus.awaitingUser ||
-        session.status == PaymentSessionStatus.verifying) {
+        session.status == PaymentSessionStatus.verifying ||
+        session.status == PaymentSessionStatus.success ||
+        session.status == PaymentSessionStatus.failed) {
       return _PayFlow(session: session);
     }
 
@@ -75,16 +78,21 @@ class _PayScreenState extends ConsumerState<PayScreen> {
                 onPressed: hasPayment
                     ? () {
                         final periods = plan.payableRows
-                            .map((r) =>
-                                r.period.toIso8601String().split('T').first,)
+                            .map(
+                              (r) =>
+                                  r.period.toIso8601String().split('T').first,
+                            )
                             .toList();
+                        // TODO: remove the mock member id when the real
+                        // repository is connected (the backend takes the
+                        // member from the login token).
                         ref.read(paymentSessionProvider.notifier).init(
                               memberId: 'mock-member-id',
                               amount: plan.total,
                               periods: periods,
                             );
                       }
-                    : null, // ← disabled when nothing to pay
+                    : null, // disabled when nothing to pay
               ),
               if (!hasPayment) ...[
                 const SizedBox(height: AppSpacing.sm),
@@ -116,14 +124,31 @@ class _PayFlow extends ConsumerWidget {
     return switch (session.status) {
       PaymentSessionStatus.initializing =>
         const Center(child: CircularProgressIndicator()),
-      PaymentSessionStatus.awaitingUser => PayWebView(
-          url: session.checkoutUrl!,
-          onClosed: () {
-            if (session.txRef != null) {
-              ref.read(paymentSessionProvider.notifier).verify(session.txRef!);
-            }
-          },
-        ),
+
+      // CHANGED: pass expectedTxRef, use the reference captured by the
+      // WebView, and guard against a missing url / reference.
+      PaymentSessionStatus.awaitingUser =>
+        (session.checkoutUrl == null || session.txRef == null)
+            ? _FailedPanel(
+                message: l10n.errorGeneric,
+                onRetry: () {
+                  ref.read(paymentSessionProvider.notifier).reset();
+                },
+              )
+            : PayWebView(
+                url: session.checkoutUrl!,
+                expectedTxRef: session.txRef!,
+                // Optional: add `returnUrl` to PaymentSession and pass it
+                // here for the most reliable detection of a finished payment.
+                onTxRefCaptured: (captured) {
+                  final txRef = captured.isNotEmpty ? captured : session.txRef!;
+                  ref.read(paymentSessionProvider.notifier).verify(txRef);
+                },
+                onCancelled: () {
+                  ref.read(paymentSessionProvider.notifier).reset();
+                },
+              ),
+
       PaymentSessionStatus.verifying => _VerifyingPanel(),
       PaymentSessionStatus.success => _SuccessPanel(session: session),
       PaymentSessionStatus.failed => _FailedPanel(

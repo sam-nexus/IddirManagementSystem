@@ -54,6 +54,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionSave => 'Save';
 
   @override
+  String get payIPaid => 'I paid';
+
+  @override
+  String get payExternalBlocked =>
+      'This option cannot open inside the app. Please choose another payment option on the page.';
+
+  @override
   String get greetingMorning => 'Good morning';
 
   @override

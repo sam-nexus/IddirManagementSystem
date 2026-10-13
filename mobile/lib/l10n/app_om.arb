@@ -131,6 +131,10 @@
   "roleAuditor": "Qorataa Herregaa",
   "profileShort": "Profaayilii",
   "profileTitle": "Profaayilii",
+  
+  "payIPaid": "Ani kaffaleera",
+  "payExternalBlocked": "Filannoon kun app keessatti banamuu hin danda'u. Maaloo fuula irratti filannoo kaffaltii biraa filadhu.",
+
   "profileLanguage": "Afaan",
   "profileChangePin": "PIN jijjiiri",
   "profileDevices": "Meeshaalee koo",

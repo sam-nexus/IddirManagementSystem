@@ -55,6 +55,13 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionSave => 'Olkaa\'i';
 
   @override
+  String get payIPaid => 'Ani kaffaleera';
+
+  @override
+  String get payExternalBlocked =>
+      'Filannoon kun app keessatti banamuu hin danda\'u. Maaloo fuula irratti filannoo kaffaltii biraa filadhu.';
+
+  @override
   String get greetingMorning => 'Akkam bulte';
 
   @override

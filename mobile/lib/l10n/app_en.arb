@@ -20,6 +20,9 @@
   "actionShare": "Share",
   "actionSave": "Save",
 
+  "payIPaid": "I paid",
+"payExternalBlocked": "This option cannot open inside the app. Please choose another payment option on the page.",
+
   "greetingMorning": "Good morning",
   "greetingAfternoon": "Good afternoon",
   "greetingEvening": "Good evening",
