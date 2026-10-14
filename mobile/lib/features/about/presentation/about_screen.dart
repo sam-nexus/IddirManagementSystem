@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
@@ -26,7 +27,16 @@ class AboutScreen extends ConsumerWidget {
         message: l10n.errorGeneric,
         onRetry: () => ref.invalidate(organizationInfoProvider),
       ),
-      data: (info) => SingleChildScrollView(
+      data: (info) => Scaffold(
+        backgroundColor: tokens.background,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(l10n.aboutTitle),
+        ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.screenEdge,
           AppSpacing.lg,
@@ -70,6 +80,7 @@ class AboutScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

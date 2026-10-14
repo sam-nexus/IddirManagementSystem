@@ -1,9 +1,11 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaa_mobile/core/l10n/om_fallback_delegates.dart';
 import 'package:odaa_mobile/core/providers/app_providers.dart';
+import 'package:odaa_mobile/core/providers/theme_provider.dart';
 import 'package:odaa_mobile/core/router/app_router.dart';
 import 'package:odaa_mobile/core/storage/prefs_store.dart';
 import 'package:odaa_mobile/core/theme/app_theme.dart';
@@ -14,6 +16,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   final prefs = await PrefsStore.open();
+
+  // Sync the calendar library with the stored preference.
+  AppDate.calendar = prefs.readCalendarSystem() == 'ethiopian'
+      ? CalendarSystem.ethiopian
+      : CalendarSystem.gregorian;
+
+
   runApp(
     ProviderScope(
       overrides: [prefsStoreProvider.overrideWithValue(prefs)],
@@ -57,7 +66,7 @@ class OdaaApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
       routerConfig: router,
       locale: lang ?? const Locale('en'),
       supportedLocales: const [Locale('en'), Locale('om')],

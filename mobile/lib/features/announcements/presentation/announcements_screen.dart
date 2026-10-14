@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
-import 'package:odaa_mobile/core/theme/app_typography.dart';
-import 'package:odaa_mobile/features/announcements/data/models/announcement.dart';
 import 'package:odaa_mobile/features/announcements/domain/announcements_providers.dart';
 import 'package:odaa_mobile/features/announcements/presentation/widgets/announcement_row.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
@@ -23,87 +21,68 @@ class AnnouncementsScreen extends ConsumerWidget {
     final isOm = Localizations.localeOf(context).languageCode == 'om';
     final async = ref.watch(announcementsProvider);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenEdge,
-            AppSpacing.lg,
-            AppSpacing.screenEdge,
-            AppSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.announcementsTitle,
-                style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                l10n.announcementsSubtitle,
-                style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
-              ),
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: tokens.background,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-        Expanded(
-          child: async.when(
-            loading: () => const _AnnouncementsSkeleton(),
-            error: (_, __) => ErrorView(
-              message: l10n.errorGeneric,
-              onRetry: () => ref.invalidate(announcementsProvider),
-            ),
-            data: (items) {
-              if (items.isEmpty) {
-                return RefreshableScroll(
-                  onRefresh: () async {
-                    ref.invalidate(announcementsProvider);
-                    await ref.read(announcementsProvider.future);
-                  },
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    child: EmptyView(
-                      title: l10n.announcementsEmpty,
-                      body: l10n.announcementsEmptyBody,
-                      icon: Icons.campaign_outlined,
-                    ),
+        title: Text(l10n.announcementsTitle),
+      ),
+      body: async.when(
+        loading: () => const _AnnouncementsSkeleton(),
+        error: (_, __) => ErrorView(
+          message: l10n.errorGeneric,
+          onRetry: () => ref.invalidate(announcementsProvider),
+        ),
+        data: (items) {
+          if (items.isEmpty) {
+            return RefreshableScroll(
+              onRefresh: () async {
+                ref.invalidate(announcementsProvider);
+                await ref.read(announcementsProvider.future);
+              },
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: EmptyView(
+                  title: l10n.announcementsEmpty,
+                  body: l10n.announcementsEmptyBody,
+                  icon: Icons.campaign_outlined,
+                ),
+              ),
+            );
+          }
+          return RefreshIndicator(
+            color: tokens.primaryAction,
+            backgroundColor: tokens.surface,
+            onRefresh: () async {
+              ref.invalidate(announcementsProvider);
+              await ref.read(announcementsProvider.future);
+            },
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const Divider(
+                height: 1,
+                indent: AppSpacing.screenEdge,
+              ),
+              itemBuilder: (context, i) {
+                final a = items[i];
+                return AnnouncementRow(
+                  announcement: a,
+                  isOm: isOm,
+                  onTap: () => context.pushNamed(
+                    'announcementDetail',
+                    pathParameters: {'id': a.id},
                   ),
                 );
-              }
-              return RefreshIndicator(
-                color: tokens.primaryAction,
-                backgroundColor: tokens.surface,
-                onRefresh: () async {
-                  ref.invalidate(announcementsProvider);
-                  await ref.read(announcementsProvider.future);
-                },
-                child: ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
-                  itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(
-                    height: 1,
-                    indent: AppSpacing.screenEdge,
-                  ),
-                  itemBuilder: (context, i) {
-                    final a = items[i];
-                    return AnnouncementRow(
-                      announcement: a,
-                      isOm: isOm,
-                      onTap: () => context.pushNamed(
-                        'announcementDetail',
-                        pathParameters: {'id': a.id},
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

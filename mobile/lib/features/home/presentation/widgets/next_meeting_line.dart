@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/core/utils/date_display.dart';
 import 'package:odaa_mobile/features/home/data/models/home_summary.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
+
 
 /// A quiet one-liner: calendar glyph + "Next meeting · 15 Dec · Hall".
 class NextMeetingLine extends StatelessWidget {
@@ -19,9 +21,9 @@ class NextMeetingLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final l10n = context.l10n;
-    final isOm = Localizations.localeOf(context).languageCode == 'om';
+    //final isOm = Localizations.localeOf(context).languageCode == 'om';
 
-    final dateLabel = _formatDate(meeting.scheduledAt, isOm);
+    final dateLabel = DateDisplay.primary(meeting.scheduledAt);
 
     return GestureDetector(
       onTap: onTap,
@@ -57,16 +59,5 @@ class NextMeetingLine extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime dt, bool isOm) {
-    const monthsEn = [
-      'Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec',
-    ];
-    const monthsOm = [
-      'Ama','Gur','Bit','Elb','Cam','Wax',
-      'Ado','Hag','Ful','Onk','Sad','Mud',
-    ];
-    final m = (isOm ? monthsOm : monthsEn)[dt.month - 1];
-    return '${dt.day} $m';
-  }
+
 }

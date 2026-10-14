@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' hide TextInput;
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
@@ -15,6 +15,7 @@ class TextInput extends StatelessWidget {
     this.inputFormatters,
     this.obscureText = false,
     this.maxLength,
+    this.maxLines = 1,
     this.textInputAction,
     this.onChanged,
     this.onSubmitted,
@@ -31,6 +32,7 @@ class TextInput extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final bool obscureText;
   final int? maxLength;
+  final int maxLines;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -41,6 +43,7 @@ class TextInput extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final hasError = errorText != null && errorText!.isNotEmpty;
+    final isMultiline = maxLines > 1;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,10 +55,12 @@ class TextInput extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         TextField(
           controller: controller,
-          keyboardType: keyboardType,
+          keyboardType:
+              keyboardType ?? (isMultiline ? TextInputType.multiline : null),
           inputFormatters: inputFormatters,
           obscureText: obscureText,
           maxLength: maxLength,
+          maxLines: maxLines,
           textInputAction: textInputAction,
           onChanged: onChanged,
           onSubmitted: onSubmitted,
@@ -66,9 +71,22 @@ class TextInput extends StatelessWidget {
             hintText: hint,
             counterText: '',
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: tokens.textMuted, size: 20)
+                ? Padding(
+                    padding: const EdgeInsets.only(
+                      left: AppSpacing.md,
+                      right: AppSpacing.sm,
+                    ),
+                    child: Icon(
+                      prefixIcon,
+                      color: tokens.textMuted,
+                      size: 20,
+                    ),
+                  )
                 : null,
-            errorText: null, // we render our own below for full control
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 0,
+              minHeight: 0,
+            ),
           ),
         ),
         AnimatedSize(

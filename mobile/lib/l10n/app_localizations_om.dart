@@ -98,6 +98,179 @@ class AppLocalizationsOm extends AppLocalizations {
   String get reportBalance => 'Hafte';
 
   @override
+  String get supportTitle => 'Gaaffii deeggarsaa';
+
+  @override
+  String get supportSubtitle => 'Yeroo barbaachisu gargaarsa gaafadhu.';
+
+  @override
+  String get supportNew => 'Gaaffii haaraa';
+
+  @override
+  String get supportSubmit => 'Gaaffii galchi';
+
+  @override
+  String get supportEmpty => 'Amma ammaatti gaaffiin deeggarsaa hin jiru';
+
+  @override
+  String get supportEmptyBody => 'Gaaffiin kee asitti mul\'ata.';
+
+  @override
+  String get supportType => 'Gosa';
+
+  @override
+  String get supportTypeDeath => 'Du\'aa maatii';
+
+  @override
+  String get supportTypeIllness => 'Dhukkuba';
+
+  @override
+  String get supportTypeEmergency => 'Ariifachiisaa';
+
+  @override
+  String get supportTypeOther => 'Kan biraa';
+
+  @override
+  String get supportFor => 'Kan';
+
+  @override
+  String get supportForMe => 'Ofii koo';
+
+  @override
+  String get supportAmountRequested => 'Maallaqa gaafatame (ETB)';
+
+  @override
+  String get supportAmountApproved => 'Maallaqa mirkaneeffame';
+
+  @override
+  String get supportDescription => 'Ibsa';
+
+  @override
+  String get supportDescriptionHint => 'Koreedhaaf maal ta\'e ibsi.';
+
+  @override
+  String get supportSubmitted => 'Galchame';
+
+  @override
+  String get supportPayoutRecorded => 'Kaffaltiin galmeeffame';
+
+  @override
+  String get authSigningIn => 'Seenaa jira…';
+
+  @override
+  String get moreTitle => 'Dabalata';
+
+  @override
+  String get moreSectionAfoosha => 'Afoosha';
+
+  @override
+  String get moreSectionHousehold => 'Mana keessan';
+
+  @override
+  String get moreSectionAccount => 'Herrega';
+
+  @override
+  String get meetingsTitle => 'Walga\'ii fi galmee';
+
+  @override
+  String get meetingsSubtitle => 'Walga\'ii dhufu fi galmee maxxanfame.';
+
+  @override
+  String get profileAppearance => 'Bifa';
+
+  @override
+  String get themeSystem => 'Sirna hordofi';
+
+  @override
+  String get themeLight => 'Ifa';
+
+  @override
+  String get themeDark => 'Dukkana';
+
+  @override
+  String get meetingsUpcoming => 'Dhufu';
+
+  @override
+  String get meetingsPast => 'Darbe';
+
+  @override
+  String get meetingsAgenda => 'Ajandaa';
+
+  @override
+  String get meetingsMinutes => 'Galmee';
+
+  @override
+  String get meetingsMinutesAvailable => 'Galmeen jira';
+
+  @override
+  String get meetingsMinutesPending => 'Galmeen amma hin maxxanfamne.';
+
+  @override
+  String get meetingsEmpty => 'Amma ammaatti walga\'iin hin jiru';
+
+  @override
+  String get meetingsEmptyBody => 'Walga\'iin koree asitti mul\'ata.';
+
+  @override
+  String get payUploadScreenshot => 'Suuraa fe\'i';
+
+  @override
+  String get manualTitle => 'Ragaa kaffaltii fe\'i';
+
+  @override
+  String get manualAmount => 'Maallaqa';
+
+  @override
+  String get manualProof => 'Suuraa';
+
+  @override
+  String get manualPickFile => 'Suuraa filachuuf tuqi';
+
+  @override
+  String get manualReplaceFile => 'Jijjiiruuf tuqi';
+
+  @override
+  String get manualSubmit => 'Gamaaggamaaf galchi';
+
+  @override
+  String get manualSubmittedTitle => 'Suuraan galmeeffameera';
+
+  @override
+  String get manualSubmittedBody =>
+      'Koreen kaffaltii kee dhiyootti mirkaneessa.';
+
+  @override
+  String get dependentsTitle => 'Maatii koo';
+
+  @override
+  String get dependentsSubtitle => 'Miseensota mana keessanii.';
+
+  @override
+  String get dependentsEmpty => 'Amma ammaatti miseensi maatii hin jiru';
+
+  @override
+  String get dependentsEmptyBody =>
+      'Koreedhaan miseensota maatii kee akka dabalu gaafadhu.';
+
+  @override
+  String get dependentInactive => 'HOJIIRRAA HIN JIRU';
+
+  @override
+  String get relationshipSpouse => 'Haadha/Abba manaa';
+
+  @override
+  String get relationshipChild => 'Daa\'ima';
+
+  @override
+  String get relationshipParent => 'Maatii';
+
+  @override
+  String get relationshipSibling => 'Obboleessa/Obboleettii';
+
+  @override
+  String get relationshipOther => 'Miseensa maatii';
+
+  @override
   String get supportShort => 'Deeggarsa';
 
   @override
@@ -282,6 +455,15 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get receiptShare => 'Nagahee qoodi';
+
+  @override
+  String get profileCalendar => 'Kalaandarii';
+
+  @override
+  String get calendarGregorian => 'Giriigooriyaan';
+
+  @override
+  String get calendarEthiopian => 'Itoophiyaa';
 
   @override
   String get historyTitle => 'Seenaa kaffaltii';

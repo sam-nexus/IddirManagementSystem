@@ -272,6 +272,348 @@ abstract class AppLocalizations {
   /// **'Balance'**
   String get reportBalance;
 
+  /// No description provided for @supportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support requests'**
+  String get supportTitle;
+
+  /// No description provided for @supportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for help when you need it.'**
+  String get supportSubtitle;
+
+  /// No description provided for @supportNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New request'**
+  String get supportNew;
+
+  /// No description provided for @supportSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit request'**
+  String get supportSubmit;
+
+  /// No description provided for @supportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No support requests yet'**
+  String get supportEmpty;
+
+  /// No description provided for @supportEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your requests will appear here.'**
+  String get supportEmptyBody;
+
+  /// No description provided for @supportType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get supportType;
+
+  /// No description provided for @supportTypeDeath.
+  ///
+  /// In en, this message translates to:
+  /// **'Death in family'**
+  String get supportTypeDeath;
+
+  /// No description provided for @supportTypeIllness.
+  ///
+  /// In en, this message translates to:
+  /// **'Illness'**
+  String get supportTypeIllness;
+
+  /// No description provided for @supportTypeEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get supportTypeEmergency;
+
+  /// No description provided for @supportTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get supportTypeOther;
+
+  /// No description provided for @supportFor.
+  ///
+  /// In en, this message translates to:
+  /// **'For'**
+  String get supportFor;
+
+  /// No description provided for @supportForMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Myself'**
+  String get supportForMe;
+
+  /// No description provided for @supportAmountRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount requested (ETB)'**
+  String get supportAmountRequested;
+
+  /// No description provided for @supportAmountApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount approved'**
+  String get supportAmountApproved;
+
+  /// No description provided for @supportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get supportDescription;
+
+  /// No description provided for @supportDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the committee what happened.'**
+  String get supportDescriptionHint;
+
+  /// No description provided for @supportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get supportSubmitted;
+
+  /// No description provided for @supportPayoutRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout recorded'**
+  String get supportPayoutRecorded;
+
+  /// No description provided for @authSigningIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in…'**
+  String get authSigningIn;
+
+  /// No description provided for @moreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreTitle;
+
+  /// No description provided for @moreSectionAfoosha.
+  ///
+  /// In en, this message translates to:
+  /// **'The Afoosha'**
+  String get moreSectionAfoosha;
+
+  /// No description provided for @moreSectionHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Your household'**
+  String get moreSectionHousehold;
+
+  /// No description provided for @moreSectionAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get moreSectionAccount;
+
+  /// No description provided for @meetingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meetings & minutes'**
+  String get meetingsTitle;
+
+  /// No description provided for @meetingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming meetings and the published minutes.'**
+  String get meetingsSubtitle;
+
+  /// No description provided for @profileAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get profileAppearance;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @meetingsUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get meetingsUpcoming;
+
+  /// No description provided for @meetingsPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get meetingsPast;
+
+  /// No description provided for @meetingsAgenda.
+  ///
+  /// In en, this message translates to:
+  /// **'Agenda'**
+  String get meetingsAgenda;
+
+  /// No description provided for @meetingsMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get meetingsMinutes;
+
+  /// No description provided for @meetingsMinutesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes available'**
+  String get meetingsMinutesAvailable;
+
+  /// No description provided for @meetingsMinutesPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes not yet published.'**
+  String get meetingsMinutesPending;
+
+  /// No description provided for @meetingsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No meetings yet'**
+  String get meetingsEmpty;
+
+  /// No description provided for @meetingsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Committee meetings will appear here.'**
+  String get meetingsEmptyBody;
+
+  /// No description provided for @payUploadScreenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload screenshot'**
+  String get payUploadScreenshot;
+
+  /// No description provided for @manualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload payment proof'**
+  String get manualTitle;
+
+  /// No description provided for @manualAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get manualAmount;
+
+  /// No description provided for @manualProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get manualProof;
+
+  /// No description provided for @manualPickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose an image'**
+  String get manualPickFile;
+
+  /// No description provided for @manualReplaceFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to replace'**
+  String get manualReplaceFile;
+
+  /// No description provided for @manualSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for review'**
+  String get manualSubmit;
+
+  /// No description provided for @manualSubmittedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot submitted'**
+  String get manualSubmittedTitle;
+
+  /// No description provided for @manualSubmittedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The committee will approve your payment shortly.'**
+  String get manualSubmittedBody;
+
+  /// No description provided for @dependentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My family'**
+  String get dependentsTitle;
+
+  /// No description provided for @dependentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Members of your household.'**
+  String get dependentsSubtitle;
+
+  /// No description provided for @dependentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No family members yet'**
+  String get dependentsEmpty;
+
+  /// No description provided for @dependentsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the committee to add your dependents.'**
+  String get dependentsEmptyBody;
+
+  /// No description provided for @dependentInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'INACTIVE'**
+  String get dependentInactive;
+
+  /// No description provided for @relationshipSpouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse'**
+  String get relationshipSpouse;
+
+  /// No description provided for @relationshipChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Child'**
+  String get relationshipChild;
+
+  /// No description provided for @relationshipParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent'**
+  String get relationshipParent;
+
+  /// No description provided for @relationshipSibling.
+  ///
+  /// In en, this message translates to:
+  /// **'Sibling'**
+  String get relationshipSibling;
+
+  /// No description provided for @relationshipOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Family member'**
+  String get relationshipOther;
+
   /// No description provided for @supportShort.
   ///
   /// In en, this message translates to:
@@ -557,7 +899,7 @@ abstract class AppLocalizations {
   /// No description provided for @payOpen.
   ///
   /// In en, this message translates to:
-  /// **'Open payment page'**
+  /// **'Pay with Chapa'**
   String get payOpen;
 
   /// No description provided for @paySuccessTitle.
@@ -625,6 +967,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share receipt'**
   String get receiptShare;
+
+  /// No description provided for @profileCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get profileCalendar;
+
+  /// No description provided for @calendarGregorian.
+  ///
+  /// In en, this message translates to:
+  /// **'Gregorian'**
+  String get calendarGregorian;
+
+  /// No description provided for @calendarEthiopian.
+  ///
+  /// In en, this message translates to:
+  /// **'Ethiopian'**
+  String get calendarEthiopian;
 
   /// No description provided for @historyTitle.
   ///

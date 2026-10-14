@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
-import 'package:odaa_mobile/core/theme/app_typography.dart';
 import 'package:odaa_mobile/features/reports/domain/reports_providers.dart';
 import 'package:odaa_mobile/features/reports/presentation/widgets/report_row.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
@@ -22,87 +21,68 @@ class ReportsScreen extends ConsumerWidget {
     final isOm = Localizations.localeOf(context).languageCode == 'om';
     final async = ref.watch(reportsProvider);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenEdge,
-            AppSpacing.lg,
-            AppSpacing.screenEdge,
-            AppSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.reportsTitle,
-                style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                l10n.reportsSubtitle,
-                style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
-              ),
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: tokens.background,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-        Expanded(
-          child: async.when(
-            loading: () => const _ReportsSkeleton(),
-            error: (_, __) => ErrorView(
-              message: l10n.errorGeneric,
-              onRetry: () => ref.invalidate(reportsProvider),
-            ),
-            data: (items) {
-              if (items.isEmpty) {
-                return RefreshableScroll(
-                  onRefresh: () async {
-                    ref.invalidate(reportsProvider);
-                    await ref.read(reportsProvider.future);
-                  },
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    child: EmptyView(
-                      title: l10n.reportsEmpty,
-                      body: l10n.reportsEmptyBody,
-                      icon: Icons.assessment_outlined,
-                    ),
+        title: Text(l10n.reportsTitle),
+      ),
+      body: async.when(
+        loading: () => const _ReportsSkeleton(),
+        error: (_, __) => ErrorView(
+          message: l10n.errorGeneric,
+          onRetry: () => ref.invalidate(reportsProvider),
+        ),
+        data: (items) {
+          if (items.isEmpty) {
+            return RefreshableScroll(
+              onRefresh: () async {
+                ref.invalidate(reportsProvider);
+                await ref.read(reportsProvider.future);
+              },
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: EmptyView(
+                  title: l10n.reportsEmpty,
+                  body: l10n.reportsEmptyBody,
+                  icon: Icons.assessment_outlined,
+                ),
+              ),
+            );
+          }
+          return RefreshIndicator(
+            color: tokens.primaryAction,
+            backgroundColor: tokens.surface,
+            onRefresh: () async {
+              ref.invalidate(reportsProvider);
+              await ref.read(reportsProvider.future);
+            },
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const Divider(
+                height: 1,
+                indent: AppSpacing.screenEdge,
+              ),
+              itemBuilder: (context, i) {
+                final r = items[i];
+                return ReportRow(
+                  report: r,
+                  isOm: isOm,
+                  onTap: () => context.pushNamed(
+                    'reportDetail',
+                    pathParameters: {'id': r.id},
                   ),
                 );
-              }
-              return RefreshIndicator(
-                color: tokens.primaryAction,
-                backgroundColor: tokens.surface,
-                onRefresh: () async {
-                  ref.invalidate(reportsProvider);
-                  await ref.read(reportsProvider.future);
-                },
-                child: ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
-                  itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(
-                    height: 1,
-                    indent: AppSpacing.screenEdge,
-                  ),
-                  itemBuilder: (context, i) {
-                    final r = items[i];
-                    return ReportRow(
-                      report: r,
-                      isOm: isOm,
-                      onTap: () => context.pushNamed(
-                        'reportDetail',
-                        pathParameters: {'id': r.id},
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

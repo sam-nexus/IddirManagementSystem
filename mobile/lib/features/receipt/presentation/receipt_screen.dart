@@ -1,9 +1,11 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/core/utils/date_display.dart';
 import 'package:odaa_mobile/core/utils/money.dart';
 import 'package:odaa_mobile/features/history/data/models/payment_record.dart';
 import 'package:odaa_mobile/features/receipt/domain/receipt_providers.dart';
@@ -29,15 +31,7 @@ class ReceiptScreen extends ConsumerWidget {
         title: Text(l10n.receiptTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              // Deep-link fallback: if we arrived directly on this URL,
-              // there's nothing to pop to.
-              context.goNamed('history');
-            }
-          },
+          onPressed: () => context.pop(),
         ),
       ),
       body: async.when(
@@ -77,8 +71,9 @@ class _ReceiptBody extends StatelessWidget {
       PaymentMethod.manual => l10n.historyMethodManual,
     };
 
-    final periodsText =
-        record.periodsCovered.map((iso) => _monthLabel(iso, isOm)).join(' · ');
+    final periodsText = record.periodsCovered
+        .map((iso) => _monthLabel(iso, isOm))
+        .join(' · ');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
@@ -86,22 +81,16 @@ class _ReceiptBody extends StatelessWidget {
         children: [
           ReceiptSlip(
             receiptNumber: record.receiptNo ?? '—',
-            footer: Center(
-              child: Text(
-                l10n.receiptThanks,
-                style: AppTypography.bodyS.copyWith(
-                  color: tokens.textMuted,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
             children: [
-              _Row(
+              _DualDateRow(
                 label: l10n.receiptDate,
-                value: _formatDate(record.paidAt),
+                date: record.paidAt,
               ),
               const SizedBox(height: AppSpacing.sm),
-              _Row(label: l10n.receiptAmount, value: Money.etb(record.amount)),
+              _Row(
+                label: l10n.receiptAmount,
+                value: Money.etb(record.amount),
+              ),
               const SizedBox(height: AppSpacing.sm),
               _Row(label: l10n.receiptMethod, value: methodLabel),
               const SizedBox(height: AppSpacing.md),
@@ -112,7 +101,7 @@ class _ReceiptBody extends StatelessWidget {
                 value: periodsText,
                 multiline: true,
               ),
-              if (record.note != null) ...[
+              if (record.note != null && record.note!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.md),
                 _Row(
                   label: l10n.receiptNote,
@@ -121,64 +110,58 @@ class _ReceiptBody extends StatelessWidget {
                 ),
               ],
             ],
+            footer: Center(
+              child: Text(
+                l10n.receiptThanks,
+                style: AppTypography.bodyS.copyWith(
+                  color: tokens.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
-  }
-
+  /// Converts a Gregorian ISO period (e.g. 2026-09-01) into a display label,
+  /// honouring the user's active calendar setting.
   String _monthLabel(String iso, bool isOm) {
     final dt = DateTime.parse(iso);
+
+    if (AppDate.calendar == CalendarSystem.ethiopian) {
+      final eth = EthiopianDate.fromGregorian(dt);
+
+      const ethMonthsEn = [
+        'Meskerem', 'Tikimt', 'Hidar', 'Tahsas', 'Tir', 'Yekatit',
+        'Megabit', 'Miazia', 'Ginbot', 'Sene', 'Hamle', 'Nehase', 'Pagume',
+      ];
+      const ethMonthsOm = [
+        'Fulbaana', 'Onkoloolessa', 'Sadaasa', 'Muddee', 'Amajjii', 'Guraandhala',
+        'Bitooteessa', 'Elbaa', 'Caamsa', 'Waxabajjii', 'Adooleessa', 'Hagayya',
+        'Qammee',
+      ];
+      final names = isOm ? ethMonthsOm : ethMonthsEn;
+      return '${names[eth.month - 1]} ${eth.year}';
+    }
+
     const namesEn = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
     ];
     const namesOm = [
-      'Amajjii',
-      'Guraandhala',
-      'Bitooteessa',
-      'Elbaa',
-      'Caamsa',
-      'Waxabajjii',
-      'Adooleessa',
-      'Hagayya',
-      'Fuulbana',
-      'Onkololeessa',
-      'Sadaasa',
-      'Muddee',
+      'Amajjii', 'Guraandhala', 'Bitooteessa', 'Elbaa', 'Caamsa', 'Waxabajjii',
+      'Adooleessa', 'Hagayya', 'Fuulbana', 'Onkololeessa', 'Sadaasa', 'Muddee',
     ];
     final names = isOm ? namesOm : namesEn;
     return '${names[dt.month - 1]} ${dt.year}';
   }
 }
+
+// ---------------------------------------------------------------------------
+// Rows
+// ---------------------------------------------------------------------------
 
 class _Row extends StatelessWidget {
   const _Row({
@@ -216,6 +199,63 @@ class _Row extends StatelessWidget {
             style: AppTypography.bodyMedium.copyWith(
               color: tokens.textPrimary,
             ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DualDateRow extends StatelessWidget {
+  const _DualDateRow({
+    required this.label,
+    required this.date,
+  });
+
+  final String label;
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final showSecondary = AppDate.calendar == CalendarSystem.ethiopian;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: tokens.textMuted,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                DateDisplay.primary(date),
+                textAlign: TextAlign.right,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: tokens.textPrimary,
+                ),
+              ),
+              if (showSecondary) ...[
+                const SizedBox(height: 2),
+                Text(
+                  DateDisplay.gregorian(date),
+                  textAlign: TextAlign.right,
+                  style: AppTypography.caption.copyWith(
+                    color: tokens.textMuted,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],

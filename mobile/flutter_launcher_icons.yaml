@@ -1,0 +1,8 @@
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/images/oda.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FAF6EE"
+  adaptive_icon_foreground: "assets/images/oda.png"
+  adaptive_icon_foreground_inset: 16

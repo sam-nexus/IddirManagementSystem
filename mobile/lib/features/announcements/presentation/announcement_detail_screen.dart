@@ -1,13 +1,16 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/core/utils/date_display.dart';
 import 'package:odaa_mobile/features/announcements/domain/announcements_providers.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
 import 'package:odaa_mobile/shared/widgets/empty_view.dart';
 import 'package:odaa_mobile/shared/widgets/error_view.dart';
+
 
 class AnnouncementDetailScreen extends ConsumerWidget {
   const AnnouncementDetailScreen({required this.id, super.key});
@@ -80,11 +83,24 @@ class AnnouncementDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  _formatDate(a.publishedAt, isOm),
-                  style: AppTypography.caption.copyWith(
-                    color: tokens.textMuted,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateDisplay.primary(a.publishedAt),
+                      style: AppTypography.caption.copyWith(
+                        color: tokens.textMuted,
+                      ),
+                    ),
+                    if (AppDate.calendar == CalendarSystem.ethiopian)
+                      Text(
+                        DateDisplay.gregorian(a.publishedAt),
+                        style: AppTypography.caption.copyWith(
+                          color: tokens.textMuted,
+                          fontSize: 11,
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
@@ -102,16 +118,5 @@ class AnnouncementDetailScreen extends ConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime dt, bool isOm) {
-    const monthsEn = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    const monthsOm = [
-      'Amajjii', 'Guraandhala', 'Bitooteessa', 'Elbaa', 'Caamsa', 'Waxabajjii',
-      'Adooleessa', 'Hagayya', 'Fuulbana', 'Onkololeessa', 'Sadaasa', 'Muddee',
-    ];
-    final months = isOm ? monthsOm : monthsEn;
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
-  }
+
 }

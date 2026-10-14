@@ -9,6 +9,8 @@ class PrefsStore {
   static const _kLanguage = 'app_language';
   static const _kOnboarded = 'onboarded';
   static const _kRememberedPhone = 'remembered_phone';
+  static const _kThemeMode = 'theme_mode';
+  static const _kCalendarSystem = 'calendar_system';
 
   static Future<PrefsStore> open() async {
     return PrefsStore(await SharedPreferences.getInstance());
@@ -28,4 +30,16 @@ class PrefsStore {
   Future<void> writePhone(String phone) =>
       _prefs.setString(_kRememberedPhone, phone);
   Future<void> clearPhone() => _prefs.remove(_kRememberedPhone);
+
+  // ---------- Theme mode ----------
+  /// Stored as 'system' | 'light' | 'dark'. Defaults to 'system'.
+  String readThemeMode() => _prefs.getString(_kThemeMode) ?? 'system';
+  Future<void> writeThemeMode(String value) =>
+      _prefs.setString(_kThemeMode, value);
+
+  // ---------- Calendar system ----------
+  String readCalendarSystem() =>
+      _prefs.getString(_kCalendarSystem) ?? 'ethiopian';
+  Future<void> writeCalendarSystem(String value) =>
+      _prefs.setString(_kCalendarSystem, value);
 }

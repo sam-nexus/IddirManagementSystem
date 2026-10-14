@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/core/utils/date_display.dart';
 import 'package:odaa_mobile/core/utils/money.dart';
 import 'package:odaa_mobile/features/history/data/models/payment_record.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
@@ -27,7 +28,7 @@ class PaymentRowTile extends StatelessWidget {
       PaymentMethod.manual => l10n.historyMethodManual,
     };
 
-    final dateLabel = _formatDate(record.paidAt);
+    final dateLabel = DateDisplay.primary(record.paidAt);
     final statusColor = switch (record.status) {
       PaymentStatus.success => tokens.statePaid,
       PaymentStatus.pending => tokens.statePending,
@@ -103,11 +104,5 @@ class PaymentRowTile extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
-  }
+
 }

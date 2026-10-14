@@ -87,27 +87,49 @@ class _PinEntryStepState extends State<PinEntryStep> {
           ),
         ),
         const Spacer(),
-        if (widget.onUseAnotherNumber != null)
-          Center(
-            child: TextButton(
-              onPressed:
-                  widget.isLoading ? null : widget.onUseAnotherNumber,
-              child: Text(
-                l10n.authUseAnotherNumber,
-                style: AppTypography.label.copyWith(color: tokens.primary),
-              ),
-            ),
-          )
-        else
-          Center(
-            child: TextButton(
-              onPressed: widget.isLoading ? null : widget.onBack,
-              child: Text(
-                l10n.actionBack,
-                style: AppTypography.label.copyWith(color: tokens.primary),
-              ),
-            ),
+        SizedBox(
+          height: 48,
+          child: Center(
+            child: widget.isLoading
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(tokens.primary),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.authSigningIn,
+                        style: AppTypography.label.copyWith(
+                          color: tokens.textMuted,
+                        ),
+                      ),
+                    ],
+                  )
+                : (widget.onUseAnotherNumber != null
+                    ? TextButton(
+                        onPressed: widget.onUseAnotherNumber,
+                        child: Text(
+                          l10n.authUseAnotherNumber,
+                          style: AppTypography.label
+                              .copyWith(color: tokens.primary),
+                        ),
+                      )
+                    : TextButton(
+                        onPressed: widget.onBack,
+                        child: Text(
+                          l10n.actionBack,
+                          style: AppTypography.label
+                              .copyWith(color: tokens.primary),
+                        ),
+                      )),
           ),
+        ),
         const SizedBox(height: AppSpacing.lg),
       ],
     );

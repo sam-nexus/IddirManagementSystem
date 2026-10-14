@@ -1,3 +1,4 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:odaa_mobile/core/providers/app_providers.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/core/utils/date_display.dart';
 import 'package:odaa_mobile/core/utils/money.dart';
 import 'package:odaa_mobile/features/home/data/models/home_summary.dart';
 import 'package:odaa_mobile/features/home/domain/home_providers.dart';
@@ -20,6 +22,8 @@ import 'package:odaa_mobile/shared/widgets/odaa_tree.dart';
 import 'package:odaa_mobile/shared/widgets/primary_button.dart';
 import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
+
+
 // ... other imports stay ...
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -144,24 +148,20 @@ class _HomeBody extends ConsumerWidget {
     );
   }
 
-  String _nextWindowDate() {
+   String _nextWindowDate() {
     final now = DateTime.now();
-    final open = DateTime(now.year, now.month, 27);
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${open.day} ${months[open.month - 1]}';
+
+    // nextOpenPeriod returns the Gregorian first-of-month of the payable due.
+    // Its Ethiopian month's 27th is when the window opens.
+    final dueGregorian = PaymentWindow.nextOpenPeriod(now);
+    final dueEthiopian = EthiopianDate.fromGregorian(dueGregorian);
+
+    // Convert (Ethiopian year, month, day 27) back to Gregorian so we can
+    // hand a DateTime to DateDisplay.primary.
+    final openGregorian =
+        EthiopianDate.toGregorian(dueEthiopian.year, dueEthiopian.month, 27);
+
+    return DateDisplay.primary(openGregorian);
   }
 }
 

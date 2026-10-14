@@ -97,6 +97,178 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportBalance => 'Balance';
 
   @override
+  String get supportTitle => 'Support requests';
+
+  @override
+  String get supportSubtitle => 'Ask for help when you need it.';
+
+  @override
+  String get supportNew => 'New request';
+
+  @override
+  String get supportSubmit => 'Submit request';
+
+  @override
+  String get supportEmpty => 'No support requests yet';
+
+  @override
+  String get supportEmptyBody => 'Your requests will appear here.';
+
+  @override
+  String get supportType => 'Type';
+
+  @override
+  String get supportTypeDeath => 'Death in family';
+
+  @override
+  String get supportTypeIllness => 'Illness';
+
+  @override
+  String get supportTypeEmergency => 'Emergency';
+
+  @override
+  String get supportTypeOther => 'Other';
+
+  @override
+  String get supportFor => 'For';
+
+  @override
+  String get supportForMe => 'Myself';
+
+  @override
+  String get supportAmountRequested => 'Amount requested (ETB)';
+
+  @override
+  String get supportAmountApproved => 'Amount approved';
+
+  @override
+  String get supportDescription => 'Description';
+
+  @override
+  String get supportDescriptionHint => 'Tell the committee what happened.';
+
+  @override
+  String get supportSubmitted => 'Submitted';
+
+  @override
+  String get supportPayoutRecorded => 'Payout recorded';
+
+  @override
+  String get authSigningIn => 'Signing in…';
+
+  @override
+  String get moreTitle => 'More';
+
+  @override
+  String get moreSectionAfoosha => 'The Afoosha';
+
+  @override
+  String get moreSectionHousehold => 'Your household';
+
+  @override
+  String get moreSectionAccount => 'Account';
+
+  @override
+  String get meetingsTitle => 'Meetings & minutes';
+
+  @override
+  String get meetingsSubtitle => 'Upcoming meetings and the published minutes.';
+
+  @override
+  String get profileAppearance => 'Appearance';
+
+  @override
+  String get themeSystem => 'Follow system';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get meetingsUpcoming => 'Upcoming';
+
+  @override
+  String get meetingsPast => 'Past';
+
+  @override
+  String get meetingsAgenda => 'Agenda';
+
+  @override
+  String get meetingsMinutes => 'Minutes';
+
+  @override
+  String get meetingsMinutesAvailable => 'Minutes available';
+
+  @override
+  String get meetingsMinutesPending => 'Minutes not yet published.';
+
+  @override
+  String get meetingsEmpty => 'No meetings yet';
+
+  @override
+  String get meetingsEmptyBody => 'Committee meetings will appear here.';
+
+  @override
+  String get payUploadScreenshot => 'Upload screenshot';
+
+  @override
+  String get manualTitle => 'Upload payment proof';
+
+  @override
+  String get manualAmount => 'Amount';
+
+  @override
+  String get manualProof => 'Screenshot';
+
+  @override
+  String get manualPickFile => 'Tap to choose an image';
+
+  @override
+  String get manualReplaceFile => 'Tap to replace';
+
+  @override
+  String get manualSubmit => 'Submit for review';
+
+  @override
+  String get manualSubmittedTitle => 'Screenshot submitted';
+
+  @override
+  String get manualSubmittedBody =>
+      'The committee will approve your payment shortly.';
+
+  @override
+  String get dependentsTitle => 'My family';
+
+  @override
+  String get dependentsSubtitle => 'Members of your household.';
+
+  @override
+  String get dependentsEmpty => 'No family members yet';
+
+  @override
+  String get dependentsEmptyBody => 'Ask the committee to add your dependents.';
+
+  @override
+  String get dependentInactive => 'INACTIVE';
+
+  @override
+  String get relationshipSpouse => 'Spouse';
+
+  @override
+  String get relationshipChild => 'Child';
+
+  @override
+  String get relationshipParent => 'Parent';
+
+  @override
+  String get relationshipSibling => 'Sibling';
+
+  @override
+  String get relationshipOther => 'Family member';
+
+  @override
   String get supportShort => 'Support';
 
   @override
@@ -246,7 +418,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payTotal => 'Total';
 
   @override
-  String get payOpen => 'Open payment page';
+  String get payOpen => 'Pay with Chapa';
 
   @override
   String get paySuccessTitle => 'Payment received';
@@ -280,6 +452,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receiptShare => 'Share receipt';
+
+  @override
+  String get profileCalendar => 'Calendar';
+
+  @override
+  String get calendarGregorian => 'Gregorian';
+
+  @override
+  String get calendarEthiopian => 'Ethiopian';
 
   @override
   String get historyTitle => 'Payment history';

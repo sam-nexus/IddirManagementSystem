@@ -14,6 +14,7 @@ import 'package:odaa_mobile/shared/widgets/empty_view.dart';
 import 'package:odaa_mobile/shared/widgets/primary_button.dart';
 import 'package:odaa_mobile/shared/widgets/secondary_button.dart';
 
+
 class PayScreen extends ConsumerStatefulWidget {
   const PayScreen({this.period, super.key});
 
@@ -83,7 +84,7 @@ class _PayScreenState extends ConsumerState<PayScreen> {
                                   r.period.toIso8601String().split('T').first,
                             )
                             .toList();
-                 
+
                         ref.read(paymentSessionProvider.notifier).init(
                               memberId: 'mock-member-id',
                               amount: plan.total,
@@ -91,6 +92,13 @@ class _PayScreenState extends ConsumerState<PayScreen> {
                             );
                       }
                     : null, // disabled when nothing to pay
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SecondaryButton(
+                label: l10n.payUploadScreenshot,
+                onPressed: hasPayment
+                    ? () => context.pushNamed('manualPayment')
+                    : null,
               ),
               if (!hasPayment) ...[
                 const SizedBox(height: AppSpacing.sm),
@@ -147,7 +155,6 @@ class _PayFlow extends ConsumerWidget {
                   ref.read(paymentSessionProvider.notifier).reset();
                 },
               ),
-
       PaymentSessionStatus.verifying => _VerifyingPanel(),
       PaymentSessionStatus.success => _SuccessPanel(session: session),
       PaymentSessionStatus.failed => _FailedPanel(
