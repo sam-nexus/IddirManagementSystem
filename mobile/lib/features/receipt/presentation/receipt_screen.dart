@@ -81,6 +81,15 @@ class _ReceiptBody extends StatelessWidget {
         children: [
           ReceiptSlip(
             receiptNumber: record.receiptNo ?? '—',
+            footer: Center(
+              child: Text(
+                l10n.receiptThanks,
+                style: AppTypography.bodyS.copyWith(
+                  color: tokens.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
             children: [
               _DualDateRow(
                 label: l10n.receiptDate,
@@ -110,15 +119,6 @@ class _ReceiptBody extends StatelessWidget {
                 ),
               ],
             ],
-            footer: Center(
-              child: Text(
-                l10n.receiptThanks,
-                style: AppTypography.bodyS.copyWith(
-                  color: tokens.textMuted,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +11,7 @@ import 'package:odaa_mobile/features/auth/presentation/pin_entry_step.dart';
 import 'package:odaa_mobile/features/auth/presentation/widgets/back_step_button.dart';
 import 'package:odaa_mobile/features/auth/presentation/widgets/locked_banner.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
+
 
 enum _Step { phone, pin }
 
@@ -111,6 +113,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               lastName: s.lastName,
               memberId: s.memberId,
             );
+
+        // Register this device for push notifications.
+        unawaited(ref.read(pushServiceProvider).registerWithBackend());
         if (!mounted) return;
         if (s.mustChangePin) {
           context.goNamed('changePin');
@@ -222,4 +227,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return diff <= 0 ? '0' : diff.toString();
   }
 }
-

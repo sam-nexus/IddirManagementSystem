@@ -27,6 +27,9 @@ dependencies:
   webview_flutter_web: ^0.2.3+4
   image_picker: ^1.1.2
   ethio_greg_dual_calendar: ^0.1.1
+  firebase_core: ^4.2.0
+  firebase_messaging: ^16.4.3
+  flutter_local_notifications: ^19.0.0
 
 
 dev_dependencies:

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1036179479591",
+    "project_id": "odaa-app",
+    "storage_bucket": "odaa-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036179479591:android:e09df6d724933a3dfbc202",
+        "android_client_info": {
+          "package_name": "com.odaa.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACq3xkltVlVHFZHK-ynIvTpadET6rhD30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

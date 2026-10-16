@@ -2,9 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaa_mobile/core/api/api_client.dart';
 import 'package:odaa_mobile/core/api/api_exception.dart';
+import 'package:odaa_mobile/core/push/push_service.dart';
 import 'package:odaa_mobile/core/storage/device_id.dart';
 import 'package:odaa_mobile/core/storage/prefs_store.dart';
 import 'package:odaa_mobile/core/storage/secure_store.dart';
+
 
 final secureStoreProvider = Provider<SecureStore>((ref) => SecureStore());
 
@@ -196,6 +198,10 @@ final firstNameProvider = Provider<String>((ref) {
       firstName.isEmpty ? 'Member' : firstName,
     _ => 'Member',
   };
+});
+
+final pushServiceProvider = Provider<PushService>((ref) {
+  return PushService(api: ref.watch(apiClientProvider));
 });
 
 

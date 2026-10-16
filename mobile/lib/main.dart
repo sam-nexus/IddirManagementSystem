@@ -1,4 +1,6 @@
 import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -6,14 +8,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaa_mobile/core/l10n/om_fallback_delegates.dart';
 import 'package:odaa_mobile/core/providers/app_providers.dart';
 import 'package:odaa_mobile/core/providers/theme_provider.dart';
+import 'package:odaa_mobile/core/push/push_service.dart';
 import 'package:odaa_mobile/core/router/app_router.dart';
 import 'package:odaa_mobile/core/storage/prefs_store.dart';
 import 'package:odaa_mobile/core/theme/app_theme.dart';
+import 'package:odaa_mobile/firebase_options.dart';
 import 'package:odaa_mobile/l10n/app_localizations.dart';
 import 'package:odaa_mobile/shared/widgets/welcome_banner.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+// Firebase must be initialized before any Firebase service is used.
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Register the background handler (used when the app is closed).
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   await dotenv.load(fileName: '.env');
   final prefs = await PrefsStore.open();
 
@@ -43,6 +56,13 @@ class OdaaApp extends ConsumerWidget {
     api.onSessionExpired = () {
       router.goNamed('login');
     };
+
+        // Initialize push on first app start.
+    ref.listen<SessionState>(sessionProvider, (prev, next) {
+      if (prev is! SessionSignedIn && next is SessionSignedIn) {
+        ref.read(pushServiceProvider).initialize();
+      }
+    });
 
     // Welcome toast: fire once when the session transitions from
     // signed-out (or unknown) to signed-in. Do not fire on Home remount.
