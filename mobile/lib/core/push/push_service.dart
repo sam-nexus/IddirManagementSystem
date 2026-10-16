@@ -129,6 +129,7 @@ class PushService {
           _channelName,
           importance: Importance.high,
           priority: Priority.high,
+          icon: 'ic_notification',
         ),
         iOS: DarwinNotificationDetails(),
       ),

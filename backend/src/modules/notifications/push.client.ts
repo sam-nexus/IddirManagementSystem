@@ -52,6 +52,7 @@ export async function sendPush(payload: PushPayload): Promise<{ success: boolean
         notification: {
           sound: 'default',
           channelId: 'odaa_general',
+          icon: 'ic_notification',
         },
       },
     });
