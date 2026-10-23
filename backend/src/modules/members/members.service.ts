@@ -83,7 +83,7 @@ async function generateHistoricalDues(
 ): Promise<void> {
   // The iddir's official start date (e.g., Meskerem 1, 2015 EC = Sep 11, 2015)
   // You can change this to whatever year the iddir actually started.
-  const iddirStart = new Date('2015-09-01');
+  const iddirStart = new Date('2026-09-01');
   const today = new Date();
 
   // Set to the first of the current month
@@ -189,7 +189,7 @@ export async function createMember(input: CreateMemberInput, ctx: Ctx) {
     // Determine the amount (use override or default 100)
     const amount = input.contribution_override ?? 100.00;
     await generateHistoricalDues(member.rows[0].id, amount, client);
-    
+
     await client.query('COMMIT');
 
     return {
