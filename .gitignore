@@ -64,4 +64,4 @@ mobile/build
 mobile/.dart_tool
 mobile/android/local.properties
 mobile/pubspec.lock
-
+mobile/android/app/src/main/res/drawable/ic_notification.png

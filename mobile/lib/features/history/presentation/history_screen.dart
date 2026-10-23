@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
-import 'package:odaa_mobile/core/theme/app_typography.dart';
 import 'package:odaa_mobile/features/history/data/models/payment_record.dart';
 import 'package:odaa_mobile/features/history/domain/history_providers.dart';
 import 'package:odaa_mobile/features/history/presentation/widgets/payment_row_tile.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
 import 'package:odaa_mobile/shared/widgets/empty_view.dart';
 import 'package:odaa_mobile/shared/widgets/error_view.dart';
+import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
 
 class HistoryScreen extends ConsumerWidget {
@@ -21,65 +21,70 @@ class HistoryScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final async = ref.watch(historyProvider);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenEdge,
-            AppSpacing.lg,
-            AppSpacing.screenEdge,
-            AppSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.historyTitle,
-                style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
-              ),
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: tokens.background,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-        Expanded(
-          child: async.when(
-            loading: () => const _HistorySkeleton(),
-            error: (_, __) => ErrorView(
-              message: l10n.errorGeneric,
-              onRetry: () => ref.invalidate(historyProvider),
-            ),
-            data: (rows) {
-              if (rows.isEmpty) {
-                return EmptyView(
+        title: Text(l10n.historyTitle),
+      ),
+      body: async.when(
+        loading: () => const _HistorySkeleton(),
+        error: (_, __) => ErrorView(
+          message: l10n.errorGeneric,
+          onRetry: () => ref.invalidate(historyProvider),
+        ),
+        data: (rows) {
+          if (rows.isEmpty) {
+            return RefreshableScroll(
+              onRefresh: () async {
+                ref.invalidate(historyProvider);
+                await ref.read(historyProvider.future);
+              },
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: EmptyView(
                   title: l10n.historyEmpty,
                   body: l10n.historyEmptyBody,
                   icon: Icons.receipt_long_outlined,
-                );
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
-                itemCount: rows.length,
-                separatorBuilder: (_, __) =>
-                    const Divider(height: 1, indent: AppSpacing.screenEdge),
-                itemBuilder: (context, i) {
-                  final r = rows[i];
-                  return PaymentRowTile(
-                    record: r,
-                    onTap: () {
-                      if (r.status == PaymentStatus.success && r.receiptNo != null) {
-                        context.pushNamed(
-                          'receipt',
-                          pathParameters: {'id': r.id},
-                        );
-                      }
-                    },
-                  );
-                },
-              );
+                ),
+              ),
+            );
+          }
+          return RefreshIndicator(
+            color: tokens.primaryAction,
+            backgroundColor: tokens.surface,
+            onRefresh: () async {
+              ref.invalidate(historyProvider);
+              await ref.read(historyProvider.future);
             },
-          ),
-        ),
-      ],
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
+              itemCount: rows.length,
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 1, indent: AppSpacing.screenEdge),
+              itemBuilder: (context, i) {
+                final r = rows[i];
+                return PaymentRowTile(
+                  record: r,
+                  onTap: () {
+                    if (r.status == PaymentStatus.success &&
+                        r.receiptNo != null) {
+                      context.pushNamed(
+                        'receipt',
+                        pathParameters: {'id': r.id},
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

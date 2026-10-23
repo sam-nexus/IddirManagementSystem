@@ -1,3 +1,4 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:odaa_mobile/core/api/api_client.dart';
 import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
@@ -15,17 +16,51 @@ class MyDuesSummary {
   final double totalOutstanding;
 }
 
+// Ethiopian month names keyed by Gregorian month number.
+String _ethiopianMonthNameEn(int gregMonth) {
+  const names = {
+    9: 'Meskerem',
+    10: 'Tikimt',
+    11: 'Hidar',
+    12: 'Tahsas',
+    1: 'Tir',
+    2: 'Yekatit',
+    3: 'Megabit',
+    4: 'Miazia',
+    5: 'Ginbot',
+    6: 'Sene',
+    7: 'Hamle',
+    8: 'Nehase',
+  };
+  return names[gregMonth] ?? '';
+}
+
+String _ethiopianMonthNameOm(int gregMonth) {
+  const names = {
+    9: 'Fulbaana',
+    10: 'Onkoloolessa',
+    11: 'Sadaasa',
+    12: 'Muddee',
+    1: 'Amajjii',
+    2: 'Guraandhala',
+    3: 'Bitooteessa',
+    4: 'Elbaa',
+    5: 'Caamsa',
+    6: 'Waxabajjii',
+    7: 'Adooleessa',
+    8: 'Hagayya',
+  };
+  return names[gregMonth] ?? '';
+}
+
 class MonthsRepository {
   MonthsRepository(this._api);
 
   final ApiClient _api;
 
-  // ------------- Public API -------------
-
-  /// Fetches everything once and returns:
-  ///   - `years`: distinct years the member has dues for, descending
-  ///   - `byYear`: Map<year, List<MonthRow>> with 12 rows per year
-  Future<({List<int> years, Map<int, List<MonthRow>> byYear})> fetchAll() async {
+  /// Fetches all dues once and groups them by year.
+  Future<({List<int> years, Map<int, List<MonthRow>> byYear})>
+      fetchAll() async {
     final data = await _api.get<Map<String, dynamic>>('/contributions/my-dues');
     final rawItems = data['items'];
     final items = rawItems is List
@@ -35,23 +70,18 @@ class MonthsRepository {
             .toList()
         : <Map<String, dynamic>>[];
 
-    // Group backend rows by year.
     final rowsByYear = <int, Map<int, Map<String, dynamic>>>{};
     for (final row in items) {
       final iso = row['period'] as String?;
       if (iso == null) continue;
       final dt = DateTime.parse(iso).toLocal();
-      rowsByYear.putIfAbsent(dt.year, () => {})[dt.month] = row;
-    }
 
-    const namesEn = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    const namesOm = [
-      'Amajjii', 'Guraandhala', 'Bitooteessa', 'Elbaa', 'Caamsa', 'Waxabajjii',
-      'Adooleessa', 'Hagayya', 'Fuulbana', 'Onkololeessa', 'Sadaasa', 'Muddee',
-    ];
+      // Convert the Gregorian date to Ethiopian to get the correct year
+      final ethDate = EthiopianDate.fromGregorian(dt);
+
+      // Group by Ethiopian year (e.g., 2019) instead of Gregorian year (e.g., 2027)
+      rowsByYear.putIfAbsent(ethDate.year, () => {})[dt.month] = row;
+    }
 
     final now = DateTime.now();
     final byYear = <int, List<MonthRow>>{};
@@ -76,23 +106,24 @@ class MonthsRepository {
         } else {
           final isFuture =
               (year > now.year) || (year == now.year && month > now.month);
-          state = isFuture
-              ? ContributionState.pending
-              : ContributionState.waived;
+          state =
+              isFuture ? ContributionState.pending : ContributionState.waived;
           amountDue = 0;
         }
 
-        yearRows.add(MonthRow(
-          period: DateTime(year, month, 1),
-          monthNameEn: namesEn[i],
-          monthNameOm: namesOm[i],
-          state: state,
-          amountDue: amountDue,
-          amountPaid: amountPaid,
-          currency: 'ETB',
-          penaltyAmount: 0,
-          paidAt: null,
-        ),);
+        yearRows.add(
+          MonthRow(
+            period: DateTime(year, month, 1),
+            monthNameEn: _ethiopianMonthNameEn(month),
+            monthNameOm: _ethiopianMonthNameOm(month),
+            state: state,
+            amountDue: amountDue,
+            amountPaid: amountPaid,
+            currency: 'ETB',
+            penaltyAmount: 0,
+            paidAt: null,
+          ),
+        );
       }
       byYear[year] = yearRows;
     }
@@ -101,13 +132,11 @@ class MonthsRepository {
     return (years: years, byYear: byYear);
   }
 
-  /// Fetches a single year's rows. Used by older callers.
   Future<List<MonthRow>> fetchYear({required int year}) async {
     final all = await fetchAll();
     return all.byYear[year] ?? const <MonthRow>[];
   }
 
-  /// The my-dues summary. Used for penalties and total-outstanding.
   Future<MyDuesSummary> fetchSummary() async {
     final data = await _api.get<Map<String, dynamic>>('/contributions/my-dues');
     final summary = data['summary'] as Map<String, dynamic>? ?? const {};

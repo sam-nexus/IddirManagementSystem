@@ -27,7 +27,11 @@ class ApiClient {
                 sendTimeout: const Duration(seconds: 20),
                 contentType: 'application/json',
                 responseType: ResponseType.json,
-                headers: {'X-Lang': 'en'},
+                headers: {
+                  'X-Lang': 'en',
+                  'Cache-Control': 'no-cache',
+                  'Pragma': 'no-cache',
+                },
               ),
             ) {
     _dio.interceptors.add(
@@ -194,7 +198,7 @@ class ApiClient {
   }
 
   /// Returns a null-safe fallback for [T] when the backend sends `data: null`.
-    T _emptyFor<T>() {
+  T _emptyFor<T>() {
     final map = <String, dynamic>{};
     if (map is T) return map as T;
 

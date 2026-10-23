@@ -47,7 +47,15 @@ class ReceiptScreen extends ConsumerWidget {
               icon: Icons.receipt_long_outlined,
             );
           }
-          return _ReceiptBody(record: record);
+          return RefreshIndicator(
+            color: tokens.primaryAction,
+            backgroundColor: tokens.surface,
+            onRefresh: () async {
+              ref.invalidate(receiptProvider(paymentId));
+              await ref.read(receiptProvider(paymentId).future);
+            },
+            child: _ReceiptBody(record: record),
+          );
         },
       ),
     );
@@ -76,6 +84,7 @@ class _ReceiptBody extends StatelessWidget {
         .join(' · ');
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
       child: Column(
         children: [
@@ -125,8 +134,6 @@ class _ReceiptBody extends StatelessWidget {
     );
   }
 
-  /// Converts a Gregorian ISO period (e.g. 2026-09-01) into a display label,
-  /// honouring the user's active calendar setting.
   String _monthLabel(String iso, bool isOm) {
     final dt = DateTime.parse(iso);
 

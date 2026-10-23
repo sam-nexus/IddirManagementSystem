@@ -1,7 +1,7 @@
 import { query } from '../../config/database';
 import { NotFoundError } from '../../utils/errors';
 import { writeAudit } from '../../utils/audit';
-import { sendSms } from '../../integrations/sms.client';
+import { sendBulkSms } from '../../integrations/sms.client';
 import type {
   CreateAnnouncementInput,
   ListAnnouncementsInput,
@@ -143,7 +143,22 @@ async function broadcastSms(en: string, om: string) {
   const members = await query<{ phone: string; language: 'en' | 'om' }>(
     `SELECT phone, language FROM members WHERE status = 'active'`
   );
-  for (const m of members.rows) {
-    sendSms(m.phone, m.language === 'om' ? om : en).catch(() => {});
+
+  if (members.rows.length === 0) return;
+
+  // Build one bulk request with per-recipient messages so each member
+  // gets their preferred language. One API call instead of N.
+  const recipients = members.rows.map((m) => ({
+    phone: m.phone,
+    message: m.language === 'om' ? om : en,
+  }));
+
+  const result = await sendBulkSms(recipients);
+  if (!result.success) {
+    console.error(`[announcements] bulk SMS failed: ${result.error}`);
+  } else if (result.campaignId) {
+    console.log(
+      `[announcements] bulk SMS queued as campaign ${result.campaignId}`
+    );
   }
 }

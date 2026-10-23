@@ -8,6 +8,7 @@ import 'package:odaa_mobile/features/about/domain/about_providers.dart';
 import 'package:odaa_mobile/features/about/presentation/widgets/committee_member_card.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
 import 'package:odaa_mobile/shared/widgets/error_view.dart';
+import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/section_header.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
 
@@ -21,66 +22,70 @@ class AboutScreen extends ConsumerWidget {
     final isOm = Localizations.localeOf(context).languageCode == 'om';
     final async = ref.watch(organizationInfoProvider);
 
-    return async.when(
-      loading: () => const _AboutSkeleton(),
-      error: (_, __) => ErrorView(
-        message: l10n.errorGeneric,
-        onRetry: () => ref.invalidate(organizationInfoProvider),
+    return Scaffold(
+      backgroundColor: tokens.background,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(l10n.aboutTitle),
       ),
-      data: (info) => Scaffold(
-        backgroundColor: tokens.background,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
+      body: async.when(
+        loading: () => const _AboutSkeleton(),
+        error: (_, __) => ErrorView(
+          message: l10n.errorGeneric,
+          onRetry: () => ref.invalidate(organizationInfoProvider),
+        ),
+        data: (info) => RefreshableScroll(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenEdge,
+            AppSpacing.lg,
+            AppSpacing.screenEdge,
+            AppSpacing.xxxl,
           ),
-          title: Text(l10n.aboutTitle),
-        ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screenEdge,
-          AppSpacing.lg,
-          AppSpacing.screenEdge,
-          AppSpacing.xxxl,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.aboutTitle,
-              style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-
-            _Section(
-              title: l10n.aboutMission,
-              body: isOm ? info.missionOm : info.missionEn,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            _Section(
-              title: l10n.aboutVision,
-              body: isOm ? info.visionOm : info.visionEn,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            _Section(
-              title: l10n.aboutBylaws,
-              body: isOm ? info.bylawsOm : info.bylawsEn,
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-
-            SectionHeader(title: l10n.aboutCommittee),
-            const SizedBox(height: AppSpacing.sm),
-            ...info.committee.map(
-              (m) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: CommitteeMemberCard(member: m),
+          onRefresh: () async {
+            ref.invalidate(organizationInfoProvider);
+            await ref.read(organizationInfoProvider.future);
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.aboutTitle,
+                style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.xxl),
+
+              _Section(
+                title: l10n.aboutMission,
+                body: isOm ? info.missionOm : info.missionEn,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+
+              _Section(
+                title: l10n.aboutVision,
+                body: isOm ? info.visionOm : info.visionEn,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+
+              _Section(
+                title: l10n.aboutBylaws,
+                body: isOm ? info.bylawsOm : info.bylawsEn,
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+
+              SectionHeader(title: l10n.aboutCommittee),
+              const SizedBox(height: AppSpacing.sm),
+              ...info.committee.map(
+                (m) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: CommitteeMemberCard(member: m),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

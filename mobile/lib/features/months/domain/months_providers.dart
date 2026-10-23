@@ -1,7 +1,10 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaa_mobile/core/providers/app_providers.dart';
 import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/features/months/data/months_repository.dart';
+
+
 
 final monthsRepositoryProvider = Provider<MonthsRepository>((ref) {
   return MonthsRepository(ref.watch(apiClientProvider));
@@ -9,7 +12,8 @@ final monthsRepositoryProvider = Provider<MonthsRepository>((ref) {
 
 /// Current year the app is showing months for.
 final selectedYearProvider = StateProvider<int>((ref) {
-  return DateTime.now().year;
+  // Default to the current Ethiopian year (e.g., 2019)
+  return EthiopianDate.fromGregorian(DateTime.now()).year;
 });
 
 /// Which sub-tab of Months is active: 'this_year', 'past_years', or 'receipts'.

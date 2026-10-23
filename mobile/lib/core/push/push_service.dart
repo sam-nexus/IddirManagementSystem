@@ -95,7 +95,9 @@ class PushService {
         _api.post<Map<String, dynamic>>(
           '/notifications/devices',
           body: {'fcm_token': newToken, 'platform': 'android'},
-        ).catchError((_) {});
+        ).catchError((_) {
+
+        });
       });
     } catch (e) {
       debugPrint('[push] register failed: $e');

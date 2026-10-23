@@ -63,6 +63,15 @@ class _AppShellState extends ConsumerState<AppShell> {
                           DateTime.now().year;
                       context.goNamed('months');
                     } else {
+                      // Past years — if we have any, select the most recent.
+                      final years =
+                          ref.read(availableYearsProvider).valueOrNull ?? [];
+                      final pastYears =
+                          years.where((y) => y != DateTime.now().year).toList();
+                      if (pastYears.isNotEmpty) {
+                        ref.read(selectedYearProvider.notifier).state =
+                            pastYears.first;
+                      }
                       context.goNamed('months');
                     }
                   },

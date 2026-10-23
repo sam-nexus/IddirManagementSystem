@@ -12,8 +12,8 @@ import 'package:odaa_mobile/features/payments/domain/payment_providers.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
 import 'package:odaa_mobile/shared/widgets/empty_view.dart';
 import 'package:odaa_mobile/shared/widgets/primary_button.dart';
+import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/secondary_button.dart';
-
 
 class PayScreen extends ConsumerStatefulWidget {
   const PayScreen({this.period, super.key});
@@ -33,8 +33,6 @@ class _PayScreenState extends ConsumerState<PayScreen> {
     final planAsync = ref.watch(paymentPlanProvider);
     final session = ref.watch(paymentSessionProvider);
 
-    // CHANGED: success and failed are now part of the flow, so the result
-    // panels are actually shown after verification finishes.
     if (session.status == PaymentSessionStatus.initializing ||
         session.status == PaymentSessionStatus.awaitingUser ||
         session.status == PaymentSessionStatus.verifying ||
@@ -52,13 +50,17 @@ class _PayScreenState extends ConsumerState<PayScreen> {
       data: (plan) {
         final hasPayment = plan.hasAnythingToPay;
 
-        return SingleChildScrollView(
+        return RefreshableScroll(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.screenEdge,
             AppSpacing.lg,
             AppSpacing.screenEdge,
             AppSpacing.xxxl,
           ),
+          onRefresh: () async {
+            ref.invalidate(paymentPlanProvider);
+            await ref.read(paymentPlanProvider.future);
+          },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -130,9 +132,6 @@ class _PayFlow extends ConsumerWidget {
     return switch (session.status) {
       PaymentSessionStatus.initializing =>
         const Center(child: CircularProgressIndicator()),
-
-      // CHANGED: pass expectedTxRef, use the reference captured by the
-      // WebView, and guard against a missing url / reference.
       PaymentSessionStatus.awaitingUser =>
         (session.checkoutUrl == null || session.txRef == null)
             ? _FailedPanel(
@@ -144,9 +143,6 @@ class _PayFlow extends ConsumerWidget {
             : PayWebView(
                 url: session.checkoutUrl!,
                 expectedTxRef: session.txRef!,
-                //returnUrl: dotenv.maybeGet('CHAPA_RETURN_URL'),
-                // Optional: add `returnUrl` to PaymentSession and pass it
-                // here for the most reliable detection of a finished payment.
                 onTxRefCaptured: (captured) {
                   final txRef = captured.isNotEmpty ? captured : session.txRef!;
                   ref.read(paymentSessionProvider.notifier).verify(txRef);

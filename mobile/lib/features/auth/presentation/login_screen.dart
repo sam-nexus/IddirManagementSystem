@@ -150,7 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthError.none:
         return null;
     }
-    return null;
+    
   }
 
   @override

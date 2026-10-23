@@ -1,3 +1,4 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaa_mobile/core/theme/app_radii.dart';
@@ -13,6 +14,38 @@ import 'package:odaa_mobile/shared/widgets/error_view.dart';
 import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
+// ---------------------------------------------------------------------------
+// Ethiopian month ordering helper (top-level, used by both views below)
+// ---------------------------------------------------------------------------
+
+/// The Gregorian month numbers in Ethiopian calendar order.
+/// Ethiopian year starts in September, so the sequence is:
+/// Sep, Oct, Nov, Dec, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug.
+const _ethiopianMonthOrder = <int>[
+  9,
+  10,
+  11,
+  12,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+];
+
+/// Returns 0 for September, 1 for October, … 11 for August.
+/// Used to sort months in Ethiopian order regardless of Gregorian numbering.
+int _ethiopianMonthIndex(DateTime period) {
+  final i = _ethiopianMonthOrder.indexOf(period.month);
+  return i < 0 ? 99 : i;
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
 
 class MonthsScreen extends ConsumerWidget {
   const MonthsScreen({super.key});
@@ -25,14 +58,13 @@ class MonthsScreen extends ConsumerWidget {
       return const _PastYearsView();
     }
 
-    // Default: this year.
     return const _ThisYearView();
   }
 }
 
-// ============================================================================
+// ---------------------------------------------------------------------------
 // THIS YEAR
-// ============================================================================
+// ---------------------------------------------------------------------------
 class _ThisYearView extends ConsumerWidget {
   const _ThisYearView();
 
@@ -45,7 +77,6 @@ class _ThisYearView extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ---------- Header ----------
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.screenEdge,
@@ -108,9 +139,9 @@ class _ThisYearView extends ConsumerWidget {
   }
 }
 
-// ============================================================================
+// ---------------------------------------------------------------------------
 // PAST YEARS
-// ============================================================================
+// ---------------------------------------------------------------------------
 class _PastYearsView extends ConsumerWidget {
   const _PastYearsView();
 
@@ -124,7 +155,6 @@ class _PastYearsView extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ---------- Header ----------
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.screenEdge,
@@ -148,19 +178,22 @@ class _PastYearsView extends ConsumerWidget {
           ),
         ),
 
-        // ---------- Year strip ----------
+        // Year strip — only shown if there is prior-year data.
         yearsAsync.when(
           loading: () => const SizedBox(height: 56),
           error: (_, __) => const SizedBox.shrink(),
           data: (years) {
-            final pastYears =
-                years.where((y) => y != DateTime.now().year).toList();
+            // Get the current Ethiopian year
+            final ethNow = EthiopianDate.fromGregorian(DateTime.now());
+
+            // Filter out the current Ethiopian year
+            final pastYears = years.where((y) => y != ethNow.year).toList();
+
             if (pastYears.isEmpty) return const SizedBox.shrink();
             return _YearStrip(years: pastYears);
           },
         ),
 
-        // ---------- List or empty ----------
         Expanded(
           child: async.when(
             loading: () => const _MonthsSkeleton(),
@@ -169,6 +202,8 @@ class _PastYearsView extends ConsumerWidget {
               onRetry: () => ref.invalidate(allMonthsProvider),
             ),
             data: (rows) {
+              // If we have no rows OR every row is a placeholder (waived with
+              // zero amount), the member has no history for the selected year.
               final nothingHere = rows.isEmpty ||
                   rows.every(
                     (r) =>
@@ -201,9 +236,9 @@ class _PastYearsView extends ConsumerWidget {
   }
 }
 
-// ============================================================================
+// ---------------------------------------------------------------------------
 // YEAR STRIP
-// ============================================================================
+// ---------------------------------------------------------------------------
 class _YearStrip extends ConsumerWidget {
   const _YearStrip({required this.years});
 
@@ -259,9 +294,9 @@ class _YearStrip extends ConsumerWidget {
   }
 }
 
-// ============================================================================
+// ---------------------------------------------------------------------------
 // MONTHS LIST
-// ============================================================================
+// ---------------------------------------------------------------------------
 class _MonthsList extends ConsumerWidget {
   const _MonthsList({required this.rows});
 
@@ -272,20 +307,19 @@ class _MonthsList extends ConsumerWidget {
     final now = DateTime.now();
     final windowOpen = PaymentWindow.isAnyWindowOpen(now);
 
-    // Paid block: ascending.
-    final paid = rows.where((r) => r.isFullyPaid).toList()
-      ..sort((a, b) => a.period.compareTo(b.period));
+    // Sort by Ethiopian month order.
+    int cmp(MonthRow a, MonthRow b) => _ethiopianMonthIndex(a.period)
+        .compareTo(_ethiopianMonthIndex(b.period));
 
-    // Unpaid block: ascending.
-    final unpaid = rows.where((r) => !r.isFullyPaid).toList()
-      ..sort((a, b) => a.period.compareTo(b.period));
+    final paid = rows.where((r) => r.isFullyPaid).toList()..sort(cmp);
+    final unpaid = rows.where((r) => !r.isFullyPaid).toList()..sort(cmp);
 
     // Rotate unpaid so it starts after the newest paid month.
     List<MonthRow> rotatedUnpaid = unpaid;
     if (paid.isNotEmpty && unpaid.isNotEmpty) {
-      final lastPaid = paid.last;
+      final lastPaidIdx = _ethiopianMonthIndex(paid.last.period);
       final startIndex = unpaid.indexWhere(
-        (r) => r.period.isAfter(lastPaid.period),
+        (r) => _ethiopianMonthIndex(r.period) > lastPaidIdx,
       );
       if (startIndex > 0) {
         rotatedUnpaid = [
@@ -317,9 +351,10 @@ class _MonthsList extends ConsumerWidget {
         itemBuilder: (context, i) {
           final row = ordered[i];
           final rowKey = '${row.period.year}-${row.period.month}';
+          final rowEthIdx = _ethiopianMonthIndex(row.period);
 
           final hasOlderUnpaid = unpaid.any(
-            (r) => '${r.period.year}-${r.period.month}'.compareTo(rowKey) < 0,
+            (r) => _ethiopianMonthIndex(r.period) < rowEthIdx,
           );
 
           final isOldestUnpaid = oldestUnpaidKey == rowKey;
@@ -336,9 +371,9 @@ class _MonthsList extends ConsumerWidget {
   }
 }
 
-// ============================================================================
+// ---------------------------------------------------------------------------
 // SKELETON
-// ============================================================================
+// ---------------------------------------------------------------------------
 class _MonthsSkeleton extends StatelessWidget {
   const _MonthsSkeleton();
 

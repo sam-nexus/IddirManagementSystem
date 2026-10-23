@@ -8,7 +8,6 @@ import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
 import 'package:odaa_mobile/core/utils/money.dart';
-import 'package:odaa_mobile/features/pay/domain/manual_payment_providers.dart';
 import 'package:odaa_mobile/features/payments/domain/payment_providers.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
 import 'package:odaa_mobile/shared/widgets/primary_button.dart';
@@ -117,11 +116,11 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen>
     });
 
     try {
-      final id = await ref.read(manualPaymentRepositoryProvider).submit(
-            fileBytes: bytes,
-            filename: name,
-            amount: plan.total,
-          );
+      // final id = await ref.read(manualPaymentRepositoryProvider).submit(
+      //       fileBytes: bytes,
+      //       filename: name,
+      //       amount: plan.total,
+      //     );
 
       if (!mounted) return;
 
