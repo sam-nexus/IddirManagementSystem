@@ -8,13 +8,13 @@ import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
 import 'package:odaa_mobile/core/utils/date_display.dart';
 import 'package:odaa_mobile/core/utils/money.dart';
+import 'package:odaa_mobile/core/utils/payment_window.dart';
 import 'package:odaa_mobile/features/home/data/models/home_summary.dart';
 import 'package:odaa_mobile/features/home/domain/home_providers.dart';
 import 'package:odaa_mobile/features/home/presentation/widgets/greeting_line.dart';
 import 'package:odaa_mobile/features/home/presentation/widgets/next_meeting_line.dart';
 import 'package:odaa_mobile/features/home/presentation/widgets/notice_teaser.dart';
 import 'package:odaa_mobile/features/home/presentation/widgets/standing_block.dart';
-import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/l10n/l10n.dart';
 import 'package:odaa_mobile/shared/widgets/error_view.dart';
 import 'package:odaa_mobile/shared/widgets/growth_ring.dart';
@@ -23,7 +23,6 @@ import 'package:odaa_mobile/shared/widgets/primary_button.dart';
 import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
 
-// ... other imports stay ...
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});

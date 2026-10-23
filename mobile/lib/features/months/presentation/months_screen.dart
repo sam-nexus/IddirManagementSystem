@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/core/utils/payment_window.dart';
 import 'package:odaa_mobile/features/history/domain/history_providers.dart';
 import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/features/months/domain/months_providers.dart';
@@ -44,12 +45,15 @@ class _ThisYearView extends ConsumerWidget {
           child: async.when(
             loading: () => const _MonthsSkeleton(),
             error: (_, __) => ErrorView(
-                message: l10n.errorGeneric,
-                onRetry: () => ref.invalidate(allMonthsProvider),),
+              message: l10n.errorGeneric,
+              onRetry: () => ref.invalidate(allMonthsProvider),
+            ),
             data: (rows) {
               final nothingHere = rows.isEmpty ||
-                  rows.every((r) =>
-                      r.state == ContributionState.waived && r.amountDue == 0,);
+                  rows.every(
+                    (r) =>
+                        r.state == ContributionState.waived && r.amountDue == 0,
+                  );
               if (nothingHere) return _buildEmptyState(ref, l10n, false);
               return _MonthsList(rows: rows);
             },
@@ -84,8 +88,12 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
         else
           // FIX 2: Specific year title shows ONLY the year (no subtitle)
           Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.screenEdge,
-                AppSpacing.lg, AppSpacing.screenEdge, AppSpacing.sm,),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenEdge,
+              AppSpacing.lg,
+              AppSpacing.screenEdge,
+              AppSpacing.sm,
+            ),
             child: Row(
               children: [
                 IconButton(
@@ -97,9 +105,11 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
                   },
                 ),
                 const SizedBox(width: 8),
-                Text('$_selectedYear',
-                    style: AppTypography.titleL
-                        .copyWith(color: tokens.textPrimary),),
+                Text(
+                  '$_selectedYear',
+                  style:
+                      AppTypography.titleL.copyWith(color: tokens.textPrimary),
+                ),
               ],
             ),
           ),
@@ -107,8 +117,9 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
           child: yearsAsync.when(
             loading: () => const _MonthsSkeleton(),
             error: (_, __) => ErrorView(
-                message: l10n.errorGeneric,
-                onRetry: () => ref.invalidate(allMonthsProvider),),
+              message: l10n.errorGeneric,
+              onRetry: () => ref.invalidate(allMonthsProvider),
+            ),
             data: (years) {
               final ethNow = EthiopianDate.fromGregorian(DateTime.now());
               final pastYears = years.where((y) => y != ethNow.year).toList()
@@ -122,9 +133,11 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
                       ErrorView(message: l10n.errorGeneric, onRetry: () {}),
                   data: (rows) {
                     final nothingHere = rows.isEmpty ||
-                        rows.every((r) =>
-                            r.state == ContributionState.waived &&
-                            r.amountDue == 0,);
+                        rows.every(
+                          (r) =>
+                              r.state == ContributionState.waived &&
+                              r.amountDue == 0,
+                        );
                     if (nothingHere) return _buildEmptyState(ref, l10n, true);
                     return _MonthsList(rows: rows);
                   },
@@ -150,10 +163,14 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
                     final y = pastYears[i];
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.screenEdge, vertical: 8,),
-                      title: Text('$y',
-                          style: AppTypography.titleM
-                              .copyWith(color: tokens.textPrimary),),
+                        horizontal: AppSpacing.screenEdge,
+                        vertical: 8,
+                      ),
+                      title: Text(
+                        '$y',
+                        style: AppTypography.titleM
+                            .copyWith(color: tokens.textPrimary),
+                      ),
                       trailing:
                           Icon(Icons.chevron_right, color: tokens.textMuted),
                       onTap: () {
@@ -172,20 +189,31 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
   }
 }
 
-Widget _buildHeader(dynamic l10n, dynamic tokens,
-    {required bool showSubtitle,}) {
+Widget _buildHeader(
+  dynamic l10n,
+  dynamic tokens, {
+  required bool showSubtitle,
+}) {
   return Padding(
-    padding: const EdgeInsets.fromLTRB(AppSpacing.screenEdge, AppSpacing.lg,
-        AppSpacing.screenEdge, AppSpacing.sm,),
+    padding: const EdgeInsets.fromLTRB(
+      AppSpacing.screenEdge,
+      AppSpacing.lg,
+      AppSpacing.screenEdge,
+      AppSpacing.sm,
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.monthsTitle,
-            style: AppTypography.titleL.copyWith(color: tokens.textPrimary),),
+        Text(
+          l10n.monthsTitle,
+          style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
+        ),
         if (showSubtitle) ...[
           const SizedBox(height: 2),
-          Text(l10n.monthsSubtitle,
-              style: AppTypography.bodyS.copyWith(color: tokens.textMuted),),
+          Text(
+            l10n.monthsSubtitle,
+            style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
+          ),
         ],
       ],
     ),
@@ -260,8 +288,13 @@ class _MonthsList extends ConsumerWidget {
           final hasOlder = oldestUnpaid != null &&
               _ethIndex(row.period) < _ethIndex(oldestUnpaid.period);
 
-          // Pass windowOpen to the tile so it can decide to show the Pay button
-          final windowOpen = PaymentWindow.isOpenFor(row.period, now);
+          final ethYear =
+              row.period.month >= 9 ? row.period.year - 7 : row.period.year - 8;
+          final windowOpen = PaymentWindow.isOpenFor(
+            ethMonth: row.ethiopianMonthIndex,
+            ethYear: ethYear,
+            now: now,
+          );
 
           VoidCallback? onReceipt;
           if (row.isFullyPaid) {
@@ -272,8 +305,9 @@ class _MonthsList extends ConsumerWidget {
               // Show a tiny loading indicator (optional, but good UX)
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                    content: Text('Loading receipt...'),
-                    duration: Duration(seconds: 1),),
+                  content: Text('Loading receipt...'),
+                  duration: Duration(seconds: 1),
+                ),
               );
 
               final paymentId = await repo.fetchPaymentIdForPeriod(periodIso);
@@ -284,7 +318,8 @@ class _MonthsList extends ConsumerWidget {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Receipt not found for this month'),),
+                    content: Text('Receipt not found for this month'),
+                  ),
                 );
               }
             };
@@ -314,16 +349,18 @@ class _MonthsSkeleton extends StatelessWidget {
       itemBuilder: (_, __) => const Row(
         children: [
           Skeleton(
-              width: 28,
-              height: 36,
-              radius: BorderRadius.all(Radius.circular(4)),),
+            width: 28,
+            height: 36,
+            radius: BorderRadius.all(Radius.circular(4)),
+          ),
           SizedBox(width: 16),
           Expanded(child: Skeleton(height: 16)),
           SizedBox(width: 16),
           Skeleton(
-              width: 56,
-              height: 20,
-              radius: BorderRadius.all(Radius.circular(4)),),
+            width: 56,
+            height: 20,
+            radius: BorderRadius.all(Radius.circular(4)),
+          ),
         ],
       ),
     );

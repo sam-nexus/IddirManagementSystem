@@ -71,6 +71,50 @@ export async function listMembers(input: ListMembersInput) {
   };
 }
 
+/**
+ * Generates unpaid dues for a newly registered member.
+ * Uses the iddir's founding date (default: 2015-09-11, Meskerem 1, 2015 EC).
+ * Generates every month up to the current Gregorian month.
+ */
+async function generateHistoricalDues(
+  memberId: string,
+  contributionAmount: number,
+  client: any // pg.PoolClient
+): Promise<void> {
+  // The iddir's official start date (e.g., Meskerem 1, 2015 EC = Sep 11, 2015)
+  // You can change this to whatever year the iddir actually started.
+  const iddirStart = new Date('2015-09-01');
+  const today = new Date();
+
+  // Set to the first of the current month
+  const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  let current = new Date(iddirStart.getFullYear(), iddirStart.getMonth(), 1);
+
+  while (current <= currentMonthStart) {
+    // We insert 'YYYY-MM-01'
+    const period = current.toISOString().split('T')[0];
+
+    await client.query(
+      `INSERT INTO contribution_dues 
+         (member_id, period, amount_due, amount_paid, status, ethiopian_month_index)
+       VALUES 
+         ($1, $2::date, $3, 0, 'unpaid', 
+           CASE EXTRACT(MONTH FROM $2::date)::int
+             WHEN 9 THEN 1 WHEN 10 THEN 2 WHEN 11 THEN 3 WHEN 12 THEN 4
+             WHEN 1 THEN 5 WHEN 2 THEN 6 WHEN 3 THEN 7 WHEN 4 THEN 8
+             WHEN 5 THEN 9 WHEN 6 THEN 10 WHEN 7 THEN 11 WHEN 8 THEN 12
+           END
+         )
+       ON CONFLICT (member_id, period) DO NOTHING`,
+      [memberId, period, contributionAmount]
+    );
+
+    current.setMonth(current.getMonth() + 1);
+  }
+}
+
+
 // =====================================================================
 // GET ONE
 // =====================================================================
@@ -141,7 +185,11 @@ export async function createMember(input: CreateMemberInput, ctx: Ctx) {
       },
       { actorId: ctx.actorId, ip: ctx.ip, userAgent: ctx.userAgent, client }
     );
-
+    // NEW: Generate all historical dues back to the iddir's founding
+    // Determine the amount (use override or default 100)
+    const amount = input.contribution_override ?? 100.00;
+    await generateHistoricalDues(member.rows[0].id, amount, client);
+    
     await client.query('COMMIT');
 
     return {

@@ -1,4 +1,3 @@
-import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:odaa_mobile/core/api/api_client.dart';
 import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/shared/widgets/status_chip.dart';
@@ -15,22 +14,20 @@ class MyDuesSummary {
   final double totalOutstanding;
 }
 
-String _ethiopianMonthNameEn(int gregMonth) {
-  const names = {
-    9: 'Meskerem', 10: 'Tikimt', 11: 'Hidar', 12: 'Tahsas',
-    1: 'Tir', 2: 'Yekatit', 3: 'Megabit', 4: 'Miazia',
-    5: 'Ginbot', 6: 'Sene', 7: 'Hamle', 8: 'Nehase',
-  };
-  return names[gregMonth] ?? '';
+String _ethiopianMonthNameEn(int ethMonthIndex) {
+  const names = [
+    'Meskerem', 'Tikimt', 'Hidar', 'Tahsas', 'Tir', 'Yekatit',
+    'Megabit', 'Miazia', 'Ginbot', 'Sene', 'Hamle', 'Nehase', 'Pagume'
+  ,];
+  return (ethMonthIndex >= 1 && ethMonthIndex <= 13) ? names[ethMonthIndex - 1] : '';
 }
 
-String _ethiopianMonthNameOm(int gregMonth) {
-  const names = {
-    9: 'Fulbaana', 10: 'Onkoloolessa', 11: 'Sadaasa', 12: 'Muddee',
-    1: 'Amajjii', 2: 'Guraandhala', 3: 'Bitooteessa', 4: 'Elbaa',
-    5: 'Caamsa', 6: 'Waxabajjii', 7: 'Adooleessa', 8: 'Hagayya',
-  };
-  return names[gregMonth] ?? '';
+String _ethiopianMonthNameOm(int ethMonthIndex) {
+  const names = [
+    'Fulbaana', 'Onkoloolessa', 'Sadaasa', 'Muddee', 'Amajjii', 'Guraandhala',
+    'Bitooteessa', 'Elbaa', 'Caamsa', 'Waxabajjii', 'Adooleessa', 'Hagayya', 'Qammee'
+  ,];
+  return (ethMonthIndex >= 1 && ethMonthIndex <= 13) ? names[ethMonthIndex - 1] : '';
 }
 
 class MonthsRepository {
@@ -45,64 +42,120 @@ class MonthsRepository {
         ? rawItems.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
         : <Map<String, dynamic>>[];
 
-    final rowsByEthYear = <int, Map<int, Map<String, dynamic>>>{};
-    final now = DateTime.now();
+    // Map: Ethiopian Year -> List<MonthRow>
+    final rowsByEthYear = <int, List<MonthRow>>{};
 
     for (final row in items) {
+      // Read the pre-computed Ethiopian index directly from the backend
+      final ethMonthIdx = int.tryParse('${row['ethiopian_month_index']}') ?? 0;
+      if (ethMonthIdx < 1 || ethMonthIdx > 13) continue;
+
+      // Determine the Ethiopian year from the Gregorian period
       final iso = row['period'] as String?;
       if (iso == null) continue;
-      
-      // FIX 1: Remove .toLocal() to prevent timezone shifting that creates 2018 ghost
       final dt = DateTime.parse(iso);
-      final ethDate = EthiopianDate.fromGregorian(dt);
       
-      rowsByEthYear.putIfAbsent(ethDate.year, () => {})[dt.month] = row;
+      // Sep-Dec belong to year-7; Jan-Aug belong to year-8
+      final ethYear = dt.month >= 9 ? dt.year - 7 : dt.year - 8;
+
+      final state = _toState(row['status'] as String?);
+      final amountDue = double.tryParse('${row['amount_due']}') ?? 0;
+      final amountPaid = double.tryParse('${row['amount_paid']}') ?? 0;
+
+      // Figure out if this is the "current" or "future" month
+      final now = DateTime.now();
+      final currentEthYear = now.month >= 9 ? now.year - 7 : now.year - 8;
+      final currentEthMonth = now.month >= 9 ? now.month - 8 : now.month + 4;
+
+      final isCurrent = (ethYear == currentEthYear && ethMonthIdx == currentEthMonth);
+      final isFuture = (ethYear > currentEthYear) ||
+                       (ethYear == currentEthYear && ethMonthIdx > currentEthMonth);
+
+      // Map Ethiopian month back to Gregorian for the DateTime period
+      final gregMonth = ethMonthIdx <= 4 ? ethMonthIdx + 8 : ethMonthIdx - 4;
+      final gregYear = ethYear + (gregMonth >= 9 ? 7 : 8);
+
+      rowsByEthYear.putIfAbsent(ethYear, () => []).add(MonthRow(
+        period: DateTime(gregYear, gregMonth, 1),
+        monthNameEn: _ethiopianMonthNameEn(ethMonthIdx),
+        monthNameOm: _ethiopianMonthNameOm(ethMonthIdx),
+        state: state,
+        amountDue: amountDue,
+        amountPaid: amountPaid,
+        currency: 'ETB',
+        ethiopianMonthIndex: ethMonthIdx,
+        penaltyAmount: 0,
+        paidAt: null,
+        isCurrentEthiopianMonth: isCurrent,
+        isFutureEthiopianMonth: isFuture,
+      ),);
     }
 
-    final byYear = <int, List<MonthRow>>{};
-
-    for (final entry in rowsByEthYear.entries) {
-      final ethYear = entry.key;
-      final months = entry.value;
+    // If the member has no dues yet, create placeholders for the current year
+    if (rowsByEthYear.isEmpty) {
+      final now = DateTime.now();
+      final currentEthYear = now.month >= 9 ? now.year - 7 : now.year - 8;
+      final currentEthMonth = now.month >= 9 ? now.month - 8 : now.month + 4;
 
       final yearRows = <MonthRow>[];
-      for (var i = 0; i < 12; i++) {
-        final month = i + 1;
-        final backend = months[month];
-
-        ContributionState state;
-        double amountDue = 0;
-        double amountPaid = 0;
-
-        if (backend != null) {
-          state = _toState(backend['status'] as String?);
-          amountDue = double.tryParse('${backend['amount_due']}') ?? 0;
-          amountPaid = double.tryParse('${backend['amount_paid']}') ?? 0;
-        } else {
-          // FIX: Use pure Ethiopian year comparison for future checks
-          final currentEthYear = EthiopianDate.fromGregorian(now).year;
-          final isFuture = (ethYear > currentEthYear) || (ethYear == currentEthYear && month > now.month);
-          state = isFuture ? ContributionState.pending : ContributionState.waived;
-          amountDue = 0;
-        }
+      for (var ethMonth = 1; ethMonth <= 12; ethMonth++) {
+        final gregMonth = ethMonth <= 4 ? ethMonth + 8 : ethMonth - 4;
+        final gregYear = currentEthYear + (gregMonth >= 9 ? 7 : 8);
+        final isCurrent = (ethMonth == currentEthMonth);
+        final isFuture = (ethMonth > currentEthMonth);
 
         yearRows.add(MonthRow(
-          period: DateTime(now.year, month, 1), // Use current Gregorian year as anchor
-          monthNameEn: _ethiopianMonthNameEn(month),
-          monthNameOm: _ethiopianMonthNameOm(month),
-          state: state,
-          amountDue: amountDue,
-          amountPaid: amountPaid,
+          period: DateTime(gregYear, gregMonth, 1),
+          monthNameEn: _ethiopianMonthNameEn(ethMonth),
+          monthNameOm: _ethiopianMonthNameOm(ethMonth),
+          state: isFuture ? ContributionState.pending : ContributionState.waived,
+          amountDue: 0,
+          amountPaid: 0,
           currency: 'ETB',
-          penaltyAmount: 0,
-          paidAt: null,
+          ethiopianMonthIndex: ethMonth,
+          isCurrentEthiopianMonth: isCurrent,
+          isFutureEthiopianMonth: isFuture,
         ),);
       }
-      byYear[ethYear] = yearRows;
+      rowsByEthYear[currentEthYear] = yearRows;
     }
 
-    final years = byYear.keys.toList()..sort((a, b) => b.compareTo(a));
-    return (years: years, byYear: byYear);
+    // Ensure all 12 months of a year are present (fill missing)
+    for (final ethYear in rowsByEthYear.keys.toList()) {
+      final existing = rowsByEthYear[ethYear]!;
+      final existingIndices = existing.map((r) => r.ethiopianMonthIndex).toSet();
+
+      final now = DateTime.now();
+      final currentEthYear = now.month >= 9 ? now.year - 7 : now.year - 8;
+      final currentEthMonth = now.month >= 9 ? now.month - 8 : now.month + 4;
+
+      for (var ethMonth = 1; ethMonth <= 12; ethMonth++) {
+        if (existingIndices.contains(ethMonth)) continue;
+
+        final gregMonth = ethMonth <= 4 ? ethMonth + 8 : ethMonth - 4;
+        final gregYear = ethYear + (gregMonth >= 9 ? 7 : 8);
+        final isCurrent = (ethYear == currentEthYear && ethMonth == currentEthMonth);
+        final isFuture = (ethYear > currentEthYear) ||
+                         (ethYear == currentEthYear && ethMonth > currentEthMonth);
+
+        existing.add(MonthRow(
+          period: DateTime(gregYear, gregMonth, 1),
+          monthNameEn: _ethiopianMonthNameEn(ethMonth),
+          monthNameOm: _ethiopianMonthNameOm(ethMonth),
+          state: isFuture ? ContributionState.pending : ContributionState.waived,
+          amountDue: 0,
+          amountPaid: 0,
+          currency: 'ETB',
+          ethiopianMonthIndex: ethMonth,
+          isCurrentEthiopianMonth: isCurrent,
+          isFutureEthiopianMonth: isFuture,
+        ),);
+      }
+      existing.sort((a, b) => a.ethiopianMonthIndex.compareTo(b.ethiopianMonthIndex));
+    }
+
+    final years = rowsByEthYear.keys.toList()..sort((a, b) => b.compareTo(a));
+    return (years: years, byYear: rowsByEthYear);
   }
 
   Future<List<MonthRow>> fetchYear({required int year}) async {

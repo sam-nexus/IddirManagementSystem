@@ -42,7 +42,7 @@ export function startJobs(): void {
 
   // 4) DB keep-alive — every 4 minutes
   cron.schedule('*/4 * * * *', () => {
-    pool.query('SELECT 1').catch(() => {});
+    pool.query('SELECT 1').catch(() => { });
   });
 
   console.log('⏰ Scheduled jobs started');
@@ -75,8 +75,14 @@ async function generateMonthlyDues(): Promise<void> {
   for (const m of members.rows) {
     const amount = m.contribution_override !== null ? Number(m.contribution_override) : planAmount;
     const res = await query(
-      `INSERT INTO contribution_dues (member_id, period, amount_due, amount_paid, status)
-       VALUES ($1, $2, $3, 0, 'unpaid')
+      `INSERT INTO contribution_dues (member_id, period, amount_due, amount_paid, status, ethiopian_month_index)
+       VALUES ($1, $2, $3, 0, 'unpaid',
+         CASE EXTRACT(MONTH FROM $2::date)::int
+           WHEN 9 THEN 1 WHEN 10 THEN 2 WHEN 11 THEN 3 WHEN 12 THEN 4
+           WHEN 1 THEN 5 WHEN 2 THEN 6 WHEN 3 THEN 7 WHEN 4 THEN 8
+           WHEN 5 THEN 9 WHEN 6 THEN 10 WHEN 7 THEN 11 WHEN 8 THEN 12
+         END
+       )
        ON CONFLICT (member_id, period) DO NOTHING
        RETURNING id`,
       [m.id, period, amount]
@@ -120,7 +126,7 @@ async function sendPaymentReminders(): Promise<void> {
       month,
       year,
     });
-    sendSms(r.phone, msg).catch(() => {});
+    sendSms(r.phone, msg).catch(() => { });
   }
   console.log(`[jobs] reminders sent: ${rows.rows.length}`);
 }

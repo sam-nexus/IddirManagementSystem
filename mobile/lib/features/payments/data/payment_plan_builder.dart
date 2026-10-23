@@ -1,71 +1,53 @@
+import 'package:odaa_mobile/core/utils/payment_window.dart';
 import 'package:odaa_mobile/features/months/data/models/month_row.dart';
 import 'package:odaa_mobile/features/payments/data/models/payment_plan.dart';
 
-/// Rules:
-///
-/// 1. Dues must be paid in chronological order. We never offer a later month
-///    while an earlier one is unpaid or partial.
-/// 2. A month's due is only payable inside its 27th → 2nd window.
-/// 3. If no window is open, the plan still returns the oldest unpaid dues
-///    (because the member might want to top up an older month), but
-///    [PaymentPlan.windowOpen] is false so the UI can adapt.
 abstract final class PaymentPlanBuilder {
   static PaymentPlan build({
     required List<MonthRow> allRows,
     required double penaltiesTotal,
     required String currency,
   }) {
-    // Chronological order is guaranteed by the repository, but sort defensively.
-    final sorted = [...allRows]..sort((a, b) => a.period.compareTo(b.period));
+    // Sort by Ethiopian month index to ensure chronological order
+    final sorted = [...allRows]..sort((a, b) {
+      final yearA = a.period.month >= 9 ? a.period.year - 7 : a.period.year - 8;
+      final yearB = b.period.month >= 9 ? b.period.year - 7 : b.period.year - 8;
+      final yearCmp = yearA.compareTo(yearB);
+      if (yearCmp != 0) return yearCmp;
+      return a.ethiopianMonthIndex.compareTo(b.ethiopianMonthIndex);
+    });
 
     final now = DateTime.now();
-    final windowOpen = PaymentWindow.isAnyWindowOpen(now);
+    //final windowOpen = PaymentWindow.isAnyWindowOpen(now);
 
-    // Oldest-first list of everything unpaid or partial.
+    // Find ALL unpaid months (not just the oldest)
     final unpaid = sorted.where((r) => r.isUnpaid).toList();
 
-    // Rule 1: chronological lock. Walk from the oldest; the first one is
-    // always eligible. Later ones are eligible only if every earlier one
-    // is already fully paid (which can't happen here because they're unpaid).
-    //
-    // So the rule simplifies to: only the FIRST unpaid month is currently
-    // payable, unless the window is open for the current month and all
-    // previous months are paid.
-    final payable = <MonthRow>[];
+    // For the window check, we use the OLDEST unpaid month. 
+    // (If the oldest month's window isn't open, they can't start paying yet).
+    bool canPayNow = false;
     if (unpaid.isNotEmpty) {
-      payable.add(unpaid.first);
-
-      // If the oldest unpaid is already inside its window, we're done —
-      // nothing beyond it can be selected without breaking the rule.
-      // If it's NOT in its window, the member can still pay it early
-      // (to clear old debt), but again, not the ones after it.
-      //
-      // The one exception is the current month: if the member has paid
-      // all prior months and the current month's window is open, they
-      // can pay the current month too.
-      final currentMonth = DateTime(now.year, now.month, 1);
-      final oldestIsCurrentOrPast =
-          !unpaid.first.period.isAfter(currentMonth);
-
-      if (oldestIsCurrentOrPast &&
-          PaymentWindow.isOpenFor(unpaid.first.period, now)) {
-        // Oldest is the current month or earlier, and its window is open.
-        // Nothing else to add (member still owes on this one).
-      }
+      final oldest = unpaid.first;
+      final ethYear = oldest.period.month >= 9 ? oldest.period.year - 7 : oldest.period.year - 8;
+      canPayNow = PaymentWindow.isOpenFor(
+        ethMonth: oldest.ethiopianMonthIndex,
+        ethYear: ethYear,
+        now: now,
+      );
     }
 
-    final duesTotal = payable.fold<double>(
+    final duesTotal = unpaid.fold<double>(
       0,
       (sum, r) => sum + r.outstanding,
     );
 
     return PaymentPlan(
-      payableRows: payable,
+      payableRows: unpaid, // Return ALL unpaid months
       duesTotal: duesTotal,
       penaltiesTotal: penaltiesTotal,
       total: duesTotal + penaltiesTotal,
       currency: currency,
-      windowOpen: windowOpen,
+      windowOpen: canPayNow, // The button enables based on the oldest month's window
     );
   }
 }

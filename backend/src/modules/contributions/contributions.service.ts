@@ -71,8 +71,14 @@ export async function generateDues(period: string, ctx: Ctx) {
     for (const m of members.rows) {
       const amount = m.contribution_override !== null ? Number(m.contribution_override) : planAmount;
       const result = await client.query(
-        `INSERT INTO contribution_dues (member_id, period, amount_due, amount_paid, status)
-         VALUES ($1, $2, $3, 0, 'unpaid')
+        `INSERT INTO contribution_dues (member_id, period, amount_due, amount_paid, status, ethiopian_month_index)
+         VALUES ($1, $2, $3, 0, 'unpaid', 
+           CASE EXTRACT(MONTH FROM $2::date)::int
+             WHEN 9 THEN 1 WHEN 10 THEN 2 WHEN 11 THEN 3 WHEN 12 THEN 4
+             WHEN 1 THEN 5 WHEN 2 THEN 6 WHEN 3 THEN 7 WHEN 4 THEN 8
+             WHEN 5 THEN 9 WHEN 6 THEN 10 WHEN 7 THEN 11 WHEN 8 THEN 12
+           END
+         )
          ON CONFLICT (member_id, period) DO NOTHING
          RETURNING id`,
         [m.id, period, amount]
@@ -117,7 +123,8 @@ export async function listDues(input: { member_id?: string; period?: string; sta
 
   const rows = await query(
     `SELECT d.id, d.member_id, m.member_no, m.first_name, m.last_name, m.phone,
-            d.period, d.amount_due, d.amount_paid, d.status, d.waived_by, d.waive_reason
+            d.period, d.amount_due, d.amount_paid, d.status, d.waived_by, d.waive_reason,
+            d.ethiopian_month_index
      FROM contribution_dues d
      JOIN members m ON m.id = d.member_id
      ${whereSql}
@@ -142,7 +149,7 @@ export async function getMyDues(memberId: string, period?: string) {
   if (period) { where.push(`d.period = $${i}`); params.push(period); i++; }
 
   const rows = await query(
-    `SELECT d.id, d.period, d.amount_due, d.amount_paid, d.status
+    `SELECT d.id, d.period, d.amount_due, d.amount_paid, d.status, d.ethiopian_month_index
      FROM contribution_dues d
      WHERE ${where.join(' AND ')}
      ORDER BY d.period DESC`,

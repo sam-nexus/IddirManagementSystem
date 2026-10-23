@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:odaa_mobile/core/theme/app_spacing.dart';
 import 'package:odaa_mobile/core/theme/app_theme_extension.dart';
 import 'package:odaa_mobile/core/theme/app_typography.dart';
+import 'package:odaa_mobile/core/utils/money.dart';
 import 'package:odaa_mobile/features/pay/data/models/payment_session.dart';
 import 'package:odaa_mobile/features/pay/domain/pay_providers.dart';
 import 'package:odaa_mobile/features/pay/presentation/widgets/pay_webview.dart';
@@ -70,46 +71,41 @@ class _PayScreenState extends ConsumerState<PayScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                hasPayment ? l10n.paySummary : l10n.payNothingToPay,
+                hasPayment
+                    ? 'You have ${plan.payableRows.length} unpaid months'
+                    : l10n.payNothingToPay,
                 style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
               ),
               const SizedBox(height: AppSpacing.xxl),
               PlanSummary(plan: plan),
               const SizedBox(height: AppSpacing.xl),
               PrimaryButton(
-                label: l10n.payOpen,
-                onPressed: hasPayment
+                label: hasPayment
+                    ? 'Pay ${plan.payableRows.length} months · ${Money.etb(plan.total)}'
+                    : l10n.payOpen,
+                onPressed: hasPayment && plan.windowOpen
                     ? () {
+                        // Send ALL unpaid months to the backend
                         final periods = plan.payableRows
-                            .map(
-                              (r) =>
-                                  r.period.toIso8601String().split('T').first,
-                            )
+                            .map((r) =>
+                                r.period.toIso8601String().split('T').first,)
                             .toList();
 
                         ref.read(paymentSessionProvider.notifier).init(
                               memberId: 'mock-member-id',
                               amount: plan.total,
-                              periods: periods,
+                              periods: periods, // Array of all unpaid months
                             );
                       }
-                    : null, // disabled when nothing to pay
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SecondaryButton(
-                label: l10n.payUploadScreenshot,
-                onPressed: hasPayment
-                    ? () => context.pushNamed('manualPayment')
                     : null,
               ),
-              if (!hasPayment) ...[
+              if (hasPayment && !plan.windowOpen) ...[
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  l10n.payNothingToPayBody,
+                  'Payment window is closed. It opens on the 27th.',
                   textAlign: TextAlign.center,
-                  style: AppTypography.caption.copyWith(
-                    color: tokens.textMuted,
-                  ),
+                  style:
+                      AppTypography.caption.copyWith(color: tokens.stateUnpaid),
                 ),
               ],
             ],
