@@ -12,6 +12,8 @@ import {
   verifyPaymentSchema,
 } from './contributions.schemas';
 import { chapaReturn } from './contributions.return.controller';
+import { z } from 'zod';
+
 
 const router = Router();
 
@@ -31,6 +33,13 @@ router.post('/pay/verify',  validate({ body: verifyPaymentSchema }),  ctrl.verif
 
 // Read payment history
 router.get('/payments',     validate({ query: listPaymentsSchema }),  ctrl.listPayments);
+router.get(
+  '/payments/by-period',
+  validate({
+    query: z.object({ period: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }),
+  }),
+  ctrl.getPaymentByPeriod
+);
 router.get('/payments/:id', validate({ params: paymentIdParamSchema }), ctrl.getReceipt);
 
 // Committee-only

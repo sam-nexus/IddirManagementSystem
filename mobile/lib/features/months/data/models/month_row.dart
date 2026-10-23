@@ -55,8 +55,22 @@ enum DisplayState { paid, unpaid, suspended, comingSoon }
 extension MonthRowDisplay on MonthRow {
   DisplayState resolveDisplayState({required bool hasOlderUnpaid}) {
     if (isFullyPaid) return DisplayState.paid;
-    if (isFutureMonth) return DisplayState.comingSoon;
-    if (isPastMonth) return DisplayState.unpaid;
+
+    final now = DateTime.now();
+    final windowOpen = PaymentWindow.isOpenFor(period, now);
+
+    // If the payment window for THIS specific month is open right now.
+    if (windowOpen) {
+      // If there's an older debt, it's blocked by the chronological rule.
+      return hasOlderUnpaid ? DisplayState.suspended : DisplayState.unpaid;
+    }
+
+    // If the window is in the future, it's coming soon.
+    if (period.isAfter(DateTime(now.year, now.month, 1))) {
+      return DisplayState.comingSoon;
+    }
+
+    // Past month, window closed, still unpaid.
     return hasOlderUnpaid ? DisplayState.suspended : DisplayState.unpaid;
   }
 }

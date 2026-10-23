@@ -14,14 +14,14 @@ class MonthRowTile extends StatelessWidget {
   const MonthRowTile({
     required this.row,
     required this.hasOlderUnpaid,
-    required this.canPayNow,
+    required this.windowOpen,
     this.onReceiptTap,
     super.key,
   });
 
   final MonthRow row;
   final bool hasOlderUnpaid;
-  final bool canPayNow;
+  final bool windowOpen;
   final VoidCallback? onReceiptTap;
 
   @override
@@ -36,10 +36,8 @@ class MonthRowTile extends StatelessWidget {
     final (String badgeLabel, ContributionState badgeState) = switch (display) {
       DisplayState.paid => (l10n.statePaid, ContributionState.paid),
       DisplayState.unpaid => (l10n.stateUnpaid, ContributionState.unpaid),
-      DisplayState.suspended =>
-        (l10n.stateSuspended, ContributionState.suspended),
-      DisplayState.comingSoon =>
-        (l10n.stateComingSoon, ContributionState.pending),
+      DisplayState.suspended => (l10n.stateSuspended, ContributionState.suspended),
+      DisplayState.comingSoon => (l10n.stateComingSoon, ContributionState.pending),
     };
 
     final trailingAmount = switch (display) {
@@ -55,6 +53,8 @@ class MonthRowTile extends StatelessWidget {
       DisplayState.suspended => ContributionState.suspended,
       DisplayState.comingSoon => ContributionState.pending,
     };
+
+    final showPayButton = display == DisplayState.unpaid && windowOpen;
 
     return Semantics(
       button: true,
@@ -84,24 +84,27 @@ class MonthRowTile extends StatelessWidget {
                   children: [
                     Text(
                       monthName,
-                      style: AppTypography.titleS.copyWith(
-                        color: tokens.textPrimary,
-                      ),
+                      style: AppTypography.titleS.copyWith(color: tokens.textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       trailingAmount,
                       style: AppTypography.bodyS.copyWith(
-                        color: display == DisplayState.unpaid
-                            ? tokens.stateUnpaid
-                            : tokens.textMuted,
+                        color: display == DisplayState.unpaid ? tokens.stateUnpaid : tokens.textMuted,
                       ),
                     ),
                   ],
                 ),
               ),
-              // Paid month + callback → Receipt button
-              if (display == DisplayState.paid && onReceiptTap != null)
+              
+              // FIX 3 & 4: Show Paid badge to the left of the Receipt button
+              if (display == DisplayState.paid) ...[
+                StatusChip(
+                  state: ContributionState.paid,
+                  label: l10n.statePaid,
+                  dense: true,
+                ),
+                const SizedBox(width: 8),
                 SizedBox(
                   height: 34,
                   child: OutlinedButton(
@@ -109,9 +112,7 @@ class MonthRowTile extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       side: BorderSide(color: tokens.primary),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: AppRadii.sm,
-                      ),
+                      shape: const RoundedRectangleBorder(borderRadius: AppRadii.sm),
                     ),
                     child: Text(
                       l10n.receiptTitle,
@@ -121,19 +122,16 @@ class MonthRowTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                )
-              // Payable row → Pay button
-              else if (canPayNow)
+                ),
+              ]
+              else if (showPayButton)
                 _PayButton(
                   label: l10n.monthsPay,
                   onTap: () => context.goNamed(
                     'pay',
-                    queryParameters: {
-                      'period': row.period.toIso8601String().split('T').first,
-                    },
+                    queryParameters: {'period': row.period.toIso8601String().split('T').first},
                   ),
                 )
-              // Otherwise → status chip
               else
                 StatusChip(
                   state: badgeState,
@@ -150,7 +148,6 @@ class MonthRowTile extends StatelessWidget {
 
 class _PayButton extends StatelessWidget {
   const _PayButton({required this.label, required this.onTap});
-
   final String label;
   final VoidCallback onTap;
 

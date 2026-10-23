@@ -1,3 +1,4 @@
+import 'package:ethio_greg_dual_calendar/ethio_greg_dual_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +61,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                       context.goNamed('history');
                     } else if (v == 'this_year') {
                       ref.read(selectedYearProvider.notifier).state =
-                          DateTime.now().year;
+                          EthiopianDate.fromGregorian(DateTime.now()).year;
                       context.goNamed('months');
                     } else {
                       // Past years — if we have any, select the most recent.

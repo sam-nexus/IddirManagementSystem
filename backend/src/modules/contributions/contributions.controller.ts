@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ok, created } from '../../utils/response';
+import { ok, created, fail } from '../../utils/response';
 import * as svc from './contributions.service';
 import { t } from '../../utils/i18n';
 
@@ -50,4 +50,17 @@ export async function listPayments(req: Request, res: Response) {
 export async function getReceipt(req: Request, res: Response) {
   const data = await svc.getReceipt(req.params.id);
   return ok(res, data);
+}
+
+export async function getPaymentByPeriod(req: Request, res: Response) {
+  const memberId = req.member!.id;
+  const period = String(req.query.period ?? '');
+  if (!period) {
+    return fail(res, 400, 'period is required');
+  }
+  const payment = await svc.getPaymentByPeriod(memberId, period);
+  if (!payment) {
+    return fail(res, 404, 'No payment found for this period');
+  }
+  return ok(res, payment);
 }

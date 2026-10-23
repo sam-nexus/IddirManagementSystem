@@ -23,7 +23,6 @@ import 'package:odaa_mobile/shared/widgets/primary_button.dart';
 import 'package:odaa_mobile/shared/widgets/refreshable_scroll.dart';
 import 'package:odaa_mobile/shared/widgets/skeleton.dart';
 
-
 // ... other imports stay ...
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -34,8 +33,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  
-
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(homeSummaryProvider);
@@ -122,11 +119,8 @@ class _HomeBody extends ConsumerWidget {
             NoticeTeaserCard(
               notice: summary.latestNotice!,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Announcement detail — coming soon'),
-                  ),
-                );
+                // Navigate to the announcements list
+                context.goNamed('announcements');
               },
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -148,7 +142,7 @@ class _HomeBody extends ConsumerWidget {
     );
   }
 
-   String _nextWindowDate() {
+  String _nextWindowDate() {
     final now = DateTime.now();
 
     // nextOpenPeriod returns the Gregorian first-of-month of the payable due.

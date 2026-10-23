@@ -716,3 +716,22 @@ export async function getReceipt(paymentId: string) {
     penalty_allocations: penaltyAllocations.rows,
   };
 }
+
+export async function getPaymentByPeriod(
+  memberId: string,
+  period: string
+): Promise<{ id: string; receipt_no: string | null } | null> {
+  const rows = await query<{ id: string; receipt_no: string | null }>(
+    `SELECT p.id, p.receipt_no
+     FROM payments p
+     JOIN payment_allocations pa ON pa.payment_id = p.id
+     JOIN contribution_dues d ON d.id = pa.due_id
+     WHERE p.member_id = $1
+       AND p.status = 'success'
+       AND d.period = $2::date
+     ORDER BY p.created_at DESC
+     LIMIT 1`,
+    [memberId, period]
+  );
+  return rows.rows[0] ?? null;
+}

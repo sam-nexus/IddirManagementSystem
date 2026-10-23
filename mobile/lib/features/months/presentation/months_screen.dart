@@ -22,18 +22,11 @@ class MonthsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final segment = ref.watch(monthsSegmentProvider);
-
-    if (segment == 'past_years') {
-      return const _PastYearsView();
-    }
-
+    if (segment == 'past_years') return const _PastYearsView();
     return const _ThisYearView();
   }
 }
 
-// ---------------------------------------------------------------------------
-// THIS YEAR
-// ---------------------------------------------------------------------------
 class _ThisYearView extends ConsumerWidget {
   const _ThisYearView();
 
@@ -46,21 +39,18 @@ class _ThisYearView extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildHeader(context, l10n, tokens),
+        _buildHeader(l10n, tokens, showSubtitle: true),
         Expanded(
           child: async.when(
             loading: () => const _MonthsSkeleton(),
             error: (_, __) => ErrorView(
-              message: l10n.errorGeneric,
-              onRetry: () => ref.invalidate(allMonthsProvider),
-            ),
+                message: l10n.errorGeneric,
+                onRetry: () => ref.invalidate(allMonthsProvider),),
             data: (rows) {
               final nothingHere = rows.isEmpty ||
                   rows.every((r) =>
                       r.state == ContributionState.waived && r.amountDue == 0,);
-
               if (nothingHere) return _buildEmptyState(ref, l10n, false);
-
               return _MonthsList(rows: rows);
             },
           ),
@@ -70,9 +60,6 @@ class _ThisYearView extends ConsumerWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// PAST YEARS
-// ---------------------------------------------------------------------------
 class _PastYearsView extends ConsumerStatefulWidget {
   const _PastYearsView();
 
@@ -93,49 +80,58 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (_selectedYear == null)
-          _buildHeader(context, l10n, tokens)
+          _buildHeader(l10n, tokens, showSubtitle: true)
         else
-          _buildYearHeader(context, l10n, tokens, _selectedYear!),
+          // FIX 2: Specific year title shows ONLY the year (no subtitle)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.screenEdge,
+                AppSpacing.lg, AppSpacing.screenEdge, AppSpacing.sm,),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() => _selectedYear = null);
+                    ref.read(selectedYearProvider.notifier).state =
+                        EthiopianDate.fromGregorian(DateTime.now()).year;
+                  },
+                ),
+                const SizedBox(width: 8),
+                Text('$_selectedYear',
+                    style: AppTypography.titleL
+                        .copyWith(color: tokens.textPrimary),),
+              ],
+            ),
+          ),
         Expanded(
           child: yearsAsync.when(
             loading: () => const _MonthsSkeleton(),
             error: (_, __) => ErrorView(
-              message: l10n.errorGeneric,
-              onRetry: () => ref.invalidate(allMonthsProvider),
-            ),
+                message: l10n.errorGeneric,
+                onRetry: () => ref.invalidate(allMonthsProvider),),
             data: (years) {
               final ethNow = EthiopianDate.fromGregorian(DateTime.now());
-              final pastYears = years
-                  .where((y) => y != ethNow.year)
-                  .toList()
+              final pastYears = years.where((y) => y != ethNow.year).toList()
                 ..sort((a, b) => b.compareTo(a));
 
-              // ----- Specific year view -----
               if (_selectedYear != null) {
                 final yearAsync = ref.watch(yearMonthsProvider);
                 return yearAsync.when(
                   loading: () => const _MonthsSkeleton(),
-                  error: (_, __) => ErrorView(
-                    message: l10n.errorGeneric,
-                    onRetry: () => ref.invalidate(allMonthsProvider),
-                  ),
+                  error: (_, __) =>
+                      ErrorView(message: l10n.errorGeneric, onRetry: () {}),
                   data: (rows) {
                     final nothingHere = rows.isEmpty ||
                         rows.every((r) =>
                             r.state == ContributionState.waived &&
                             r.amountDue == 0,);
-                    if (nothingHere) {
-                      return _buildEmptyState(ref, l10n, true);
-                    }
+                    if (nothingHere) return _buildEmptyState(ref, l10n, true);
                     return _MonthsList(rows: rows);
                   },
                 );
               }
 
-              // ----- Year list view -----
-              if (pastYears.isEmpty) {
-                return _buildEmptyState(ref, l10n, true);
-              }
+              if (pastYears.isEmpty) return _buildEmptyState(ref, l10n, true);
 
               return RefreshIndicator(
                 color: tokens.primaryAction,
@@ -154,18 +150,12 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
                     final y = pastYears[i];
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenEdge,
-                        vertical: 8,
-                      ),
-                      title: Text(
-                        '$y',
-                        style: AppTypography.titleM
-                            .copyWith(color: tokens.textPrimary),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: tokens.textMuted,
-                      ),
+                          horizontal: AppSpacing.screenEdge, vertical: 8,),
+                      title: Text('$y',
+                          style: AppTypography.titleM
+                              .copyWith(color: tokens.textPrimary),),
+                      trailing:
+                          Icon(Icons.chevron_right, color: tokens.textMuted),
                       onTap: () {
                         setState(() => _selectedYear = y);
                         ref.read(selectedYearProvider.notifier).state = y;
@@ -180,70 +170,23 @@ class _PastYearsViewState extends ConsumerState<_PastYearsView> {
       ],
     );
   }
-
-  Widget _buildYearHeader(
-    BuildContext context,
-    dynamic l10n,
-    dynamic tokens,
-    int year,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenEdge,
-        AppSpacing.lg,
-        AppSpacing.screenEdge,
-        AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              setState(() => _selectedYear = null);
-              ref.read(selectedYearProvider.notifier).state =
-                  EthiopianDate.fromGregorian(DateTime.now()).year;
-            },
-          ),
-          const SizedBox(width: 8),
-          Text(
-            l10n.monthsTitle,
-            style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
-          ),
-          const Spacer(),
-          Text(
-            '$year',
-            style: AppTypography.titleL.copyWith(color: tokens.accent),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-// ---------------------------------------------------------------------------
-// SHARED WIDGETS
-// ---------------------------------------------------------------------------
-
-Widget _buildHeader(BuildContext context, dynamic l10n, dynamic tokens) {
+Widget _buildHeader(dynamic l10n, dynamic tokens,
+    {required bool showSubtitle,}) {
   return Padding(
-    padding: const EdgeInsets.fromLTRB(
-      AppSpacing.screenEdge,
-      AppSpacing.lg,
-      AppSpacing.screenEdge,
-      AppSpacing.sm,
-    ),
+    padding: const EdgeInsets.fromLTRB(AppSpacing.screenEdge, AppSpacing.lg,
+        AppSpacing.screenEdge, AppSpacing.sm,),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.monthsTitle,
-          style: AppTypography.titleL.copyWith(color: tokens.textPrimary),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          l10n.monthsSubtitle,
-          style: AppTypography.bodyS.copyWith(color: tokens.textMuted),
-        ),
+        Text(l10n.monthsTitle,
+            style: AppTypography.titleL.copyWith(color: tokens.textPrimary),),
+        if (showSubtitle) ...[
+          const SizedBox(height: 2),
+          Text(l10n.monthsSubtitle,
+              style: AppTypography.bodyS.copyWith(color: tokens.textMuted),),
+        ],
       ],
     ),
   );
@@ -259,9 +202,7 @@ Widget _buildEmptyState(WidgetRef ref, dynamic l10n, bool isPast) {
       height: 500,
       child: EmptyView(
         title: isPast ? l10n.pastYearsEmpty : l10n.monthsNothingThisYear,
-        body: isPast
-            ? l10n.pastYearsEmptyBody
-            : l10n.monthsNothingThisYearBody,
+        body: isPast ? l10n.pastYearsEmptyBody : l10n.monthsNothingThisYearBody,
         icon: isPast ? Icons.history_outlined : Icons.calendar_today_outlined,
       ),
     ),
@@ -270,7 +211,6 @@ Widget _buildEmptyState(WidgetRef ref, dynamic l10n, bool isPast) {
 
 class _MonthsList extends ConsumerWidget {
   const _MonthsList({required this.rows});
-
   final List<MonthRow> rows;
 
   int _ethIndex(DateTime p) {
@@ -281,8 +221,6 @@ class _MonthsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
-    final windowOpen = PaymentWindow.isAnyWindowOpen(now);
-
     int cmp(MonthRow a, MonthRow b) =>
         _ethIndex(a.period).compareTo(_ethIndex(b.period));
 
@@ -319,34 +257,35 @@ class _MonthsList extends ConsumerWidget {
         separatorBuilder: (_, __) => const Divider(height: 1, indent: 68),
         itemBuilder: (context, i) {
           final row = ordered[i];
-
           final hasOlder = oldestUnpaid != null &&
               _ethIndex(row.period) < _ethIndex(oldestUnpaid.period);
 
-          final canPay = oldestUnpaid == row && windowOpen && row.isUnpaid;
+          // Pass windowOpen to the tile so it can decide to show the Pay button
+          final windowOpen = PaymentWindow.isOpenFor(row.period, now);
 
-          // ----- Receipt button for paid months -----
           VoidCallback? onReceipt;
           if (row.isFullyPaid) {
             onReceipt = () async {
-              final periodIso =
-                  row.period.toIso8601String().split('T').first;
+              final periodIso = row.period.toIso8601String().split('T').first;
               final repo = ref.read(historyRepositoryProvider);
-              try {
-                final payment =
-                    await repo.fetchPaymentForPeriod(periodIso);
-                if (!context.mounted) return;
-                if (payment != null && payment.receiptNo != null) {
-                  context.goNamed(
-                    'receipt',
-                    pathParameters: {'id': payment.id},
-                  );
-                } else {
-                  context.goNamed('history');
-                }
-              } catch (_) {
-                if (!context.mounted) return;
-                context.goNamed('history');
+
+              // Show a tiny loading indicator (optional, but good UX)
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Loading receipt...'),
+                    duration: Duration(seconds: 1),),
+              );
+
+              final paymentId = await repo.fetchPaymentIdForPeriod(periodIso);
+
+              if (!context.mounted) return;
+              if (paymentId != null) {
+                context.goNamed('receipt', pathParameters: {'id': paymentId});
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Receipt not found for this month'),),
+                );
               }
             };
           }
@@ -354,7 +293,7 @@ class _MonthsList extends ConsumerWidget {
           return MonthRowTile(
             row: row,
             hasOlderUnpaid: hasOlder,
-            canPayNow: canPay,
+            windowOpen: windowOpen,
             onReceiptTap: onReceipt,
           );
         },
@@ -375,18 +314,16 @@ class _MonthsSkeleton extends StatelessWidget {
       itemBuilder: (_, __) => const Row(
         children: [
           Skeleton(
-            width: 28,
-            height: 36,
-            radius: BorderRadius.all(Radius.circular(4)),
-          ),
+              width: 28,
+              height: 36,
+              radius: BorderRadius.all(Radius.circular(4)),),
           SizedBox(width: 16),
           Expanded(child: Skeleton(height: 16)),
           SizedBox(width: 16),
           Skeleton(
-            width: 56,
-            height: 20,
-            radius: BorderRadius.all(Radius.circular(4)),
-          ),
+              width: 56,
+              height: 20,
+              radius: BorderRadius.all(Radius.circular(4)),),
         ],
       ),
     );
