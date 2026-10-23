@@ -15,12 +15,14 @@ class MonthRowTile extends StatelessWidget {
     required this.row,
     required this.hasOlderUnpaid,
     required this.canPayNow,
+    this.onReceiptTap,
     super.key,
   });
 
   final MonthRow row;
   final bool hasOlderUnpaid;
   final bool canPayNow;
+  final VoidCallback? onReceiptTap;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +100,30 @@ class MonthRowTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (canPayNow)
+              // Paid month + callback → Receipt button
+              if (display == DisplayState.paid && onReceiptTap != null)
+                SizedBox(
+                  height: 34,
+                  child: OutlinedButton(
+                    onPressed: onReceiptTap,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      side: BorderSide(color: tokens.primary),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: AppRadii.sm,
+                      ),
+                    ),
+                    child: Text(
+                      l10n.receiptTitle,
+                      style: AppTypography.caption.copyWith(
+                        color: tokens.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                )
+              // Payable row → Pay button
+              else if (canPayNow)
                 _PayButton(
                   label: l10n.monthsPay,
                   onTap: () => context.goNamed(
@@ -108,6 +133,7 @@ class MonthRowTile extends StatelessWidget {
                     },
                   ),
                 )
+              // Otherwise → status chip
               else
                 StatusChip(
                   state: badgeState,

@@ -626,7 +626,13 @@ export async function recordCashPayment(
 // =====================================================================
 // PAYMENTS LIST + RECEIPT
 // =====================================================================
-export async function listPayments(input: { member_id?: string; method?: string; status?: string; page: number; limit: number }) {
+export async function listPayments(input: {
+  member_id?: string;
+  method?: string;
+  status?: string;
+  page: number;
+  limit: number;
+}) {
   const where: string[] = [];
   const params: unknown[] = [];
   let i = 1;
@@ -638,23 +644,42 @@ export async function listPayments(input: { member_id?: string; method?: string;
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const offset = (input.page - 1) * input.limit;
 
-  const countRes = await query<{ c: number }>(`SELECT COUNT(*)::int AS c FROM payments p ${whereSql}`, params);
+  const countRes = await query<{ c: number }>(
+    `SELECT COUNT(*)::int AS c FROM payments p ${whereSql}`,
+    params
+  );
 
   const rows = await query(
     `SELECT p.id, p.receipt_no, p.member_id, m.member_no, m.first_name, m.last_name,
             p.amount, p.currency, p.method, p.status, p.tx_ref, p.chapa_ref,
-            p.note, p.paid_at, p.verified_at, p.created_at
+            p.note, p.paid_at, p.verified_at, p.created_at,
+            COALESCE(
+              ARRAY_AGG(to_char(d.period, 'YYYY-MM-DD') ORDER BY d.period)
+                FILTER (WHERE d.period IS NOT NULL),
+              '{}'::text[]
+            ) AS periods_covered
      FROM payments p
      JOIN members m ON m.id = p.member_id
+     LEFT JOIN payment_allocations pa ON pa.payment_id = p.id
+     LEFT JOIN contribution_dues d ON d.id = pa.due_id
      ${whereSql}
+     GROUP BY p.id, m.id, m.member_no, m.first_name, m.last_name
      ORDER BY p.created_at DESC
      LIMIT $${i} OFFSET $${i + 1}`,
     [...params, input.limit, offset]
   );
 
   return {
-    items: rows.rows,
-    pagination: { page: input.page, limit: input.limit, total: countRes.rows[0].c, pages: Math.max(1, Math.ceil(countRes.rows[0].c / input.limit)) },
+    items: rows.rows.map((r: any) => ({
+      ...r,
+      periods_covered: Array.isArray(r.periods_covered) ? r.periods_covered : [],
+    })),
+    pagination: {
+      page: input.page,
+      limit: input.limit,
+      total: countRes.rows[0].c,
+      pages: Math.max(1, Math.ceil(countRes.rows[0].c / input.limit)),
+    },
   };
 }
 

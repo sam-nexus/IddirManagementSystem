@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:odaa_mobile/core/api/api_exception.dart';
 import 'package:odaa_mobile/core/api/error_mapper.dart';
@@ -22,9 +23,9 @@ class ApiClient {
                 baseUrl: baseUrl ??
                     dotenv.env['API_BASE_URL'] ??
                     'http://localhost:4000',
-                connectTimeout: const Duration(seconds: 15),
-                receiveTimeout: const Duration(seconds: 20),
-                sendTimeout: const Duration(seconds: 20),
+                connectTimeout: const Duration(seconds: 45),
+                receiveTimeout: const Duration(seconds: 45),
+                sendTimeout: const Duration(seconds: 45),
                 contentType: 'application/json',
                 responseType: ResponseType.json,
                 headers: {
@@ -167,29 +168,45 @@ class ApiClient {
   Future<T> delete<T>(String path, {Map<String, dynamic>? query}) =>
       _run<T>(() => _dio.delete(path, queryParameters: query));
 
+  /// Retries a request exactly once if it fails with a transient network error.
+  Future<Response> _retryIfTransient(Future<Response> Function() call) async {
+    try {
+      return await call();
+    } on DioException catch (e) {
+      final isTransient = e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.connectionError;
+
+      if (!isTransient) rethrow;
+
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      try {
+        return await call();
+      } catch (_) {
+        rethrow; // If the second attempt fails, let it fail normally
+      }
+    }
+  }
+
   Future<T> _run<T>(Future<Response> Function() call) async {
     try {
-      final res = await call();
+      // Wrap the call in the retry logic
+      final res = await _retryIfTransient(call);
+
       final body = res.data;
-
       if (body == null) {
-        return _emptyFor<T>();
+        return <String, dynamic>{} as T;
       }
-
       if (body is Map && body.containsKey('data')) {
-        final inner = body['data'];
-        if (inner == null) {
-          return _emptyFor<T>();
-        }
-        return inner as T;
+        return body['data'] as T;
       }
-
       return body as T;
     } on DioException catch (e) {
       throw mapDioError(e);
     } catch (e, st) {
-      // ignore: avoid_print
-      print('[api] parse error: $e\n$st');
+      debugPrint('[api] parse error: $e\n$st');
       throw const ApiException(
         kind: ApiErrorKind.unknown,
         message: 'Unexpected response from the server.',
@@ -198,18 +215,18 @@ class ApiClient {
   }
 
   /// Returns a null-safe fallback for [T] when the backend sends `data: null`.
-  T _emptyFor<T>() {
-    final map = <String, dynamic>{};
-    if (map is T) return map as T;
+  // T _emptyFor<T>() {
+  //   final map = <String, dynamic>{};
+  //   if (map is T) return map as T;
 
-    final list = <dynamic>[];
-    if (list is T) return list as T;
+  //   final list = <dynamic>[];
+  //   if (list is T) return list as T;
 
-    throw const ApiException(
-      kind: ApiErrorKind.unknown,
-      message: 'The server returned no data where some was expected.',
-    );
-  }
+  //   throw const ApiException(
+  //     kind: ApiErrorKind.unknown,
+  //     message: 'The server returned no data where some was expected.',
+  //   );
+  // }
 
   //- a wrapped object:        { data: [...] } (already unwrapped by _run, but just in case)
 }
